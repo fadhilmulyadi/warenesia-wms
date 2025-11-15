@@ -15,12 +15,14 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var list<int, string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
+        'is_approved',
     ];
 
     /**
@@ -42,7 +44,28 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'is_approved' => 'boolean',
             'password' => 'hashed',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isManager(): bool
+    {
+        return $this->role === 'manager';
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->role === 'staff';
+    }
+
+    public function isSupplier(): bool
+    {
+        return $this->role === 'supplier';
     }
 }
