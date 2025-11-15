@@ -14,23 +14,47 @@
 @endsection
 
 @section('content')
-{{-- STATE UNTUK WIDGET & MANAGE DASHBOARD --}}
 <div
     x-data="{
-            manageDashboardOpen: false,
-            widgets: {
-                quickLinks: true,
-                kpi: true,
-                sales: true,
-                purchases: true,
-                productOverview: true,
-                stockHealth: true,
-                reorder: true,
-                reminders: true,
-                customerOverview: false, // optional / prio 2
-            }
-        }"
+        manageDashboardOpen: false,
+        widgets: {
+            quickLinks:      { visible: true,  minimized: false, expanded: false, label: 'Quick links' },
+            kpi:             { visible: true,  minimized: false, expanded: false, label: 'Key performance indicators' },
+            sales:           { visible: true,  minimized: false, expanded: false, label: 'Sales overview' },
+            purchases:       { visible: true,  minimized: false, expanded: false, label: 'Purchases overview' },
+            productOverview: { visible: true,  minimized: false, expanded: false, label: 'Product overview' },
+            stockHealth:     { visible: true,  minimized: false, expanded: false, label: 'Stock health' },
+            reorder:         { visible: true,  minimized: false, expanded: false, label: 'Reorder' },
+            reminders:       { visible: true,  minimized: false, expanded: false, label: 'Reminders' },
+            customerOverview:{ visible: false, minimized: false, expanded: false, label: 'Customer overview (optional)' }
+        },
+        toggleMinimize(name) {
+            this.widgets[name].minimized = ! this.widgets[name].minimized;
+        },
+        toggleExpand(name) {
+            this.widgets[name].expanded = ! this.widgets[name].expanded;
+        },
+        closeWidget(name) {
+            this.widgets[name].visible = false;
+        },
+        collapseAll() {
+            Object.keys(this.widgets).forEach(key => this.widgets[key].minimized = true);
+        },
+        expandAll() {
+            Object.keys(this.widgets).forEach(key => this.widgets[key].minimized = false);
+        },
+        resetLayout() {
+            window.location.reload();
+        },
+        initSortable(el) {
+            if (!window.Sortable) return;
+            window.Sortable.create(el, {
+                handle: '.widget-drag-handle'
+            });
+        }
+    }"
     class="space-y-6">
+
     {{-- BAR ATAS: date range + dashboard actions + tombol Manage dashboard --}}
     <div
         x-data="{ rangeOpen: false, selectedRange: 'Last 30 days' }"
@@ -52,7 +76,6 @@
                     x-cloak
                     x-show="rangeOpen"
                     @click.outside="rangeOpen = false"
-                    x-transition
                     class="absolute z-20 mt-2 w-60 rounded-xl border border-slate-200 bg-white shadow-lg text-sm">
                     <div class="px-3 py-2 border-b border-slate-100 font-semibold text-slate-700">
                         Date range
@@ -101,19 +124,28 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2 justify-between md:justify-end">
-            {{-- Dashboard actions (UI dulu, nanti kita isi fungsinya) --}}
+            {{-- Dashboard actions --}}
             <div class="flex items-center gap-2 text-xs text-slate-500">
-                <button type="button" class="inline-flex items-center gap-1 hover:text-slate-800">
+                <button
+                    type="button"
+                    class="inline-flex items-center gap-1 hover:text-slate-800"
+                    @click="collapseAll()">
                     <x-lucide-chevrons-down class="h-3 w-3" />
                     Collapse all widgets
                 </button>
                 <span>·</span>
-                <button type="button" class="inline-flex items-center gap-1 hover:text-slate-800">
+                <button
+                    type="button"
+                    class="inline-flex items-center gap-1 hover:text-slate-800"
+                    @click="expandAll()">
                     <x-lucide-chevrons-up class="h-3 w-3" />
                     Expand all widgets
                 </button>
                 <span>·</span>
-                <button type="button" class="inline-flex items-center gap-1 hover:text-slate-800">
+                <button
+                    type="button"
+                    class="inline-flex items-center gap-1 hover:text-slate-800"
+                    @click="resetLayout()">
                     <x-lucide-rotate-ccw class="h-3 w-3" />
                     Reset layout
                 </button>
@@ -130,50 +162,96 @@
         </div>
     </div>
 
-    {{-- WIDGET: QUICK LINKS --}}
-    <template x-if="widgets.quickLinks">
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-sm font-semibold text-slate-800">Quick links</h2>
-                <p class="text-xs text-slate-500">Akses cepat ke master data gudang.</p>
+    {{-- GRID WIDGET --}}
+    <div
+        class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start"
+        x-ref="widgetsGrid"
+        x-init="initSortable($refs.widgetsGrid)">
+
+        {{-- QUICK LINKS --}}
+        <section
+            x-show="widgets.quickLinks.visible"
+            :class="widgets.quickLinks.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
+                    <div>
+                        <h2 class="text-sm font-semibold text-slate-800">Quick links</h2>
+                        <p class="text-xs text-slate-500">
+                            Akses cepat ke master data gudang.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('quickLinks')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('quickLinks')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.quickLinks.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('quickLinks')">
+                        <x-lucide-x class="h-3 w-3" />
+                    </button>
+                </div>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
-                {{-- NOTE: angka masih placeholder, nanti diisi dari controller --}}
-                <a href="#"
-                    class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
-                    <span class="text-xs text-slate-500">Products</span>
-                    <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
-                </a>
-                <a href="#"
-                    class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
-                    <span class="text-xs text-slate-500">Categories</span>
-                    <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
-                </a>
-                <a href="#"
-                    class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
-                    <span class="text-xs text-slate-500">Suppliers</span>
-                    <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
-                </a>
-                <a href="#"
-                    class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
-                    <span class="text-xs text-slate-500">Customers</span>
-                    <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
-                </a>
-                <a href="#"
-                    class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
-                    <span class="text-xs text-slate-500">Users</span>
-                    <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
-                </a>
+
+            <div
+                x-show="!widgets.quickLinks.minimized"
+                class="mt-1">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                    <a href="#"
+                        class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
+                        <span class="text-xs text-slate-500">Products</span>
+                        <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
+                    </a>
+                    <a href="#"
+                        class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
+                        <span class="text-xs text-slate-500">Categories</span>
+                        <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
+                    </a>
+                    <a href="#"
+                        class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
+                        <span class="text-xs text-slate-500">Suppliers</span>
+                        <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
+                    </a>
+                    <a href="#"
+                        class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
+                        <span class="text-xs text-slate-500">Customers</span>
+                        <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
+                    </a>
+                    <a href="#"
+                        class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
+                        <span class="text-xs text-slate-500">Users</span>
+                        <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
+                    </a>
+                </div>
             </div>
         </section>
-    </template>
 
-    {{-- ROW 1: KPI + SALES WIDGET --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {{-- WIDGET: KPI --}}
-        <template x-if="widgets.kpi">
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div class="flex items-start justify-between gap-3 mb-4">
+        {{-- KPI --}}
+        <section
+            x-show="widgets.kpi.visible"
+            :class="widgets.kpi.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
                     <div>
                         <h2 class="text-sm font-semibold text-slate-800">Key performance indicators</h2>
                         <p class="text-xs text-slate-500">
@@ -181,7 +259,33 @@
                         </p>
                     </div>
                 </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('kpi')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('kpi')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.kpi.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('kpi')">
+                        <x-lucide-x class="h-3 w-3" />
+                    </button>
+                </div>
+            </div>
 
+            <div
+                x-show="!widgets.kpi.minimized"
+                class="mt-1">
                 {{-- 7 KPI cards --}}
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs mb-4">
                     @php
@@ -277,73 +381,115 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 border-t border-slate-100 text-[11px] text-slate-500">
-                                <span>Showing 0–0 of 0</span>
-                                <div class="flex items-center gap-2">
-                                    <span>Show:</span>
-                                    <select class="border border-slate-200 rounded-lg px-2 py-1 text-xs">
-                                        <option>10</option>
-                                        <option>25</option>
-                                        <option>50</option>
-                                    </select>
-                                    <span>| Go to page</span>
-                                    <input type="number" class="w-12 border border-slate-200 rounded-lg px-2 py-1 text-xs" value="1" min="1">
-                                    <button class="px-2 py-1 border border-slate-200 rounded-lg text-xs">Go</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-            </section>
-        </template>
+            </div>
+        </section>
 
-        {{-- WIDGET: SALES OVERVIEW (versi list ringkas) --}}
-        <template x-if="widgets.sales">
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div class="flex items-start justify-between gap-3 mb-3">
+        {{-- SALES OVERVIEW --}}
+        <section
+            x-show="widgets.sales.visible"
+            :class="widgets.sales.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
                     <div>
                         <h2 class="text-sm font-semibold text-slate-800">Sales overview</h2>
                         <p class="text-xs text-slate-500">
                             Ringkasan barang keluar ke customer.
                         </p>
                     </div>
-                    <button class="text-xs text-teal-600 font-semibold hover:underline">
-                        Go to sales list
+                </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('sales')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('sales')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.sales.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('sales')">
+                        <x-lucide-x class="h-3 w-3" />
                     </button>
                 </div>
+            </div>
 
-                <div class="space-y-2 text-xs">
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-500">Total orders (periode)</span>
-                        <span class="font-semibold text-slate-800">0</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-500">Pending approval</span>
-                        <span class="font-semibold text-amber-600">0</span>
-                    </div>
+            <div
+                x-show="!widgets.sales.minimized"
+                class="mt-1 space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Total orders (periode)</span>
+                    <span class="font-semibold text-slate-800">0</span>
                 </div>
-            </section>
-        </template>
-    </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Pending approval</span>
+                    <span class="font-semibold text-amber-600">0</span>
+                </div>
+                <button class="mt-2 inline-flex items-center gap-1 text-xs text-teal-600 font-semibold hover:underline">
+                    <x-lucide-external-link class="h-3 w-3" />
+                    Go to sales list
+                </button>
+            </div>
+        </section>
 
-    {{-- ROW 2: PRODUCT OVERVIEW + PURCHASES --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {{-- PRODUCT OVERVIEW --}}
-        <template x-if="widgets.productOverview">
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div class="flex items-start justify-between gap-3 mb-3">
+        <section
+            x-show="widgets.productOverview.visible"
+            :class="widgets.productOverview.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
                     <div>
                         <h2 class="text-sm font-semibold text-slate-800">Product overview</h2>
                         <p class="text-xs text-slate-500">
                             Top selling, low stock, dan performa produk.
                         </p>
                     </div>
-                    <button class="inline-flex items-center gap-1 text-xs text-teal-600 font-semibold hover:underline">
-                        <x-lucide-plus class="h-3 w-3" />
-                        Go to product list
+                </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('productOverview')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('productOverview')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.productOverview.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('productOverview')">
+                        <x-lucide-x class="h-3 w-3" />
                     </button>
                 </div>
+            </div>
 
+            <div
+                x-show="!widgets.productOverview.minimized"
+                class="mt-1">
                 <div class="flex flex-wrap gap-2 text-xs mb-3">
                     <button class="px-3 py-1.5 rounded-full bg-slate-900 text-white border border-slate-900">
                         Top selling
@@ -378,25 +524,58 @@
                         </tbody>
                     </table>
                 </div>
-            </section>
-        </template>
+
+                <button class="mt-2 inline-flex items-center gap-1 text-xs text-teal-600 font-semibold hover:underline">
+                    <x-lucide-plus class="h-3 w-3" />
+                    Go to product list
+                </button>
+            </div>
+        </section>
 
         {{-- PURCHASES / RESTOCK OVERVIEW --}}
-        <template x-if="widgets.purchases">
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div class="flex items-start justify-between gap-3 mb-3">
+        <section
+            x-show="widgets.purchases.visible"
+            :class="widgets.purchases.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
                     <div>
                         <h2 class="text-sm font-semibold text-slate-800">Purchases overview</h2>
                         <p class="text-xs text-slate-500">
                             Ringkasan restock order dan status penerimaan barang.
                         </p>
                     </div>
-                    <button class="inline-flex items-center gap-1 text-xs text-teal-600 font-semibold hover:underline">
-                        <x-lucide-plus class="h-3 w-3" />
-                        Go to purchases list
+                </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('purchases')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('purchases')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.purchases.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('purchases')">
+                        <x-lucide-x class="h-3 w-3" />
                     </button>
                 </div>
+            </div>
 
+            <div
+                x-show="!widgets.purchases.minimized"
+                class="mt-1">
                 <div class="flex flex-wrap gap-2 text-xs mb-3">
                     <button class="px-3 py-1.5 rounded-full bg-slate-900 text-white border border-slate-900">
                         Draft
@@ -435,16 +614,24 @@
                         </tbody>
                     </table>
                 </div>
-            </section>
-        </template>
-    </div>
 
-    {{-- ROW 3: STOCK HEALTH + REORDER + REMINDERS --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <button class="mt-2 inline-flex items-center gap-1 text-xs text-teal-600 font-semibold hover:underline">
+                    <x-lucide-plus class="h-3 w-3" />
+                    Go to purchases list
+                </button>
+            </div>
+        </section>
+
         {{-- STOCK HEALTH --}}
-        <template x-if="widgets.stockHealth">
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div class="flex items-start justify-between gap-3 mb-3">
+        <section
+            x-show="widgets.stockHealth.visible"
+            :class="widgets.stockHealth.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
                     <div>
                         <h2 class="text-sm font-semibold text-slate-800">Stock health</h2>
                         <p class="text-xs text-slate-500">
@@ -452,55 +639,114 @@
                         </p>
                     </div>
                 </div>
-                <div class="space-y-2 text-xs">
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-500">Total SKUs</span>
-                        <span class="font-semibold text-slate-800">0</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-500">Low stock items</span>
-                        <span class="font-semibold text-amber-600">0</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-500">Out of stock</span>
-                        <span class="font-semibold text-red-600">0</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-500">Total on-hand quantity</span>
-                        <span class="font-semibold text-slate-800">0</span>
-                    </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('stockHealth')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('stockHealth')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.stockHealth.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('stockHealth')">
+                        <x-lucide-x class="h-3 w-3" />
+                    </button>
                 </div>
-            </section>
-        </template>
+            </div>
 
-        {{-- REORDER / LOW STOCK LIST --}}
-        <template x-if="widgets.reorder">
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div class="flex items-start justify-between gap-3 mb-3">
+            <div
+                x-show="!widgets.stockHealth.minimized"
+                class="mt-1 space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Total SKUs</span>
+                    <span class="font-semibold text-slate-800">0</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Low stock items</span>
+                    <span class="font-semibold text-amber-600">0</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Out of stock</span>
+                    <span class="font-semibold text-red-600">0</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Total on-hand quantity</span>
+                    <span class="font-semibold text-slate-800">0</span>
+                </div>
+            </div>
+        </section>
+
+        {{-- REORDER --}}
+        <section
+            x-show="widgets.reorder.visible"
+            :class="widgets.reorder.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
                     <div>
                         <h2 class="text-sm font-semibold text-slate-800">Reorder</h2>
                         <p class="text-xs text-slate-500">
                             Produk dengan stok di bawah minimum.
                         </p>
                     </div>
-                    <button class="inline-flex items-center gap-1 text-xs text-teal-600 font-semibold hover:underline">
-                        <x-lucide-plus class="h-3 w-3" />
-                        Create restock order
+                </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('reorder')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('reorder')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.reorder.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('reorder')">
+                        <x-lucide-x class="h-3 w-3" />
                     </button>
                 </div>
+            </div>
 
+            <div
+                x-show="!widgets.reorder.minimized"
+                class="mt-1">
                 <ul class="space-y-1 text-xs">
                     <li class="text-slate-400">
                         Belum ada produk yang perlu direstock.
                     </li>
                 </ul>
-            </section>
-        </template>
+            </div>
+        </section>
 
         {{-- REMINDERS --}}
-        <template x-if="widgets.reminders">
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-                <div class="flex items-start justify-between gap-3 mb-3">
+        <section
+            x-show="widgets.reminders.visible"
+            :class="widgets.reminders.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
                     <div>
                         <h2 class="text-sm font-semibold text-slate-800">Reminders</h2>
                         <p class="text-xs text-slate-500">
@@ -508,36 +754,92 @@
                         </p>
                     </div>
                 </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('reminders')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('reminders')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.reminders.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('reminders')">
+                        <x-lucide-x class="h-3 w-3" />
+                    </button>
+                </div>
+            </div>
+
+            <div
+                x-show="!widgets.reminders.minimized"
+                class="mt-1">
                 <ul class="space-y-2 text-xs">
                     <li class="flex items-start gap-2">
                         <x-lucide-alert-circle class="h-4 w-4 mt-0.5 text-amber-600" />
                         <span>Tidak ada reminder aktif untuk saat ini.</span>
                     </li>
                 </ul>
-            </section>
-        </template>
-    </div>
-
-    {{-- (Optional) CUSTOMER OVERVIEW – default hidden --}}
-    <template x-if="widgets.customerOverview">
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-            <div class="flex items-start justify-between gap-3 mb-3">
-                <div>
-                    <h2 class="text-sm font-semibold text-slate-800">Customer overview</h2>
-                    <p class="text-xs text-slate-500">
-                        Analisis customer berdasarkan penjualan.
-                    </p>
-                </div>
-                <button class="inline-flex items-center gap-1 text-xs text-teal-600 font-semibold hover:underline">
-                    <x-lucide-plus class="h-3 w-3" />
-                    Go to customer list
-                </button>
             </div>
-            <p class="text-xs text-slate-400">
-                Widget ini optional, akan diisi jika modul customer sudah tersedia.
-            </p>
         </section>
-    </template>
+
+        {{-- CUSTOMER OVERVIEW (optional) --}}
+        <section
+            x-show="widgets.customerOverview.visible"
+            :class="widgets.customerOverview.expanded ? 'md:col-span-2' : ''"
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col transition-all duration-200">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-start gap-2">
+                    <button type="button" class="widget-drag-handle text-slate-300 hover:text-slate-500 mt-0.5">
+                        <x-lucide-grip-vertical class="h-4 w-4" />
+                    </button>
+                    <div>
+                        <h2 class="text-sm font-semibold text-slate-800">Customer overview</h2>
+                        <p class="text-xs text-slate-500">
+                            Analisis customer berdasarkan penjualan.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleExpand('customerOverview')">
+                        <x-lucide-maximize-2 class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="toggleMinimize('customerOverview')">
+                        <x-lucide-chevron-up
+                            class="h-3 w-3 transition-transform duration-150"
+                            x-bind:class="widgets.customerOverview.minimized ? 'rotate-180' : ''" />
+                    </button>
+                    <button
+                        type="button"
+                        class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"
+                        @click="closeWidget('customerOverview')">
+                        <x-lucide-x class="h-3 w-3" />
+                    </button>
+                </div>
+            </div>
+
+            <div
+                x-show="!widgets.customerOverview.minimized"
+                class="mt-1">
+                <p class="text-xs text-slate-400">
+                    Widget ini optional, akan diisi jika modul customer sudah tersedia.
+                </p>
+            </div>
+        </section>
+    </div>
 
     {{-- MANAGE DASHBOARD MODAL --}}
     <div
@@ -567,60 +869,15 @@
                         Select widgets to display
                     </p>
 
-                    {{-- Checkbox per widget --}}
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.quickLinks">
-                        <span>Quick links</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.kpi">
-                        <span>Key performance indicators</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.sales">
-                        <span>Sales overview</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.purchases">
-                        <span>Purchases overview</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.productOverview">
-                        <span>Product overview</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.stockHealth">
-                        <span>Stock health</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.reorder">
-                        <span>Reorder</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.reminders">
-                        <span>Reminders</span>
-                    </label>
-
-                    <label class="flex items-center gap-2 text-xs text-slate-700">
-                        <input type="checkbox" class="rounded border-slate-300"
-                            x-model="widgets.customerOverview">
-                        <span>Customer overview (optional)</span>
-                    </label>
+                    <template x-for="(config, key) in widgets" :key="key">
+                        <label class="flex items-center gap-2 text-xs text-slate-700">
+                            <input
+                                type="checkbox"
+                                class="rounded border-slate-300"
+                                x-model="config.visible">
+                            <span x-text="config.label"></span>
+                        </label>
+                    </template>
                 </div>
             </div>
 

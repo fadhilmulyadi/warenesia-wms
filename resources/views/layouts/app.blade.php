@@ -24,10 +24,10 @@
 <body class="font-sans antialiased bg-slate-100 text-slate-900">
     <div
         x-data="{ sidebarOpen: true, appearanceOpen: false, userMenuOpen: false }"
-        class="min-h-screen flex">
+        class="h-screen flex overflow-hidden"><!-- ⬅️ penuh layar, scroll dikunci -->
         {{-- SIDEBAR --}}
         <aside
-            class="flex flex-col bg-slate-900 text-slate-100 transition-all duration-300 ease-in-out relative"
+            class="flex flex-col bg-slate-900 text-slate-100 transition-all duration-300 ease-in-out relative h-full"
             :class="sidebarOpen ? 'w-64' : 'w-20'">
             {{-- Logo + nama aplikasi --}}
             <div class="h-16 flex items-center px-4 border-b border-slate-800">
@@ -143,9 +143,10 @@
         </aside>
 
         {{-- MAIN AREA --}}
-        <div class="flex-1 flex flex-col min-w-0">
-            {{-- TOPBAR --}}
-            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6">
+        <div class="flex-1 flex flex-col min-w-0 h-full">
+            {{-- TOPBAR (STICKY DI DALAM MAIN AREA) --}}
+            <header
+                class="h-16 bg-white/95 border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-20 backdrop-blur">
                 <div class="flex items-center gap-3">
                     @yield('page-header')
                 </div>
@@ -202,8 +203,8 @@
                 </div>
             </header>
 
-            {{-- CONTENT --}}
-            <main class="flex-1 px-4 py-6 lg:px-8">
+            {{-- CONTENT (AREA YANG BISA DISCROLL) --}}
+            <main class="flex-1 px-4 py-6 lg:px-8 overflow-y-auto">
                 @yield('content')
             </main>
         </div>
