@@ -213,10 +213,12 @@
                 x-show="!widgets.quickLinks.minimized"
                 class="mt-1">
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
-                    <a href="#"
+                    <a href="{{ route('admin.products.index') }}"
                         class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">
                         <span class="text-xs text-slate-500">Products</span>
-                        <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">0</span>
+                        <span class="text-xl font-semibold text-slate-900 group-hover:text-teal-700">
+                            {{ number_format($stats['products']) }}
+                        </span>
                     </a>
                     <a href="#"
                         class="group rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 hover:bg-teal-50 hover:border-teal-100 flex flex-col gap-1">

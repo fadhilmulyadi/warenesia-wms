@@ -18,7 +18,10 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      */
     public function run(): void
-    {
+    {   
+        // Demo User
+        $this->call(RoleAndUserSeeder::class);
+
         // Kategori
         $categories = Category::factory(5)->create();
 

@@ -20,9 +20,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('supplier_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
+                ->nullable();
                 
             $table->text('description')->nullable();
 
