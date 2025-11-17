@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ProductController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -39,6 +41,13 @@ Route::middleware(['auth', 'role:supplier'])->group(function () {
     Route::get('/supplier/dashboard', function () {
         return view('supplier.dashboard');
     })->name('supplier.dashboard');
+});
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('dashboard');
+
+    Route::resource('products', ProductController::class);
 });
 
 require __DIR__.'/auth.php';
