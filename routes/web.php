@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SupplierController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -62,12 +63,13 @@ Route::middleware(['auth', 'role:admin,manager'])
         // Product management
         Route::resource('products', ProductController::class);
 
-        // Quick add category from product form (modal + button "+")
+        // Quick add category + category CRUD
         Route::post('categories/quick-store', [CategoryController::class, 'quickStore'])
             ->name('categories.quick-store');
-
-        // Full category CRUD (list, create, edit, delete)
         Route::resource('categories', CategoryController::class)->except(['show']);
+
+        // Supplier management
+        Route::resource('suppliers', SupplierController::class)->except(['show']);
     });
 
 require __DIR__ . '/auth.php';
