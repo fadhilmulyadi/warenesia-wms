@@ -17,13 +17,16 @@ class SupplierFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'         => $this->faker->company(),
-            'company_name' => $this->faker->company(),
-            'email'        => $this->faker->unique()->companyEmail(),
-            'phone'        => $this->faker->phoneNumber(),
-            'address'      => $this->faker->address(),
-            'city'         => $this->faker->city(),
-            'country'      => 'Indonesia',
+            'name' => $this->faker->company(),
+            'contact_person' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'phone' => $this->faker->phoneNumber(),
+            'tax_number' => $this->faker->optional()->bothify('NPWP-##########'),
+            'address' => $this->faker->address(),
+            'city' => $this->faker->city(),
+            'country' => 'Indonesia',
+            'is_active' => true,
+            'notes' => null,
         ];
     }
 }

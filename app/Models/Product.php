@@ -33,4 +33,19 @@ class Product extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
+
+    public function increaseStock(int $quantity): void
+    {
+        if ($quantity < 0) {
+            throw new \InvalidArgumentException('Quantity must not be negative.');
+        }
+
+        if ($quantity === 0) {
+            return;
+        }
+
+        $this->current_stock = (int) $this->current_stock + $quantity;
+        $this->save();
+    }
+
 }

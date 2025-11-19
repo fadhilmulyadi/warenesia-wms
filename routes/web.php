@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SupplierController;
+use App\Http\Controllers\Admin\IncomingTransactionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -70,6 +71,28 @@ Route::middleware(['auth', 'role:admin,manager'])
 
         // Supplier management
         Route::resource('suppliers', SupplierController::class)->except(['show']);
+    });
+
+Route::middleware(['auth', 'role:admin,manager,staff'])
+    ->prefix('admin')
+    ->as('admin.')
+    ->group(function () {
+        Route::resource('purchases', IncomingTransactionController::class)
+            ->only(['index', 'create', 'store', 'show']);
+    });
+
+Route::middleware(['auth', 'role:admin,manager'])
+    ->prefix('admin')
+    ->as('admin.')
+    ->group(function () {
+        Route::patch('purchases/{purchase}/verify', [IncomingTransactionController::class, 'verify'])
+            ->name('purchases.verify');
+
+        Route::patch('purchases/{purchase}/reject', [IncomingTransactionController::class, 'reject'])
+            ->name('purchases.reject');
+
+        Route::patch('purchases/{purchase}/complete', [IncomingTransactionController::class, 'complete'])
+            ->name('purchases.complete');
     });
 
 require __DIR__ . '/auth.php';
