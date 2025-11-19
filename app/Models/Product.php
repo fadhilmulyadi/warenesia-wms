@@ -48,4 +48,34 @@ class Product extends Model
         $this->save();
     }
 
+    public function hasSufficientStock(int $quantity): bool
+    {
+        if ($quantity <= 0) {
+            return false;
+        }
+
+        return (int) $this->current_stock >= $quantity;
+    }
+
+    public function decreaseStock(int $quantity): void
+    {
+        if ($quantity < 0) {
+            throw new \InvalidArgumentException('Quantity must not be negative.');
+        }
+
+        if ($quantity === 0) {
+            return;
+        }
+
+        $currentStock = (int) $this->current_stock;
+        $newStock = $currentStock - $quantity;
+
+        if ($newStock < 0) {
+            throw new \InvalidArgumentException('Insufficient stock to decrease.');
+        }
+
+        $this->current_stock = $newStock;
+        $this->save();
+    }
+
 }

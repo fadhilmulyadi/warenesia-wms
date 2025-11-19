@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\IncomingTransactionController;
+use App\Http\Controllers\Admin\OutgoingTransactionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -95,4 +96,15 @@ Route::middleware(['auth', 'role:admin,manager'])
             ->name('purchases.complete');
     });
 
+Route::middleware(['auth', 'role:admin,manager'])
+    ->prefix('admin')
+    ->as('admin.')
+    ->group(function () {
+        Route::patch('sales/{sale}/approve', [OutgoingTransactionController::class, 'approve'])
+            ->name('sales.approve');
+
+        Route::patch('sales/{sale}/ship', [OutgoingTransactionController::class, 'ship'])
+            ->name('sales.ship');
+    });
+    
 require __DIR__ . '/auth.php';
