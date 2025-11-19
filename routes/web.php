@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\CategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,10 +20,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Role-based dashboards
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('admin.dashboard');
 });
 
 Route::middleware(['auth', 'role:manager'])->group(function () {
@@ -43,11 +49,25 @@ Route::middleware(['auth', 'role:supplier'])->group(function () {
     })->name('supplier.dashboard');
 });
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('dashboard');
+/*
+|--------------------------------------------------------------------------
+| Admin area: products & categories (Admin & Manager)
+|--------------------------------------------------------------------------
+*/
 
-    Route::resource('products', ProductController::class);
-});
+Route::middleware(['auth', 'role:admin,manager'])
+    ->prefix('admin')
+    ->as('admin.')
+    ->group(function () {
+        // Product management
+        Route::resource('products', ProductController::class);
 
-require __DIR__.'/auth.php';
+        // Quick add category from product form (modal + button "+")
+        Route::post('categories/quick-store', [CategoryController::class, 'quickStore'])
+            ->name('categories.quick-store');
+
+        // Full category CRUD (list, create, edit, delete)
+        Route::resource('categories', CategoryController::class)->except(['show']);
+    });
+
+require __DIR__ . '/auth.php';
