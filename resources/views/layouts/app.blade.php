@@ -78,8 +78,8 @@
             </a>
 
             {{-- Purchases / Barang Masuk --}}
-            <a href="#"
-               class="{{ sidebar_classes(false) }}">
+            <a href="{{ route('admin.purchases.index') }}"
+               class="{{ sidebar_classes(request()->routeIs('admin.purchases.*')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-shopping-bag class="h-4 w-4" />
                 </span>
