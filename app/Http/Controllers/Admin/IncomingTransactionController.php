@@ -20,7 +20,7 @@ class IncomingTransactionController extends Controller
      */
     public function index(Request $request): View
     {
-$       $search = $request->query('q', '');
+        $search = $request->query('q', '');
         $statusFilter = $request->query('status', '');
 
         $transactionsQuery = IncomingTransaction::query()

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
@@ -76,6 +77,11 @@ class Product extends Model
 
         $this->current_stock = $newStock;
         $this->save();
+    }
+
+    public function restockOrderItems(): HasMany
+    {
+        return $this->hasMany(RestockOrderItem::class);
     }
 
 }

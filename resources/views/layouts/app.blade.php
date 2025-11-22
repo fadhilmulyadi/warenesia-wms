@@ -86,9 +86,18 @@
                 <span class="font-medium" x-show="sidebarOpen" x-transition>Purchases</span>
             </a>
 
+            {{-- Restocks (PO ke supplier) --}}
+            <a href="{{ route('admin.restocks.index') }}"
+               class="{{ sidebar_classes(request()->routeIs('admin.restocks.*')) }}">
+                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                    <x-lucide-truck class="h-4 w-4" />
+                </span>
+                <span class="font-medium" x-show="sidebarOpen" x-transition>Restocks</span>
+            </a>
+
             {{-- Sales / Barang Keluar --}}
             <a href="{{ route('admin.sales.index') }}"
-            class="{{ sidebar_classes(request()->routeIs('admin.sales.*')) }}">
+               class="{{ sidebar_classes(request()->routeIs('admin.sales.*')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-shopping-cart class="h-4 w-4" />
                 </span>
@@ -97,7 +106,7 @@
 
             {{-- Inventory / Products --}}
             <a href="{{ route('admin.products.index') }}"
-               class="{{ sidebar_classes(false) }}">
+               class="{{ sidebar_classes(request()->routeIs('admin.products.*')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-box class="h-4 w-4" />
                 </span>
