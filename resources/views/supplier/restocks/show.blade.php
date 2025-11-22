@@ -8,7 +8,7 @@
             Restock #{{ $restock->po_number }}
         </h1>
         <p class="text-xs text-slate-500">
-            Supplier: {{ $restock->supplier->name ?? 'Unknown supplier' }}
+            Warehouse: Warenesia
         </p>
     </div>
 
@@ -19,53 +19,42 @@
         ])
 
         <a
-            href="{{ route('admin.restocks.index') }}"
+            href="{{ route('supplier.restocks.index') }}"
             class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
         >
             Back to list
         </a>
 
         @if($restock->isPending())
-            <form method="POST" action="{{ route('admin.restocks.cancel', $restock) }}" class="inline-flex">
-                @csrf
-                @method('PATCH')
-                <button
-                    type="submit"
-                    class="inline-flex items-center rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-600"
-                >
-                    Cancel order
-                </button>
-            </form>
-        @elseif($restock->isConfirmed())
-            <form method="POST" action="{{ route('admin.restocks.mark-in-transit', $restock) }}" class="inline-flex">
-                @csrf
-                @method('PATCH')
-                <button
-                    type="submit"
-                    class="inline-flex items-center rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-700"
-                >
-                    Mark in transit
-                </button>
-            </form>
-            <form method="POST" action="{{ route('admin.restocks.cancel', $restock) }}" class="inline-flex">
-                @csrf
-                @method('PATCH')
-                <button
-                    type="submit"
-                    class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                    Cancel
-                </button>
-            </form>
-        @elseif($restock->isInTransit())
-            <form method="POST" action="{{ route('admin.restocks.mark-received', $restock) }}" class="inline-flex">
+            <form method="POST" action="{{ route('supplier.restocks.confirm', $restock) }}" class="inline-flex">
                 @csrf
                 @method('PATCH')
                 <button
                     type="submit"
                     class="inline-flex items-center rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600"
                 >
-                    Mark as received
+                    Confirm order
+                </button>
+            </form>
+
+            <form
+                method="POST"
+                action="{{ route('supplier.restocks.reject', $restock) }}"
+                class="inline-flex items-center gap-2"
+            >
+                @csrf
+                @method('PATCH')
+                <input
+                    type="text"
+                    name="reject_reason"
+                    placeholder="Reason (optional)"
+                    class="rounded-lg border border-slate-200 px-2 py-1.5 text-[11px]"
+                >
+                <button
+                    type="submit"
+                    class="inline-flex items-center rounded-lg bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-600"
+                >
+                    Reject order
                 </button>
             </form>
         @endif
@@ -99,7 +88,7 @@
             @include('admin.components.restock-status-timeline', ['status' => $restock->status])
         </div>
 
-        {{-- Meta restock --}}
+        {{-- Order info --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
             <h2 class="text-[11px] font-semibold text-slate-800 uppercase tracking-wide">
                 Order info
@@ -124,13 +113,6 @@
                     <dt class="text-[11px] text-slate-500">Expected delivery</dt>
                     <dd class="text-[13px] text-slate-900">
                         {{ optional($restock->expected_delivery_date)->format('d M Y') ?? '-' }}
-                    </dd>
-                </div>
-
-                <div class="space-y-0.5">
-                    <dt class="text-[11px] text-slate-500">Supplier</dt>
-                    <dd class="text-[13px] text-slate-900">
-                        {{ $restock->supplier->name ?? 'Unknown supplier' }}
                     </dd>
                 </div>
 

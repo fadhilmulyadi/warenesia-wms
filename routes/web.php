@@ -7,7 +7,10 @@ use App\Http\Controllers\Admin\OutgoingTransactionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\RestockOrderController;
 use App\Http\Controllers\Admin\SupplierController;
+use App\Http\Controllers\Manager\DashboardController as ManagerDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,21 +65,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:manager'])->group(function () {
-    Route::get('/manager/dashboard', function () {
-        return view('manager.dashboard');
-    })->name('manager.dashboard');
+    Route::get('/manager/dashboard', [ManagerDashboardController::class, 'index'])
+        ->name('manager.dashboard');
 });
 
 Route::middleware(['auth', 'role:staff'])->group(function () {
-    Route::get('/staff/dashboard', function () {
-        return view('staff.dashboard');
-    })->name('staff.dashboard');
+    Route::get('/staff/dashboard', [StaffDashboardController::class, 'index'])
+        ->name('staff.dashboard');
 });
 
 Route::middleware(['auth', 'role:supplier'])->group(function () {
-    Route::get('/supplier/dashboard', function () {
-        return view('supplier.dashboard');
-    })->name('supplier.dashboard');
+    Route::get('/supplier/dashboard', [SupplierDashboardController::class, 'index'])
+        ->name('supplier.dashboard');
 });
 
 /*
@@ -108,6 +108,15 @@ Route::middleware(['auth', 'role:admin,manager'])
         // Restock orders (PO ke supplier)
         Route::resource('restocks', RestockOrderController::class)
             ->only(['index', 'create', 'store', 'show']);
+
+        Route::patch('restocks/{restock}/mark-in-transit', [RestockOrderController::class, 'markInTransit'])
+            ->name('restocks.mark-in-transit');
+
+        Route::patch('restocks/{restock}/mark-received', [RestockOrderController::class, 'markReceived'])
+            ->name('restocks.mark-received');
+
+        Route::patch('restocks/{restock}/cancel', [RestockOrderController::class, 'cancel'])
+            ->name('restocks.cancel');
     });
 
 /*
@@ -159,6 +168,29 @@ Route::middleware(['auth', 'role:admin,manager'])
 
         Route::patch('sales/{sale}/ship', [OutgoingTransactionController::class, 'ship'])
             ->name('sales.ship');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Supplier portal: restock orders
+|--------------------------------------------------------------------------
+| Supplier dapat melihat dan mengelola restock order mereka sendiri.
+*/
+Route::middleware(['auth', 'role:supplier'])
+    ->prefix('supplier')
+    ->as('supplier.')
+    ->group(function () {
+        Route::get('restocks', [RestockOrderController::class, 'supplierIndex'])
+            ->name('restocks.index');
+
+        Route::get('restocks/{restock}', [RestockOrderController::class, 'supplierShow'])
+            ->name('restocks.show');
+
+        Route::patch('restocks/{restock}/confirm', [RestockOrderController::class, 'supplierConfirm'])
+            ->name('restocks.confirm');
+
+        Route::patch('restocks/{restock}/reject', [RestockOrderController::class, 'supplierReject'])
+            ->name('restocks.reject');
     });
 
 require __DIR__ . '/auth.php';

@@ -11,16 +11,16 @@ class RestockOrder extends Model
 {
     use HasFactory;
 
-    public const STATUS_PENDING   = 'pending';
-    public const STATUS_CONFIRMED = 'confirmed';
+    public const STATUS_PENDING    = 'pending';
+    public const STATUS_CONFIRMED  = 'confirmed';
     public const STATUS_IN_TRANSIT = 'in_transit';
-    public const STATUS_RECEIVED  = 'received';
-    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_RECEIVED   = 'received';
+    public const STATUS_CANCELLED  = 'cancelled';
 
     public const DEFAULT_PER_PAGE = 10;
 
     private const PURCHASE_ORDER_PREFIX = 'PO';
-    private const SEQUENCE_PAD_LENGTH = 4;
+    private const SEQUENCE_PAD_LENGTH   = 4;
 
     protected $fillable = [
         'po_number',
@@ -37,13 +37,17 @@ class RestockOrder extends Model
     ];
 
     protected $casts = [
-        'order_date' => 'date',
-        'expected_delivery_date' => 'date',
-        'total_items' => 'integer',
-        'total_quantity' => 'integer',
-        'total_amount' => 'decimal:2',
+        'order_date'              => 'date',
+        'expected_delivery_date'  => 'date',
+        'total_items'             => 'integer',
+        'total_quantity'          => 'integer',
+        'total_amount'            => 'decimal:2',
     ];
 
+    /**
+     * Generate next purchase order number with pattern:
+     * PO-YYYYMMDD-XXXX
+     */
     public static function generateNextPurchaseOrderNumber(): string
     {
         $datePart = now()->format('Ymd');
@@ -74,24 +78,63 @@ class RestockOrder extends Model
         return self::PURCHASE_ORDER_PREFIX . '-' . $datePart . '-' . $sequencePart;
     }
 
+    /**
+     * Supplier yang menerima restock order ini.
+     */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
+    /**
+     * User yang membuat restock order.
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * User yang mengkonfirmasi restock order (jika ada).
+     */
     public function confirmedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'confirmed_by');
     }
 
+    /**
+     * Item produk di dalam restock order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<RestockOrderItem>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(RestockOrderItem::class);
+    }
+
+    /**
+     * Opsi status untuk dropdown/filter/UI.
+     *
+     * @return array<string,string>
+     */
+    public static function statusOptions(): array
+    {
+        return [
+            self::STATUS_PENDING    => 'Pending',
+            self::STATUS_CONFIRMED  => 'Confirmed',
+            self::STATUS_IN_TRANSIT => 'In transit',
+            self::STATUS_RECEIVED   => 'Received',
+            self::STATUS_CANCELLED  => 'Cancelled',
+        ];
+    }
+
+    /**
+     * Label status yang sudah dirapikan untuk kebutuhan UI.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return self::statusOptions()[$this->status]
+            ?? ucfirst((string) $this->status);
     }
 
     public function isPending(): bool
@@ -117,6 +160,15 @@ class RestockOrder extends Model
     public function isCancelled(): bool
     {
         return $this->status === self::STATUS_CANCELLED;
+    }
+
+    /**
+     * Dipakai untuk aksi "Confirm" di workflow (Admin/Manager sekarang),
+     * dan bisa juga nanti di-reuse untuk konfirmasi sisi supplier.
+     */
+    public function canBeConfirmed(): bool
+    {
+        return $this->isPending();
     }
 
     public function canBeConfirmedBySupplier(): bool

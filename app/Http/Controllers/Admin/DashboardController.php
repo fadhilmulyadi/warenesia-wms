@@ -3,98 +3,88 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Customer;
+use App\Models\IncomingTransaction;
+use App\Models\OutgoingTransaction;
 use App\Models\Product;
+use App\Models\RestockOrder;
 use App\Models\Supplier;
 use App\Models\User;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): View
     {
-        // Statistik utama untuk quick links
-        $stats = [
-            'products'   => Product::count(),
+        $periodStart = now()->startOfMonth();
+        $periodEnd = now()->endOfMonth();
+
+        $quickLinks = [
+            'products' => Product::count(),
             'categories' => Category::count(),
-            'suppliers'  => Supplier::count(),
-            'customers'  => Customer::count(),
-            'users'      => User::count(),
+            'suppliers' => Supplier::count(),
+            'customers' => Customer::count(),
+            'users' => User::count(),
         ];
 
-        // Stock health
-        $stock = [
-            'total_skus'   => $stats['products'],
-            'low_stock'    => Product::whereColumn('current_stock', '<=', 'min_stock')
-                                     ->where('current_stock', '>', 0)
-                                     ->count(),
-            'out_of_stock' => Product::where('current_stock', 0)->count(),
-            'total_on_hand'=> Product::sum('current_stock'),
-        ];
+        $revenue = OutgoingTransaction::whereBetween('transaction_date', [$periodStart, $periodEnd])
+            ->whereIn('status', [OutgoingTransaction::STATUS_APPROVED, OutgoingTransaction::STATUS_SHIPPED])
+            ->sum('total_amount');
 
-        // KPI
+        $inflow = IncomingTransaction::whereBetween('transaction_date', [$periodStart, $periodEnd])
+            ->whereIn('status', [IncomingTransaction::STATUS_VERIFIED, IncomingTransaction::STATUS_COMPLETED])
+            ->sum('total_amount');
+
+        $pendingOrders = OutgoingTransaction::where('status', OutgoingTransaction::STATUS_PENDING)->count();
+        $pendingPurchases = IncomingTransaction::where('status', IncomingTransaction::STATUS_PENDING)->count();
+
         $kpi = [
-            'revenue'        => 0,
-            'net'            => 0,
-            'pending_orders' => 0,
-            'due_orders'     => 0,
-            'overdue_orders' => 0,
-            'inflow'         => 0,
-            'outflow'        => 0,
+            'revenue' => $revenue,
+            'net' => $revenue - $inflow,
+            'pendingOrders' => $pendingOrders,
+            'dueOrders' => 0, // TODO: implement when due date is available.
+            'overdueOrders' => 0, // TODO: implement when due date is available.
+            'inflow' => $inflow,
+            'outflow' => $inflow,
+            'pendingPurchases' => $pendingPurchases,
         ];
 
-        return view('admin.dashboard', compact('stats', 'stock', 'kpi'));
-    }
+        $stockHealth = [
+            'totalSkus' => $quickLinks['products'],
+            'lowStock' => Product::whereColumn('current_stock', '<', 'min_stock')->count(),
+            'outOfStock' => Product::where('current_stock', 0)->count(),
+            'totalOnHand' => (int) Product::sum('current_stock'),
+        ];
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        $recentRestocks = RestockOrder::with('supplier')
+            ->orderByDesc('order_date')
+            ->orderByDesc('id')
+            ->limit(6)
+            ->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $recentSales = OutgoingTransaction::orderByDesc('transaction_date')
+            ->orderByDesc('id')
+            ->limit(6)
+            ->get();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $topProducts = Product::orderByDesc('current_stock')
+            ->limit(5)
+            ->get();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        $lowStockProducts = Product::whereColumn('current_stock', '<', 'min_stock')
+            ->orderBy('current_stock')
+            ->limit(5)
+            ->get();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return view('admin.dashboard', compact(
+            'quickLinks',
+            'kpi',
+            'stockHealth',
+            'recentRestocks',
+            'recentSales',
+            'topProducts',
+            'lowStockProducts'
+        ));
     }
 }

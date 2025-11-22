@@ -11,7 +11,8 @@ class RestockOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check()
+            && in_array(auth()->user()->role, ['admin', 'manager'], true);
     }
 
     /**

@@ -60,6 +60,14 @@
                     default    => 'dashboard',
                 };
 
+                $restockRoute = $role === 'supplier'
+                    ? 'supplier.restocks.index'
+                    : 'admin.restocks.index';
+
+                $restockActivePattern = $role === 'supplier'
+                    ? 'supplier.restocks.*'
+                    : 'admin.restocks.*';
+
                 function sidebar_classes($isActive = false) {
                     $base = 'group flex items-center gap-3 px-3 py-2.5 rounded-xl transition';
                     $inactive = 'text-slate-300 hover:bg-slate-800 hover:text-white';
@@ -87,10 +95,10 @@
             </a>
 
             {{-- Restocks (PO ke supplier) --}}
-            <a href="{{ route('admin.restocks.index') }}"
-               class="{{ sidebar_classes(request()->routeIs('admin.restocks.*')) }}">
+            <a href="{{ route($restockRoute) }}"
+               class="{{ sidebar_classes(request()->routeIs($restockActivePattern)) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                    <x-lucide-truck class="h-4 w-4" />
+                    <x-lucide-repeat class="h-4 w-4" />
                 </span>
                 <span class="font-medium" x-show="sidebarOpen" x-transition>Restocks</span>
             </a>
@@ -237,8 +245,12 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold">Appearance settings</h2>
-                <button @click="appearanceOpen = false" class="text-slate-400 hover:text-slate-600">
-                    ✕
+                <button
+                    @click="appearanceOpen = false"
+                    class="text-slate-400 hover:text-slate-600"
+                    aria-label="Close appearance settings"
+                >
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <p class="text-sm text-slate-500">
