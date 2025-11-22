@@ -11,6 +11,7 @@ use App\Models\Supplier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class RestockOrderController extends Controller
@@ -21,16 +22,18 @@ class RestockOrderController extends Controller
     public function index(Request $request): View
     {
         $search = (string) $request->query('q', '');
-        $supplierFilter = (int) $request->query('supplier_id', 0);
         $statusFilter = (string) $request->query('status', '');
 
         $restockOrdersQuery = RestockOrder::query()
             ->with(['supplier', 'createdBy'])
             ->when($search !== '', function ($query) use ($search): void {
-                $query->where('po_number', 'like', '%' . $search . '%');
-            })
-            ->when($supplierFilter > 0, function ($query) use ($supplierFilter): void {
-                $query->where('supplier_id', $supplierFilter);
+                $query->where(function ($innerQuery) use ($search): void {
+                    $innerQuery
+                        ->where('po_number', 'like', '%' . $search . '%')
+                        ->orWhereHas('supplier', function ($supplierQuery) use ($search): void {
+                            $supplierQuery->where('name', 'like', '%' . $search . '%');
+                        });
+                });
             })
             ->when($statusFilter !== '', function ($query) use ($statusFilter): void {
                 $query->where('status', $statusFilter);
@@ -42,27 +45,9 @@ class RestockOrderController extends Controller
             ->paginate(RestockOrder::DEFAULT_PER_PAGE)
             ->withQueryString();
 
-        $suppliers = Supplier::orderBy('name')->get();
+        $statusOptions = RestockOrder::statusOptions();
 
-        $statusOptions = [
-            RestockOrder::STATUS_PENDING => 'Pending',
-            RestockOrder::STATUS_CONFIRMED => 'Confirmed',
-            RestockOrder::STATUS_IN_TRANSIT => 'In transit',
-            RestockOrder::STATUS_RECEIVED => 'Received',
-            RestockOrder::STATUS_CANCELLED => 'Cancelled',
-        ];
-
-        return view(
-            'admin.restocks.index',
-            compact(
-                'restockOrders',
-                'suppliers',
-                'statusOptions',
-                'search',
-                'supplierFilter',
-                'statusFilter'
-            )
-        );
+        return view('admin.restocks.index', compact('restockOrders', 'statusOptions', 'search', 'statusFilter'));
     }
 
     /**
@@ -70,7 +55,9 @@ class RestockOrderController extends Controller
      */
     public function create(): View
     {
-        $suppliers = Supplier::orderBy('name')->get();
+        $suppliers = Supplier::where('is_active', true)
+            ->orderBy('name')
+            ->get();
         $products = Product::orderBy('name')->get();
         $today = now()->toDateString();
 
@@ -150,6 +137,10 @@ class RestockOrderController extends Controller
         } catch (\Throwable $exception) {
             DB::rollBack();
 
+            Log::error('Failed to create restock order', [
+                'message' => $exception->getMessage(),
+            ]);
+
             return back()
                 ->withInput()
                 ->withErrors([
@@ -161,34 +152,158 @@ class RestockOrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(RestockOrder $restockOrder): View
+    public function show(RestockOrder $restock): View
     {
-        $restockOrder->load(['supplier', 'createdBy', 'confirmedBy', 'items.product']);
+        $restock->load(['supplier', 'createdBy', 'confirmedBy', 'items.product']);
+        $statusOptions = RestockOrder::statusOptions();
 
-        return view('admin.restocks.show', compact('restockOrder'));
+        return view('admin.restocks.show', compact('restock', 'statusOptions'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function markInTransit(RestockOrder $restock): RedirectResponse
     {
-        //
+        if (! $restock->canBeMarkedInTransit()) {
+            return redirect()
+                ->route('admin.restocks.show', $restock)
+                ->withErrors([
+                    'general' => 'Only confirmed orders can be marked as in transit.',
+                ]);
+        }
+
+        $restock->update([
+            'status' => RestockOrder::STATUS_IN_TRANSIT,
+        ]);
+
+        return redirect()
+            ->route('admin.restocks.show', $restock)
+            ->with('success', 'Restock order marked as in transit.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function markReceived(RestockOrder $restock): RedirectResponse
     {
-        //
+        if (! $restock->canBeMarkedReceived()) {
+            return redirect()
+                ->route('admin.restocks.show', $restock)
+                ->withErrors([
+                    'general' => 'Only in transit orders can be marked as received.',
+                ]);
+        }
+
+        $restock->update([
+            'status' => RestockOrder::STATUS_RECEIVED,
+        ]);
+
+        return redirect()
+            ->route('admin.restocks.show', $restock)
+            ->with('success', 'Restock order marked as received.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function cancel(RestockOrder $restock): RedirectResponse
     {
-        //
+        if (! $restock->canBeCancelled()) {
+            return redirect()
+                ->route('admin.restocks.show', $restock)
+                ->withErrors([
+                    'general' => 'Only pending or confirmed orders can be cancelled.',
+                ]);
+        }
+
+        $restock->update([
+            'status' => RestockOrder::STATUS_CANCELLED,
+        ]);
+
+        return redirect()
+            ->route('admin.restocks.show', $restock)
+            ->with('success', 'Restock order cancelled.');
+    }
+
+    public function supplierIndex(Request $request): View
+    {
+        $supplier = $request->user();
+
+        $search = (string) $request->query('q', '');
+        $statusFilter = (string) $request->query('status', '');
+
+        $restockOrdersQuery = RestockOrder::query()
+            ->where('supplier_id', $supplier->id)
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where('po_number', 'like', '%' . $search . '%');
+            })
+            ->when($statusFilter !== '', function ($query) use ($statusFilter): void {
+                $query->where('status', $statusFilter);
+            })
+            ->orderByDesc('order_date')
+            ->orderByDesc('id');
+
+        $restockOrders = $restockOrdersQuery
+            ->paginate(RestockOrder::DEFAULT_PER_PAGE)
+            ->withQueryString();
+
+        $statusOptions = RestockOrder::statusOptions();
+
+        return view('supplier.restocks.index', compact('restockOrders', 'statusOptions', 'search', 'statusFilter'));
+    }
+
+    public function supplierShow(Request $request, RestockOrder $restock): View
+    {
+        $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
+
+        $restock->load(['supplier', 'createdBy', 'confirmedBy', 'items.product']);
+        $statusOptions = RestockOrder::statusOptions();
+
+        return view('supplier.restocks.show', compact('restock', 'statusOptions'));
+    }
+
+    public function supplierConfirm(Request $request, RestockOrder $restock): RedirectResponse
+    {
+        $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
+
+        if (! $restock->canBeConfirmedBySupplier()) {
+            return redirect()
+                ->route('supplier.restocks.show', $restock)
+                ->withErrors(['general' => 'Only pending orders can be confirmed.']);
+        }
+
+        $restock->update([
+            'status' => RestockOrder::STATUS_CONFIRMED,
+            'confirmed_by' => $request->user()->id,
+        ]);
+
+        return redirect()
+            ->route('supplier.restocks.show', $restock)
+            ->with('success', 'Restock order confirmed.');
+    }
+
+    public function supplierReject(Request $request, RestockOrder $restock): RedirectResponse
+    {
+        $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
+
+        if (! $restock->canBeConfirmedBySupplier()) {
+            return redirect()
+                ->route('supplier.restocks.show', $restock)
+                ->withErrors(['general' => 'Only pending orders can be rejected.']);
+        }
+
+        $rejectReason = trim((string) $request->input('reject_reason', ''));
+        $updates = ['status' => RestockOrder::STATUS_CANCELLED];
+
+        if ($rejectReason !== '') {
+            $existingNotes = (string) ($restock->notes ?? '');
+            $notePrefix = $existingNotes !== '' ? $existingNotes . PHP_EOL : '';
+            $updates['notes'] = $notePrefix . 'Supplier rejection reason: ' . $rejectReason;
+        }
+
+        $restock->update($updates);
+
+        return redirect()
+            ->route('supplier.restocks.show', $restock)
+            ->with('success', 'Restock order rejected.');
+    }
+
+    private function abortIfSupplierDoesNotOwn(RestockOrder $restock, int $supplierId): void
+    {
+        if ($restock->supplier_id !== $supplierId) {
+            abort(403);
+        }
     }
 }

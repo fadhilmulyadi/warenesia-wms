@@ -6,7 +6,7 @@
     <div class="flex flex-col">
         <h1 class="text-base font-semibold text-slate-900">New restock order</h1>
         <p class="text-xs text-slate-500">
-            Buat permintaan restock ke supplier. Nilai stok akan diperbarui saat barang diterima.
+            Create a purchase order for suppliers. Stock will be updated when items are received.
         </p>
     </div>
 
@@ -102,7 +102,7 @@
                             required
                             class="w-full rounded-lg border border-slate-200 px-2 py-2 text-[11px]"
                         >
-                            <option value="">– Select supplier –</option>
+                            <option value="">-- Select supplier --</option>
                             @foreach($suppliers as $supplier)
                                 <option
                                     value="{{ $supplier->id }}"
@@ -161,7 +161,7 @@
                                                 x-model="item.product_id"
                                                 required
                                             >
-                                                <option value="">– Select product –</option>
+                                                <option value="">-- Select product --</option>
                                                 @foreach($products as $product)
                                                     <option value="{{ $product->id }}">
                                                         {{ $product->name }} ({{ $product->sku }})
