@@ -122,8 +122,8 @@
             </a>
 
             {{-- Reports --}}
-            <a href="#"
-               class="{{ sidebar_classes(false) }}">
+            <a href="{{ route('admin.reports.transactions') }}"
+               class="{{ sidebar_classes(request()->routeIs('admin.reports.*')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-bar-chart-3 class="h-4 w-4" />
                 </span>

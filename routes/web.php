@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\IncomingTransactionController;
 use App\Http\Controllers\Admin\OutgoingTransactionController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RestockOrderController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Manager\DashboardController as ManagerDashboardController;
@@ -117,6 +118,12 @@ Route::middleware(['auth', 'role:admin,manager'])
 
         Route::patch('restocks/{restock}/cancel', [RestockOrderController::class, 'cancel'])
             ->name('restocks.cancel');
+
+        Route::get('reports/transactions', [ReportController::class, 'transactions'])
+            ->name('reports.transactions');
+
+        Route::get('reports/transactions/export', [ReportController::class, 'exportTransactions'])
+            ->name('reports.transactions.export');
     });
 
 /*
