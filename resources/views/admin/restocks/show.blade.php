@@ -218,5 +218,108 @@
                 </table>
             </div>
         </div>
+
+        {{-- Supplier rating --}}
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+            <div class="flex items-center justify-between">
+                <h2 class="text-[11px] font-semibold text-slate-800 uppercase tracking-wide">
+                    Supplier rating
+                </h2>
+                @if($restock->hasRating())
+                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                        Rated
+                    </span>
+                @endif
+            </div>
+
+            @if(! $restock->isReceived())
+                <p class="text-[11px] text-slate-500">
+                    Rating is available after this restock order is marked as received.
+                </p>
+            @elseif(! $restock->hasRating())
+                <form method="POST" action="{{ route('admin.restocks.rate', $restock) }}" class="space-y-3">
+                    @csrf
+                    @method('PATCH')
+
+                    <div class="space-y-1">
+                        <label for="rating" class="text-[11px] font-semibold text-slate-700">
+                            Rating ({{ \App\Models\RestockOrder::MIN_RATING }}-{{ \App\Models\RestockOrder::MAX_RATING }})
+                        </label>
+                        <select
+                            id="rating"
+                            name="rating"
+                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[12px]"
+                        >
+                            @for($i = \App\Models\RestockOrder::MIN_RATING; $i <= \App\Models\RestockOrder::MAX_RATING; $i++)
+                                <option value="{{ $i }}" @selected((int) old('rating', $restock->rating) === $i)>
+                                    {{ $i }}
+                                </option>
+                            @endfor
+                        </select>
+                        @error('rating')
+                            <p class="text-[11px] text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="rating_notes" class="text-[11px] font-semibold text-slate-700">
+                            Feedback (optional)
+                        </label>
+                        <textarea
+                            id="rating_notes"
+                            name="rating_notes"
+                            rows="3"
+                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[12px]"
+                            placeholder="Share brief feedback about supplier performance (delivery speed, accuracy, etc.)."
+                        >{{ old('rating_notes', $restock->rating_notes) }}</textarea>
+                        @error('rating_notes')
+                            <p class="text-[11px] text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="submit"
+                            class="inline-flex items-center rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-600"
+                        >
+                            Save rating
+                        </button>
+                        <a
+                            href="{{ route('admin.restocks.show', $restock) }}"
+                            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            @else
+                <div class="space-y-3">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg font-semibold text-slate-900">
+                                {{ $restock->rating }}/{{ \App\Models\RestockOrder::MAX_RATING }}
+                            </span>
+                            <div class="flex items-center gap-0.5">
+                                @for($i = \App\Models\RestockOrder::MIN_RATING; $i <= \App\Models\RestockOrder::MAX_RATING; $i++)
+                                    <x-lucide-star class="h-4 w-4 {{ $i <= (int) $restock->rating ? 'text-yellow-400' : 'text-slate-300' }}" />
+                                @endfor
+                            </div>
+                        </div>
+                        <div class="text-[11px] text-slate-500">
+                            Rated by {{ $restock->ratingGivenBy->name ?? 'Unknown user' }}
+                            @if($restock->rating_given_at)
+                                on {{ $restock->rating_given_at->format('d M Y H:i') }}
+                            @endif
+                        </div>
+                    </div>
+
+                    @if($restock->rating_notes)
+                        <div class="rounded-lg bg-slate-50 px-3 py-2 text-[12px] text-slate-800 whitespace-pre-line">
+                            {{ $restock->rating_notes }}
+                        </div>
+                    @endif
+                </div>
+            @endif
+        </div>
     </div>
 @endsection

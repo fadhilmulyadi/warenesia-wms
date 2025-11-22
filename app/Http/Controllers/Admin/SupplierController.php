@@ -28,6 +28,15 @@ class SupplierController extends Controller
                         ->orWhere('phone', 'like', '%' . $search . '%');
                 });
             })
+            ->withCount([
+                'restockOrders as rated_restock_count' => function ($query): void {
+                    $query->whereNotNull('rating');
+                },
+            ])
+            ->withAvg(
+                'restockOrders as average_rating',
+                'rating'
+            )
             ->orderBy('name');
 
         $suppliers = $suppliersQuery->paginate(Supplier::DEFAULT_PER_PAGE)
