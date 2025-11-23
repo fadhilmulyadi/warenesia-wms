@@ -17,6 +17,9 @@ class RestockOrder extends Model
     public const STATUS_RECEIVED   = 'received';
     public const STATUS_CANCELLED  = 'cancelled';
 
+    public const MIN_RATING = 1;
+    public const MAX_RATING = 5;
+
     public const DEFAULT_PER_PAGE = 10;
 
     private const PURCHASE_ORDER_PREFIX = 'PO';
@@ -34,6 +37,10 @@ class RestockOrder extends Model
         'total_quantity',
         'total_amount',
         'notes',
+        'rating',
+        'rating_notes',
+        'rating_given_by',
+        'rating_given_at',
     ];
 
     protected $casts = [
@@ -42,6 +49,8 @@ class RestockOrder extends Model
         'total_items'             => 'integer',
         'total_quantity'          => 'integer',
         'total_amount'            => 'decimal:2',
+        'rating'                  => 'integer',
+        'rating_given_at'         => 'datetime',
     ];
 
     /**
@@ -100,6 +109,11 @@ class RestockOrder extends Model
     public function confirmedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'confirmed_by');
+    }
+
+    public function ratingGivenBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rating_given_by');
     }
 
     /**
@@ -189,5 +203,24 @@ class RestockOrder extends Model
     public function canBeCancelled(): bool
     {
         return $this->isPending() || $this->isConfirmed();
+    }
+
+    public function hasRating(): bool
+    {
+        return $this->rating !== null;
+    }
+
+    public function canBeRated(): bool
+    {
+        return $this->isReceived();
+    }
+
+    public function isRatedBy(?User $user): bool
+    {
+        if ($user === null || $this->rating_given_by === null) {
+            return false;
+        }
+
+        return (int) $this->rating_given_by === (int) $user->id;
     }
 }

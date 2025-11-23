@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RestockOrderRequest;
+use App\Http\Requests\RestockOrderRatingRequest;
 use App\Models\Product;
 use App\Models\RestockOrder;
 use App\Models\RestockOrderItem;
@@ -154,10 +155,36 @@ class RestockOrderController extends Controller
      */
     public function show(RestockOrder $restock): View
     {
-        $restock->load(['supplier', 'createdBy', 'confirmedBy', 'items.product']);
+        $restock->load(['supplier', 'createdBy', 'confirmedBy', 'ratingGivenBy', 'items.product']);
         $statusOptions = RestockOrder::statusOptions();
 
         return view('admin.restocks.show', compact('restock', 'statusOptions'));
+    }
+
+    public function rate(RestockOrderRatingRequest $request, RestockOrder $restockOrder): RedirectResponse
+    {
+        if (! $restockOrder->canBeRated()) {
+            return redirect()
+                ->route('admin.restocks.show', $restockOrder)
+                ->withErrors([
+                    'general' => 'Only received restock orders can be rated.',
+                ]);
+        }
+
+        $validated = $request->validated();
+
+        $restockOrder->fill([
+            'rating' => $validated['rating'],
+            'rating_notes' => $validated['rating_notes'] ?? null,
+            'rating_given_by' => $request->user()->id,
+            'rating_given_at' => now(),
+        ]);
+
+        $restockOrder->save();
+
+        return redirect()
+            ->route('admin.restocks.show', $restockOrder)
+            ->with('success', 'Supplier rating has been saved successfully.');
     }
 
     public function markInTransit(RestockOrder $restock): RedirectResponse

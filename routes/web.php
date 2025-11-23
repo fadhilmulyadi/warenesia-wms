@@ -110,6 +110,9 @@ Route::middleware(['auth', 'role:admin,manager'])
         Route::resource('restocks', RestockOrderController::class)
             ->only(['index', 'create', 'store', 'show']);
 
+        Route::patch('restocks/{restockOrder}/rating', [RestockOrderController::class, 'rate'])
+            ->name('restocks.rate');
+
         Route::patch('restocks/{restock}/mark-in-transit', [RestockOrderController::class, 'markInTransit'])
             ->name('restocks.mark-in-transit');
 

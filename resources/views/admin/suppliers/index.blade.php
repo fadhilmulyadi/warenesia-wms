@@ -59,6 +59,8 @@
                         <th class="px-4 py-2">Contact</th>
                         <th class="px-4 py-2">Email</th>
                         <th class="px-4 py-2">Phone</th>
+                        <th class="px-4 py-2">Avg rating</th>
+                        <th class="px-4 py-2">Rated restocks</th>
                         <th class="px-4 py-2 text-center">Status</th>
                         <th class="px-4 py-2 text-right">Actions</th>
                     </tr>
@@ -88,6 +90,19 @@
                             </td>
                             <td class="px-4 py-2">
                                 {{ $supplier->phone ?: '-' }}
+                            </td>
+                            <td class="px-4 py-2">
+                                @if($supplier->average_rating !== null)
+                                    <div class="inline-flex items-center gap-1">
+                                        <span class="text-[12px] text-slate-900">{{ number_format((float) $supplier->average_rating, 1) }}</span>
+                                        <x-lucide-star class="h-3 w-3 text-yellow-400" />
+                                    </div>
+                                @else
+                                    <span class="text-slate-400">-</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-2">
+                                {{ $supplier->rated_restock_count ?? 0 }}
                             </td>
                             <td class="px-4 py-2 text-center">
                                 @if($supplier->is_active)
@@ -128,7 +143,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-[11px] text-slate-500">
+                            <td colspan="8" class="px-4 py-6 text-center text-[11px] text-slate-500">
                                 No suppliers found. Try changing the filter or add a new supplier.
                             </td>
                         </tr>
