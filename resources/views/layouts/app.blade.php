@@ -47,27 +47,9 @@
             </div>
         </div>
 
-        {{-- Menu utama --}}
-        <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto text-sm">
+            {{-- Menu utama --}}
+            <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto text-sm">
             @php
-                $role = auth()->user()->role ?? null;
-
-                $dashboardRoute = match ($role) {
-                    'admin'    => 'admin.dashboard',
-                    'manager'  => 'manager.dashboard',
-                    'staff'    => 'staff.dashboard',
-                    'supplier' => 'supplier.dashboard',
-                    default    => 'dashboard',
-                };
-
-                $restockRoute = $role === 'supplier'
-                    ? 'supplier.restocks.index'
-                    : 'admin.restocks.index';
-
-                $restockActivePattern = $role === 'supplier'
-                    ? 'supplier.restocks.*'
-                    : 'admin.restocks.*';
-
                 function sidebar_classes($isActive = false) {
                     $base = 'group flex items-center gap-3 px-3 py-2.5 rounded-xl transition';
                     $inactive = 'text-slate-300 hover:bg-slate-800 hover:text-white';
@@ -77,8 +59,8 @@
             @endphp
 
             {{-- Dashboard --}}
-            <a href="{{ route($dashboardRoute) }}"
-               class="{{ sidebar_classes(request()->routeIs($dashboardRoute)) }}">
+            <a href="{{ route('dashboard') }}"
+               class="{{ sidebar_classes(request()->routeIs('dashboard')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-layout-dashboard class="h-4 w-4" />
                 </span>
@@ -86,49 +68,91 @@
             </a>
 
             {{-- Purchases / Barang Masuk --}}
-            <a href="{{ route('admin.purchases.index') }}"
-               class="{{ sidebar_classes(request()->routeIs('admin.purchases.*')) }}">
+            @can('viewAny', \App\Models\IncomingTransaction::class)
+            <a href="{{ route('purchases.index') }}"
+               class="{{ sidebar_classes(request()->routeIs('purchases.*')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-shopping-bag class="h-4 w-4" />
                 </span>
                 <span class="font-medium" x-show="sidebarOpen" x-transition>Purchases</span>
             </a>
+            @endcan
 
             {{-- Restocks (PO ke supplier) --}}
-            <a href="{{ route($restockRoute) }}"
-               class="{{ sidebar_classes(request()->routeIs($restockActivePattern)) }}">
-                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                    <x-lucide-repeat class="h-4 w-4" />
-                </span>
-                <span class="font-medium" x-show="sidebarOpen" x-transition>Restocks</span>
-            </a>
+            @can('viewAny', \App\Models\RestockOrder::class)
+                <a href="{{ route('restocks.index') }}"
+                   class="{{ sidebar_classes(request()->routeIs('restocks.*')) }}">
+                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <x-lucide-repeat class="h-4 w-4" />
+                    </span>
+                    <span class="font-medium" x-show="sidebarOpen" x-transition>Restocks</span>
+                </a>
+            @endcan
+
+            @can('viewSupplierRestocks', \App\Models\RestockOrder::class)
+                <a href="{{ route('supplier.restocks.index') }}"
+                   class="{{ sidebar_classes(request()->routeIs('supplier.restocks.*')) }}">
+                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <x-lucide-truck class="h-4 w-4" />
+                    </span>
+                    <span class="font-medium" x-show="sidebarOpen" x-transition>Supplier Restocks</span>
+                </a>
+            @endcan
 
             {{-- Sales / Barang Keluar --}}
-            <a href="{{ route('admin.sales.index') }}"
-               class="{{ sidebar_classes(request()->routeIs('admin.sales.*')) }}">
+            @can('viewAny', \App\Models\OutgoingTransaction::class)
+            <a href="{{ route('sales.index') }}"
+               class="{{ sidebar_classes(request()->routeIs('sales.*')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-shopping-cart class="h-4 w-4" />
                 </span>
                 <span class="font-medium" x-show="sidebarOpen" x-transition>Sales</span>
             </a>
+            @endcan
 
             {{-- Inventory / Products --}}
-            <a href="{{ route('admin.products.index') }}"
-               class="{{ sidebar_classes(request()->routeIs('admin.products.*')) }}">
+            @can('viewAny', \App\Models\Product::class)
+            <a href="{{ route('products.index') }}"
+               class="{{ sidebar_classes(request()->routeIs('products.*')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-box class="h-4 w-4" />
                 </span>
                 <span class="font-medium" x-show="sidebarOpen" x-transition>Inventory</span>
             </a>
+            @endcan
+
+            {{-- Categories --}}
+            @can('viewAny', \App\Models\Category::class)
+                <a href="{{ route('categories.index') }}"
+                   class="{{ sidebar_classes(request()->routeIs('categories.*')) }}">
+                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <x-lucide-tags class="h-4 w-4" />
+                    </span>
+                    <span class="font-medium" x-show="sidebarOpen" x-transition>Categories</span>
+                </a>
+            @endcan
+
+            {{-- Suppliers --}}
+            @can('viewAny', \App\Models\Supplier::class)
+                <a href="{{ route('suppliers.index') }}"
+                   class="{{ sidebar_classes(request()->routeIs('suppliers.*')) }}">
+                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <x-lucide-building-2 class="h-4 w-4" />
+                    </span>
+                    <span class="font-medium" x-show="sidebarOpen" x-transition>Suppliers</span>
+                </a>
+            @endcan
 
             {{-- Reports --}}
-            <a href="{{ route('admin.reports.transactions') }}"
-               class="{{ sidebar_classes(request()->routeIs('admin.reports.*')) }}">
+            @can('view-transactions-report')
+            <a href="{{ route('reports.transactions') }}"
+               class="{{ sidebar_classes(request()->routeIs('reports.*')) }}">
                 <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                     <x-lucide-bar-chart-3 class="h-4 w-4" />
                 </span>
                 <span class="font-medium" x-show="sidebarOpen" x-transition>Reports</span>
             </a>
+            @endcan
 
             {{-- Settings --}}
             <a href="#"

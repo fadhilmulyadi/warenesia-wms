@@ -1,19 +1,16 @@
 <?php
 
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\IncomingTransactionController;
-use App\Http\Controllers\Admin\OutgoingTransactionController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\ProductBarcodeController;
-use App\Http\Controllers\Admin\ProductScanController;
-use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Admin\RestockOrderController;
-use App\Http\Controllers\Admin\SupplierController;
-use App\Http\Controllers\Manager\DashboardController as ManagerDashboardController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\IncomingTransactionController;
+use App\Http\Controllers\OutgoingTransactionController;
+use App\Http\Controllers\ProductBarcodeController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductScanController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
-use App\Http\Controllers\Supplier\DashboardController as SupplierDashboardController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RestockOrderController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,12 +26,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
 /*
 |--------------------------------------------------------------------------
 | Authenticated user profile
@@ -44,6 +35,14 @@ Route::get('/dashboard', function () {
 */
 
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+
+    Route::redirect('/admin/dashboard', '/dashboard');
+    Route::redirect('/manager/dashboard', '/dashboard');
+    Route::redirect('/staff/dashboard', '/dashboard');
+    Route::redirect('/supplier/dashboard', '/dashboard');
+
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -56,34 +55,6 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Role-based dashboards
-|--------------------------------------------------------------------------
-| Setiap role punya dashboard awal sendiri untuk memisahkan
-| perspektif Admin, Manager, Staff Gudang, dan Supplier.
-*/
-
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('admin.dashboard');
-});
-
-Route::middleware(['auth', 'role:manager'])->group(function () {
-    Route::get('/manager/dashboard', [ManagerDashboardController::class, 'index'])
-        ->name('manager.dashboard');
-});
-
-Route::middleware(['auth', 'role:staff'])->group(function () {
-    Route::get('/staff/dashboard', [StaffDashboardController::class, 'index'])
-        ->name('staff.dashboard');
-});
-
-Route::middleware(['auth', 'role:supplier'])->group(function () {
-    Route::get('/supplier/dashboard', [SupplierDashboardController::class, 'index'])
-        ->name('supplier.dashboard');
-});
-
-/*
-|--------------------------------------------------------------------------
 | Admin & Manager: master data dan konfigurasi gudang
 |--------------------------------------------------------------------------
 | Hanya Admin dan Warehouse Manager yang boleh mengelola
@@ -91,8 +62,6 @@ Route::middleware(['auth', 'role:supplier'])->group(function () {
 */
 
 Route::middleware(['auth', 'role:admin,manager'])
-    ->prefix('admin')
-    ->as('admin.')
     ->group(function () {
         Route::get('products/export', [ProductController::class, 'export'])
             ->name('products.export');
@@ -149,8 +118,6 @@ Route::middleware(['auth', 'role:admin,manager'])
 */
 
 Route::middleware(['auth', 'role:admin,manager,staff'])
-    ->prefix('admin')
-    ->as('admin.')
     ->group(function () {
         Route::get('products/{product}/barcode', [ProductBarcodeController::class, 'show'])
             ->name('products.barcode');
@@ -186,8 +153,6 @@ Route::middleware(['auth', 'role:admin,manager,staff'])
 */
 
 Route::middleware(['auth', 'role:admin,manager'])
-    ->prefix('admin')
-    ->as('admin.')
     ->group(function () {
         // Approval flow untuk incoming transactions (purchases)
         Route::patch('purchases/{purchase}/verify', [IncomingTransactionController::class, 'verify'])
