@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\IncomingTransactionController;
 use App\Http\Controllers\Admin\OutgoingTransactionController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductBarcodeController;
+use App\Http\Controllers\Admin\ProductScanController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RestockOrderController;
 use App\Http\Controllers\Admin\SupplierController;
@@ -150,6 +152,18 @@ Route::middleware(['auth', 'role:admin,manager,staff'])
     ->prefix('admin')
     ->as('admin.')
     ->group(function () {
+        Route::get('products/{product}/barcode', [ProductBarcodeController::class, 'show'])
+            ->name('products.barcode');
+
+        Route::get('products/{product}/barcode/label', [ProductBarcodeController::class, 'label'])
+            ->name('products.barcode.label');
+
+        Route::get('barcode/scan', [ProductScanController::class, 'showForm'])
+            ->name('barcode.scan');
+
+        Route::post('barcode/scan', [ProductScanController::class, 'handleScan'])
+            ->name('barcode.scan.handle');
+
         Route::get('purchases/export', [IncomingTransactionController::class, 'export'])
             ->name('purchases.export');
         // Incoming transactions (barang masuk / purchases)

@@ -43,14 +43,19 @@ class IncomingTransactionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
         $suppliers = Supplier::orderBy('name')->get();
         $products = Product::orderBy('name')->get();
 
         $today = now()->toDateString();
 
-        return view('admin.purchases.create', compact('suppliers', 'products', 'today'));
+        $prefilledProductId = $this->resolvePrefilledProductId($request);
+
+        return view(
+            'admin.purchases.create',
+            compact('suppliers', 'products', 'today', 'prefilledProductId')
+        );
     }
 
     /**
@@ -264,6 +269,17 @@ class IncomingTransactionController extends Controller
         return redirect()
             ->route('admin.purchases.show', $purchase)
             ->with('success', 'Transaction marked as completed.');
+    }
+
+    private function resolvePrefilledProductId(Request $request): ?int
+    {
+        $productId = $request->query('product_id');
+
+        if ($productId === null || $productId === '') {
+            return null;
+        }
+
+        return is_numeric($productId) ? (int) $productId : null;
     }
 
     private function buildIncomingTransactionIndexQuery(Request $request): Builder

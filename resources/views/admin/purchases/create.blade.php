@@ -32,7 +32,7 @@
         /** @var array<int, array{product_id: int|null, quantity: int, unit_cost: float|null}> $initialItems */
         $initialItems = old('items', [
             [
-                'product_id' => null,
+                'product_id' => $prefilledProductId ?? null,
                 'quantity' => 1,
                 'unit_cost' => null,
             ],
