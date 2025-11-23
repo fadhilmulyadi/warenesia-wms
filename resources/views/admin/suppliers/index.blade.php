@@ -12,6 +12,13 @@
 
     <div class="flex items-center gap-2">
         <a
+            href="{{ route('admin.suppliers.export', request()->query()) }}"
+            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+        >
+            <x-lucide-download class="h-3 w-3 mr-1" />
+            Export CSV
+        </a>
+        <a
             href="{{ route('admin.suppliers.create') }}"
             class="inline-flex items-center rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-600"
         >

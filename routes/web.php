@@ -92,6 +92,9 @@ Route::middleware(['auth', 'role:admin,manager'])
     ->prefix('admin')
     ->as('admin.')
     ->group(function () {
+        Route::get('products/export', [ProductController::class, 'export'])
+            ->name('products.export');
+
         // Product management (inventory master)
         Route::resource('products', ProductController::class);
 
@@ -99,13 +102,19 @@ Route::middleware(['auth', 'role:admin,manager'])
         Route::post('categories/quick-store', [CategoryController::class, 'quickStore'])
             ->name('categories.quick-store');
 
+        Route::get('categories/export', [CategoryController::class, 'export'])
+            ->name('categories.export');
         Route::resource('categories', CategoryController::class)
             ->except(['show']);
 
+        Route::get('suppliers/export', [SupplierController::class, 'export'])
+            ->name('suppliers.export');
         // Supplier master data
         Route::resource('suppliers', SupplierController::class)
             ->except(['show']);
 
+        Route::get('restocks/export', [RestockOrderController::class, 'export'])
+            ->name('restocks.export');
         // Restock orders (PO ke supplier)
         Route::resource('restocks', RestockOrderController::class)
             ->only(['index', 'create', 'store', 'show']);
@@ -141,10 +150,14 @@ Route::middleware(['auth', 'role:admin,manager,staff'])
     ->prefix('admin')
     ->as('admin.')
     ->group(function () {
+        Route::get('purchases/export', [IncomingTransactionController::class, 'export'])
+            ->name('purchases.export');
         // Incoming transactions (barang masuk / purchases)
         Route::resource('purchases', IncomingTransactionController::class)
             ->only(['index', 'create', 'store', 'show']);
 
+        Route::get('sales/export', [OutgoingTransactionController::class, 'export'])
+            ->name('sales.export');
         // Outgoing transactions (barang keluar / sales)
         Route::resource('sales', OutgoingTransactionController::class)
             ->only(['index', 'create', 'store', 'show']);

@@ -8,30 +8,27 @@ use App\Http\Requests\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Supplier;
-use GuzzleHttp\Handler\Proxy;
+use App\Support\CsvExporter;
+use Illuminate\Database\Eloquent\Builder;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
+    private const DEFAULT_PER_PAGE = 10;
+    private const EXPORT_CHUNK_SIZE = 200;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $search = $request->input('q');
+        $productQuery = $this->buildProductIndexQuery($request);
 
-        $query = Product::with(['category', 'supplier']);
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('sku', 'like', '%' . $search . '%');
-            });
-        }
-
-        $products = $query
-            ->orderBy('name')
-            ->paginate(10)
+        $products = $productQuery
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
+
+        $search = (string) $request->query('q', '');
 
         return view('admin.products.index', compact('products', 'search'));
     }
@@ -116,5 +113,68 @@ class ProductController extends Controller
         return redirect()
             ->route('admin.products.index')
             ->with('status', 'Product deleted successfully.');
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $productQuery = $this->buildProductIndexQuery($request);
+        $fileName = 'products-' . now()->format('Ymd-His') . '.csv';
+
+        return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($productQuery): void {
+            $output->fputcsv([
+                'ID',
+                'Name',
+                'SKU',
+                'Category',
+                'Supplier',
+                'Purchase Price',
+                'Sale Price',
+                'Min Stock',
+                'Current Stock',
+                'Unit',
+                'Rack Location',
+                'Created At',
+                'Updated At',
+            ]);
+
+            $productQuery
+                ->orderBy('name')
+                ->orderBy('id')
+                ->chunk(self::EXPORT_CHUNK_SIZE, static function ($products) use ($output): void {
+                    foreach ($products as $product) {
+                        $output->fputcsv([
+                            $product->id,
+                            $product->name,
+                            $product->sku,
+                            $product->category->name ?? '',
+                            $product->supplier->name ?? '',
+                            (float) $product->purchase_price,
+                            (float) $product->sale_price,
+                            (int) $product->min_stock,
+                            (int) $product->current_stock,
+                            $product->unit,
+                            $product->rack_location,
+                            optional($product->created_at)->toDateTimeString(),
+                            optional($product->updated_at)->toDateTimeString(),
+                        ]);
+                    }
+                });
+        });
+    }
+
+    private function buildProductIndexQuery(Request $request): Builder
+    {
+        $search = (string) $request->query('q', '');
+
+        return Product::query()
+            ->with(['category', 'supplier'])
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $innerQuery) use ($search): void {
+                    $innerQuery
+                        ->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('sku', 'like', '%' . $search . '%');
+                });
+            })
+            ->orderBy('name');
     }
 }
