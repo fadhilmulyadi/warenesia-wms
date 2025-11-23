@@ -5,28 +5,28 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
+use App\Support\CsvExporter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CategoryController extends Controller
 {
+    private const DEFAULT_PER_PAGE = 10;
+    private const EXPORT_CHUNK_SIZE = 200;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $search = $request->input('q');
+        $categoryQuery = $this->buildCategoryIndexQuery($request);
 
-        $query = Category::query()
-            ->withCount('products');
-
-        if ($search) {
-            $query->where('name', 'like', '%' . $search . '%');
-        }
-
-        $categories = $query
-            ->orderBy('name')
-            ->paginate(10)
+        $categories = $categoryQuery
+            ->paginate(self::DEFAULT_PER_PAGE)
             ->withQueryString();
+
+        $search = (string) $request->query('q', '');
 
         return view('admin.categories.index', [
             'categories' => $categories,
@@ -116,6 +116,49 @@ class CategoryController extends Controller
             ->back()
             ->with('success', 'Category created successfully.')
             ->with('newCategoryId', $category->id);
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $categoryQuery = $this->buildCategoryIndexQuery($request);
+        $fileName = 'categories-' . now()->format('Ymd-His') . '.csv';
+
+        return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($categoryQuery): void {
+            $output->fputcsv([
+                'ID',
+                'Name',
+                'Description',
+                'Created At',
+                'Updated At',
+            ]);
+
+            $categoryQuery
+                ->orderBy('name')
+                ->orderBy('id')
+                ->chunk(self::EXPORT_CHUNK_SIZE, static function ($categories) use ($output): void {
+                    foreach ($categories as $category) {
+                        $output->fputcsv([
+                            $category->id,
+                            $category->name,
+                            (string) $category->description,
+                            optional($category->created_at)->toDateTimeString(),
+                            optional($category->updated_at)->toDateTimeString(),
+                        ]);
+                    }
+                });
+        });
+    }
+
+    private function buildCategoryIndexQuery(Request $request): Builder
+    {
+        $search = (string) $request->input('q', '');
+
+        return Category::query()
+            ->withCount('products')
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->orderBy('name');
     }
 
 }

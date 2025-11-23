@@ -8,48 +8,34 @@ use App\Models\IncomingTransaction;
 use App\Models\IncomingTransactionItem;
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Support\CsvExporter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class IncomingTransactionController extends Controller
 {
+    private const ROLE_STAFF = 'staff';
+    private const EXPORT_CHUNK_SIZE = 200;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request): View
     {
-        $search = $request->query('q', '');
-        $statusFilter = $request->query('status', '');
-
-        $transactionsQuery = IncomingTransaction::query()
-            ->with(['supplier', 'createdBy'])
-            ->when($search !== '', function ($query) use ($search): void {
-                $query->where(function ($innerQuery) use ($search): void {
-                    $innerQuery
-                        ->where('transaction_number', 'like', '%' . $search . '%')
-                        ->orWhereHas('supplier', function ($supplierQuery) use ($search): void {
-                            $supplierQuery->where('name', 'like', '%' . $search . '%');
-                        });
-                });
-            })
-            ->when($statusFilter !== '', function ($query) use ($statusFilter): void {
-                $query->where('status', $statusFilter);
-            })
-            ->orderByDesc('transaction_date')
-            ->orderByDesc('id');
+        $transactionsQuery = $this->buildIncomingTransactionIndexQuery($request);
 
         $transactions = $transactionsQuery
             ->paginate(IncomingTransaction::DEFAULT_PER_PAGE)
             ->withQueryString();
 
-        $statusOptions = [
-            IncomingTransaction::STATUS_PENDING => 'Pending',
-            IncomingTransaction::STATUS_VERIFIED => 'Verified',
-            IncomingTransaction::STATUS_COMPLETED => 'Completed',
-            IncomingTransaction::STATUS_REJECTED => 'Rejected',
-        ];
+        $search = (string) $request->query('q', '');
+        $statusFilter = (string) $request->query('status', '');
+        $statusOptions = $this->incomingStatusOptions();
 
         return view('admin.purchases.index', compact('transactions', 'search', 'statusFilter', 'statusOptions'));
     }
@@ -138,6 +124,53 @@ class IncomingTransactionController extends Controller
                 ->withInput()
                 ->withErrors(['general' => 'Failed to create incoming transaction. Please try again.']);
         }
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $transactionQuery = $this->buildIncomingTransactionIndexQuery($request);
+        $user = $request->user();
+
+        if ($user !== null && $user->role === self::ROLE_STAFF) {
+            $transactionQuery->where('created_by', $user->id);
+        }
+
+        $fileName = 'purchases-' . now()->format('Ymd-His') . '.csv';
+
+        return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($transactionQuery): void {
+            $output->fputcsv([
+                'Transaction Number',
+                'Transaction Date',
+                'Supplier Name',
+                'Status',
+                'Total Items',
+                'Total Quantity',
+                'Total Amount',
+                'Created By',
+                'Verified By',
+                'Notes',
+            ]);
+
+            $transactionQuery
+                ->orderBy('transaction_date')
+                ->orderBy('id')
+                ->chunk(self::EXPORT_CHUNK_SIZE, function (Collection $transactions) use ($output): void {
+                    foreach ($transactions as $transaction) {
+                        $output->fputcsv([
+                            $transaction->transaction_number,
+                            optional($transaction->transaction_date)->format('Y-m-d'),
+                            optional($transaction->supplier)->name ?? '',
+                            $this->incomingStatusLabel((string) $transaction->status),
+                            (int) $transaction->total_items,
+                            (int) $transaction->total_quantity,
+                            (float) $transaction->total_amount,
+                            optional($transaction->createdBy)->name ?? '',
+                            optional($transaction->verifiedBy)->name ?? '',
+                            (string) $transaction->notes,
+                        ]);
+                    }
+                });
+        });
     }
 
     /**
@@ -231,5 +264,53 @@ class IncomingTransactionController extends Controller
         return redirect()
             ->route('admin.purchases.show', $purchase)
             ->with('success', 'Transaction marked as completed.');
+    }
+
+    private function buildIncomingTransactionIndexQuery(Request $request): Builder
+    {
+        $search = (string) $request->query('q', '');
+        $statusFilter = (string) $request->query('status', '');
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
+
+        return IncomingTransaction::query()
+            ->with(['supplier', 'createdBy', 'verifiedBy'])
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $innerQuery) use ($search): void {
+                    $innerQuery
+                        ->where('transaction_number', 'like', '%' . $search . '%')
+                        ->orWhereHas('supplier', function (Builder $supplierQuery) use ($search): void {
+                            $supplierQuery->where('name', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->when($statusFilter !== '', function (Builder $query) use ($statusFilter): void {
+                $query->where('status', $statusFilter);
+            })
+            ->when($dateFrom, function (Builder $query) use ($dateFrom): void {
+                $query->whereDate('transaction_date', '>=', $dateFrom);
+            })
+            ->when($dateTo, function (Builder $query) use ($dateTo): void {
+                $query->whereDate('transaction_date', '<=', $dateTo);
+            })
+            ->orderByDesc('transaction_date')
+            ->orderByDesc('id');
+    }
+
+    private function incomingStatusOptions(): array
+    {
+        return [
+            IncomingTransaction::STATUS_PENDING => 'Pending',
+            IncomingTransaction::STATUS_VERIFIED => 'Verified',
+            IncomingTransaction::STATUS_COMPLETED => 'Completed',
+            IncomingTransaction::STATUS_REJECTED => 'Rejected',
+        ];
+    }
+
+    private function incomingStatusLabel(string $status): string
+    {
+        $options = $this->incomingStatusOptions();
+
+        return $options[$status] ?? ucfirst($status);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\TransactionReportRequest;
 use App\Models\IncomingTransaction;
 use App\Models\OutgoingTransaction;
 use App\Models\RestockOrder;
+use App\Support\CsvExporter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -15,6 +16,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
+    private const EXPORT_CHUNK_SIZE = 200;
+
     public function transactions(TransactionReportRequest $request): View
     {
         $filters = $request->filters();
@@ -85,17 +88,23 @@ class ReportController extends Controller
         $filters = $request->filters();
         $dateRange = $this->buildDateRange($filters);
 
-        $incomingQuery = $this->buildIncomingQuery($filters, $dateRange)->with(['supplier']);
-        $salesQuery = $this->buildSalesQuery($filters, $dateRange);
-        $restockQuery = $this->buildRestockQuery($filters, $dateRange)->with(['supplier']);
+        $incomingQuery = $this->buildIncomingQuery($filters, $dateRange)->with(['supplier', 'createdBy']);
+        $salesQuery = $this->buildSalesQuery($filters, $dateRange)->with(['createdBy']);
+        $restockQuery = $this->buildRestockQuery($filters, $dateRange)->with(['supplier', 'createdBy']);
 
         $selectedTypes = $this->selectedTypes($filters['transaction_type']);
-        $filename = 'transactions_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'transactions-' . now()->format('Ymd-His') . '.csv';
 
-        return response()->streamDownload(function () use ($selectedTypes, $incomingQuery, $salesQuery, $restockQuery): void {
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, ['Type', 'Date', 'Reference', 'Counterparty', 'Status', 'Total Amount']);
+        return CsvExporter::stream($filename, function (\SplFileObject $output) use ($selectedTypes, $incomingQuery, $salesQuery, $restockQuery): void {
+            $output->fputcsv([
+                'Type',
+                'Date',
+                'Number',
+                'Counterparty',
+                'Status',
+                'Total Amount',
+                'Created By',
+            ]);
 
             $exportMap = [
                 'purchases' => [
@@ -107,6 +116,9 @@ class ReportController extends Controller
                     'counterparty' => static function ($transaction): string {
                         return optional($transaction->supplier)->name ?? '-';
                     },
+                    'creator' => static function ($transaction): string {
+                        return optional($transaction->createdBy)->name ?? '';
+                    },
                 ],
                 'sales' => [
                     'query' => $salesQuery,
@@ -117,6 +129,9 @@ class ReportController extends Controller
                     'counterparty' => static function ($transaction): string {
                         return (string) $transaction->customer_name;
                     },
+                    'creator' => static function ($transaction): string {
+                        return optional($transaction->createdBy)->name ?? '';
+                    },
                 ],
                 'restocks' => [
                     'query' => $restockQuery,
@@ -126,6 +141,9 @@ class ReportController extends Controller
                     'type_label' => 'Restock',
                     'counterparty' => static function ($transaction): string {
                         return optional($transaction->supplier)->name ?? '-';
+                    },
+                    'creator' => static function ($transaction): string {
+                        return optional($transaction->createdBy)->name ?? '';
                     },
                 ],
             ];
@@ -140,29 +158,26 @@ class ReportController extends Controller
                     ->orderBy($config['date_column'])
                     ->orderBy('id');
 
-                $query->chunk(200, function (Collection $rows) use ($handle, $config): void {
+                $query->chunk(self::EXPORT_CHUNK_SIZE, function (Collection $rows) use ($output, $config): void {
                     foreach ($rows as $row) {
                         $dateValue = $row->{$config['date_column']};
                         $formattedDate = $dateValue instanceof Carbon
                             ? $dateValue->format('Y-m-d')
                             : (string) $dateValue;
 
-                        fputcsv($handle, [
+                        $output->fputcsv([
                             $config['type_label'],
                             $formattedDate,
                             $row->{$config['reference_column']},
                             $config['counterparty']($row),
                             $this->statusLabel((string) $row->status, $config['status_type']),
                             (float) $row->total_amount,
+                            $config['creator']($row),
                         ]);
                     }
                 });
             }
-
-            fclose($handle);
-        }, $filename, [
-            'Content-Type' => 'text/csv',
-        ]);
+        });
     }
 
     /**

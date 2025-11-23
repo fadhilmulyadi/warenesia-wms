@@ -52,6 +52,13 @@
             >
                 Filter
             </button>
+            <a
+                href="{{ route('admin.sales.export', request()->query()) }}"
+                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50"
+            >
+                <x-lucide-download class="h-3 w-3 mr-1" />
+                Export CSV
+            </a>
         </form>
 
         <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">

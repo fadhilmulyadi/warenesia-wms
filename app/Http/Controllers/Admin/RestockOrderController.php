@@ -9,43 +9,33 @@ use App\Models\Product;
 use App\Models\RestockOrder;
 use App\Models\RestockOrderItem;
 use App\Models\Supplier;
+use App\Support\CsvExporter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RestockOrderController extends Controller
 {
+    private const EXPORT_CHUNK_SIZE = 200;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request): View
     {
-        $search = (string) $request->query('q', '');
-        $statusFilter = (string) $request->query('status', '');
-
-        $restockOrdersQuery = RestockOrder::query()
-            ->with(['supplier', 'createdBy'])
-            ->when($search !== '', function ($query) use ($search): void {
-                $query->where(function ($innerQuery) use ($search): void {
-                    $innerQuery
-                        ->where('po_number', 'like', '%' . $search . '%')
-                        ->orWhereHas('supplier', function ($supplierQuery) use ($search): void {
-                            $supplierQuery->where('name', 'like', '%' . $search . '%');
-                        });
-                });
-            })
-            ->when($statusFilter !== '', function ($query) use ($statusFilter): void {
-                $query->where('status', $statusFilter);
-            })
-            ->orderByDesc('order_date')
-            ->orderByDesc('id');
+        $restockOrdersQuery = $this->buildRestockOrderIndexQuery($request);
 
         $restockOrders = $restockOrdersQuery
             ->paginate(RestockOrder::DEFAULT_PER_PAGE)
             ->withQueryString();
 
+        $search = (string) $request->query('q', '');
+        $statusFilter = (string) $request->query('status', '');
         $statusOptions = RestockOrder::statusOptions();
 
         return view('admin.restocks.index', compact('restockOrders', 'statusOptions', 'search', 'statusFilter'));
@@ -244,6 +234,55 @@ class RestockOrderController extends Controller
             ->with('success', 'Restock order cancelled.');
     }
 
+    public function export(Request $request): StreamedResponse
+    {
+        $restockOrdersQuery = $this->buildRestockOrderIndexQuery($request);
+        $fileName = 'restocks-' . now()->format('Ymd-His') . '.csv';
+
+        return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($restockOrdersQuery): void {
+            $output->fputcsv([
+                'PO Number',
+                'Order Date',
+                'Expected Delivery Date',
+                'Supplier',
+                'Status',
+                'Total Items',
+                'Total Quantity',
+                'Total Amount',
+                'Rating',
+                'Rating Notes',
+                'Created By',
+                'Confirmed By',
+                'Created At',
+                'Updated At',
+            ]);
+
+            $restockOrdersQuery
+                ->orderBy('order_date')
+                ->orderBy('id')
+                ->chunk(self::EXPORT_CHUNK_SIZE, function (Collection $restockOrders) use ($output): void {
+                    foreach ($restockOrders as $restockOrder) {
+                        $output->fputcsv([
+                            $restockOrder->po_number,
+                            optional($restockOrder->order_date)->format('Y-m-d'),
+                            optional($restockOrder->expected_delivery_date)->format('Y-m-d'),
+                            optional($restockOrder->supplier)->name ?? '',
+                            $restockOrder->status_label,
+                            (int) $restockOrder->total_items,
+                            (int) $restockOrder->total_quantity,
+                            (float) $restockOrder->total_amount,
+                            $restockOrder->rating !== null ? (int) $restockOrder->rating : '',
+                            (string) $restockOrder->rating_notes,
+                            optional($restockOrder->createdBy)->name ?? '',
+                            optional($restockOrder->confirmedBy)->name ?? '',
+                            optional($restockOrder->created_at)->toDateTimeString(),
+                            optional($restockOrder->updated_at)->toDateTimeString(),
+                        ]);
+                    }
+                });
+        });
+    }
+
     public function supplierIndex(Request $request): View
     {
         $supplier = $request->user();
@@ -325,6 +364,37 @@ class RestockOrderController extends Controller
         return redirect()
             ->route('supplier.restocks.show', $restock)
             ->with('success', 'Restock order rejected.');
+    }
+
+    private function buildRestockOrderIndexQuery(Request $request): Builder
+    {
+        $search = (string) $request->query('q', '');
+        $statusFilter = (string) $request->query('status', '');
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
+
+        return RestockOrder::query()
+            ->with(['supplier', 'createdBy', 'confirmedBy', 'ratingGivenBy'])
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $innerQuery) use ($search): void {
+                    $innerQuery
+                        ->where('po_number', 'like', '%' . $search . '%')
+                        ->orWhereHas('supplier', function (Builder $supplierQuery) use ($search): void {
+                            $supplierQuery->where('name', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->when($statusFilter !== '', function (Builder $query) use ($statusFilter): void {
+                $query->where('status', $statusFilter);
+            })
+            ->when($dateFrom, function (Builder $query) use ($dateFrom): void {
+                $query->whereDate('order_date', '>=', $dateFrom);
+            })
+            ->when($dateTo, function (Builder $query) use ($dateTo): void {
+                $query->whereDate('order_date', '<=', $dateTo);
+            })
+            ->orderByDesc('order_date')
+            ->orderByDesc('id');
     }
 
     private function abortIfSupplierDoesNotOwn(RestockOrder $restock, int $supplierId): void

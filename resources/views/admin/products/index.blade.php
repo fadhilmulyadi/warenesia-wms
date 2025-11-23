@@ -28,11 +28,20 @@
             </div>
         </form>
 
-        <a href="{{ route('admin.products.create') }}"
-            class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700">
-            <x-lucide-plus class="h-3 w-3" />
-            Tambah Produk
-        </a>
+        <div class="flex items-center gap-2">
+            <a
+                href="{{ route('admin.products.export', request()->query()) }}"
+                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+            >
+                <x-lucide-download class="h-3 w-3 mr-1" />
+                Export CSV
+            </a>
+            <a href="{{ route('admin.products.create') }}"
+                class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700">
+                <x-lucide-plus class="h-3 w-3" />
+                Tambah Produk
+            </a>
+        </div>
     </div>
 
     {{-- Tabel --}}
