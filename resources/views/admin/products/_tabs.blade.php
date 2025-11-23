@@ -34,6 +34,8 @@
 
     $canManageCategories = auth()->check()
         && in_array(auth()->user()->role, ['admin', 'manager'], true);
+
+    $showBarcodeSection = $product !== null && $formMode !== 'create';
 @endphp
 
 <div
@@ -104,7 +106,35 @@
             <div x-show="activeTab === 'general'" x-cloak class="space-y-4">
                 <h2 class="text-xs font-semibold text-slate-800 mb-1">General information</h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div @class([
+                    'grid grid-cols-1 gap-4',
+                    'md:grid-cols-[auto,1fr] items-start' => $showBarcodeSection,
+                ])>
+                    @if($showBarcodeSection)
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="rounded-xl border border-slate-200 bg-white p-3">
+                                <img
+                                    src="{{ route('admin.products.barcode', $product) }}"
+                                    alt="QR code for {{ $product->name }}"
+                                    class="h-32 w-32 object-contain"
+                                >
+                            </div>
+                            <div class="text-[11px] text-slate-600 text-center">
+                                {{ $product->getBarcodeLabel() }}
+                            </div>
+                            <a
+                                href="{{ route('admin.products.barcode.label', $product) }}"
+                                target="_blank"
+                                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50"
+                            >
+                                <x-lucide-printer class="h-3 w-3 mr-1" />
+                                Print label
+                            </a>
+                        </div>
+                    @endif
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {{-- Column 1 --}}
                     <div class="space-y-3">
                         <div>
@@ -271,19 +301,21 @@
                                     </span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {{-- Description --}}
+                    <div>
+                        <label class="text-[11px] text-slate-500 mb-1 block">Description</label>
+                        <textarea
+                            name="description"
+                            rows="3"
+                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
+                            @disabled($isReadOnly)
+                        >{{ old('description', optional($product)->description) }}</textarea>
                     </div>
                 </div>
-
-                {{-- Description --}}
-                <div class="mt-4">
-                    <label class="text-[11px] text-slate-500 mb-1 block">Description</label>
-                    <textarea
-                        name="description"
-                        rows="3"
-                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-                        @disabled($isReadOnly)
-                    >{{ old('description', optional($product)->description) }}</textarea>
-                </div>
+            </div>
             </div>
 
             {{-- TAB PRICES --}}

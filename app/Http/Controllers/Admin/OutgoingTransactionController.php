@@ -42,12 +42,14 @@ class OutgoingTransactionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
         $products = Product::orderBy('name')->get();
         $today = now()->toDateString();
 
-        return view('admin.sales.create', compact('products', 'today'));
+        $prefilledProductId = $this->resolvePrefilledProductId($request);
+
+        return view('admin.sales.create', compact('products', 'today', 'prefilledProductId'));
     }
 
     /**
@@ -283,6 +285,17 @@ class OutgoingTransactionController extends Controller
         return redirect()
             ->route('admin.sales.show', $sale)
             ->with('success', 'Transaction marked as shipped.');
+    }
+
+    private function resolvePrefilledProductId(Request $request): ?int
+    {
+        $productId = $request->query('product_id');
+
+        if ($productId === null || $productId === '') {
+            return null;
+        }
+
+        return is_numeric($productId) ? (int) $productId : null;
     }
 
     private function buildOutgoingTransactionIndexQuery(Request $request): Builder

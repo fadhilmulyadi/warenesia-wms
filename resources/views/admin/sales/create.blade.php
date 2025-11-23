@@ -31,7 +31,7 @@
     @php
         $initialItems = old('items', [
             [
-                'product_id' => null,
+                'product_id' => $prefilledProductId ?? null,
                 'quantity' => 1,
                 'unit_price' => null,
             ],
