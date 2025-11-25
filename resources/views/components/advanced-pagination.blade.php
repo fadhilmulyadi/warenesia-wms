@@ -26,7 +26,7 @@
 
     $capacityOptionsData = [];
     foreach($capacityOptions as $cap) {
-        // Key = URL, Label = Angka (misal: 10)
+        // Key = URL, Label = Angka
         $capacityOptionsData[$perPageUrl($cap)] = $cap;
     }
 @endphp
@@ -54,9 +54,8 @@
             {{ $paginator->links('pagination::tailwind') }} 
         </div>
         
-        {{-- Range Info --}}
         <div class="hidden sm:block text-xs font-medium text-slate-500">
-            Menampilkan <span class="font-bold text-slate-700">{{ number_format($paginator->firstItem() ?? 0) }}-{{ number_format($paginator->lastItem() ?? 0) }}</span> dari <span class="font-bold text-slate-700">{{ number_format($paginator->total()) }}</span> data produk
+            Menampilkan <span class="font-bold text-slate-700">{{ number_format($paginator->firstItem() ?? 0) }}-{{ number_format($paginator->lastItem() ?? 0) }}</span> dari <span class="font-bold text-slate-700">{{ number_format($paginator->total()) }}</span> data
         </div>
     </div>
 
@@ -64,16 +63,18 @@
     <div class="flex items-center gap-3 mt-3 md:mt-0">
         <div class="flex items-center gap-2">            
             <x-custom-select
-                width="w-[120px]"
+                width="w-[130px]"
                 prefix-label="Tampilkan:"
                 :options="$capacityOptionsData"
                 :value="$perPageUrl($perPage)"
                 :on-change="'window.location.href = val'"
                 drop-up
+                :searchable="false"
+                class="h-[42px] flex items-center"
             />
         </div>
         
-        {{-- Go To --}}
+        {{-- Go To Page --}}
         <div class="flex items-center bg-white border border-slate-200 shadow-sm rounded-xl p-1 h-[42px]">
             <span class="pl-3 pr-2 text-xs font-medium text-slate-400 whitespace-nowrap">Ke Hal.</span>
             
