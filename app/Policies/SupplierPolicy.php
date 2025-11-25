@@ -40,7 +40,6 @@ class SupplierPolicy
 
     public function export(User $user): bool
     {
-        // Scope exported rows appropriately in controllers (staff should only see their own data).
         return $this->canView($user);
     }
 

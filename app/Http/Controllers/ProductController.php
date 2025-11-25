@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ProductController extends Controller
 {
     private const DEFAULT_PER_PAGE = 10;
+    private const MAX_PER_PAGE = 250;
     private const EXPORT_CHUNK_SIZE = 200;
 
     /**
@@ -22,17 +23,22 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Product::class);
+        $requestedPerPage = (int) $request->query('per_page', self::DEFAULT_PER_PAGE);
 
-        $productQuery = $this->buildProductIndexQuery($request);
+            $perPage = min($requestedPerPage, self::MAX_PER_PAGE);
+            if ($perPage <= 0) {
+                $perPage = self::DEFAULT_PER_PAGE;
+            }
+            
+            $productQuery = $this->buildProductIndexQuery($request);
 
-        $products = $productQuery
-            ->paginate(self::DEFAULT_PER_PAGE)
-            ->withQueryString();
+            $products = $productQuery
+                ->paginate($perPage)
+                ->withQueryString();
 
-        $search = (string) $request->query('q', '');
+            $search = (string) $request->query('q', '');
 
-        return view('products.index', compact('products', 'search'));
+            return view('products.index', compact('products', 'search'));
     }
 
     /**
@@ -55,24 +61,12 @@ class ProductController extends Controller
     {
         $this->authorize('create', Product::class);
 
-        $validated = $request->validate([
-            'name'          => ['required', 'string', 'max:255'],
-            'sku'           => ['required', 'string', 'max:255', 'unique:products,sku'],
-            'category_id'   => ['required', 'exists:categories,id'],
-            'supplier_id'   => ['nullable', 'exists:suppliers,id'],
-            'purchase_price'=> ['required', 'numeric', 'min:0'],
-            'sale_price'    => ['required', 'numeric', 'min:0'],
-            'min_stock'     => ['required', 'integer', 'min:0'],
-            'current_stock' => ['required', 'integer', 'min:0'],
-            'unit'          => ['required', 'string', 'max:20'],
-            'rack_location' => ['nullable', 'string', 'max:50'],
-            'description'   => ['nullable', 'string'],
-        ]);
+        $data = $request->validated();
 
-            $product = Product::create($validated);
+        Product::create($data);
 
         return redirect()
-            ->route('products.edit', $product)
+            ->route('products.index')
             ->with('success', 'Produk berhasil ditambahkan.');
     }
 
@@ -115,7 +109,7 @@ class ProductController extends Controller
 
         return redirect()
             ->route('products.index')
-            ->with('status', 'Product updated successfully.');
+            ->with('success', 'Product updated successfully.');
     }
 
     /**
@@ -129,7 +123,7 @@ class ProductController extends Controller
 
         return redirect()
             ->route('products.index')
-            ->with('status', 'Product deleted successfully.');
+            ->with('success', 'Product deleted successfully.');
     }
 
     public function export(Request $request): StreamedResponse

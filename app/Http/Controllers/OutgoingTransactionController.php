@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OutgoingTransactionRequest;
+use App\Exceptions\InsufficientStockException;
 use App\Models\OutgoingTransaction;
-use App\Models\OutgoingTransactionItem;
 use App\Models\Product;
 use App\Support\CsvExporter;
+use App\Services\TransactionService;
+use DomainException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -20,6 +23,10 @@ class OutgoingTransactionController extends Controller
 {
     private const ROLE_STAFF = 'staff';
     private const EXPORT_CHUNK_SIZE = 200;
+
+    public function __construct(private readonly TransactionService $transactionService)
+    {
+    }
 
     /**
      * Display a listing of the resource.
@@ -64,67 +71,18 @@ class OutgoingTransactionController extends Controller
         $this->authorize('create', OutgoingTransaction::class);
 
         $validated = $request->validated();
-        $itemsData = $validated['items'] ?? [];
-
-        if (count($itemsData) === 0) {
-            return back()
-                ->withInput()
-                ->withErrors(['items' => 'At least one product must be added to the transaction.']);
-        }
-
-        $transactionNumber = OutgoingTransaction::generateNextTransactionNumber();
-
-        DB::beginTransaction();
 
         try {
-            $totalItems = count($itemsData);
-            $totalQuantity = 0;
-            $totalAmount = 0.0;
-
-            $transaction = OutgoingTransaction::create([
-                'transaction_number' => $transactionNumber,
-                'transaction_date' => $validated['transaction_date'],
-                'customer_name' => $validated['customer_name'],
-                'created_by' => $request->user()->id,
-                'approved_by' => null,
-                'status' => OutgoingTransaction::STATUS_PENDING,
-                'total_items' => 0,
-                'total_quantity' => 0,
-                'total_amount' => 0,
-                'notes' => $validated['notes'] ?? null,
-            ]);
-
-            foreach ($itemsData as $itemData) {
-                $quantity = (int) $itemData['quantity'];
-                $unitPrice = isset($itemData['unit_price']) ? (float) $itemData['unit_price'] : 0.0;
-                $lineTotal = $quantity * $unitPrice;
-
-                $totalQuantity += $quantity;
-                $totalAmount += $lineTotal;
-
-                OutgoingTransactionItem::create([
-                    'outgoing_transaction_id' => $transaction->id,
-                    'product_id' => $itemData['product_id'],
-                    'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'line_total' => $lineTotal,
-                ]);
-            }
-
-            $transaction->update([
-                'total_items' => $totalItems,
-                'total_quantity' => $totalQuantity,
-                'total_amount' => $totalAmount,
-            ]);
-
-            DB::commit();
+            $transaction = $this->transactionService->createOutgoing($validated, $request->user());
 
             return redirect()
                 ->route('sales.show', $transaction)
                 ->with('success', 'Outgoing transaction created successfully. Pending approval.');
+        } catch (InvalidArgumentException $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['items' => $exception->getMessage()]);
         } catch (\Throwable $exception) {
-            DB::rollBack();
-
             return back()
                 ->withInput()
                 ->withErrors(['general' => 'Failed to create outgoing transaction. Please try again.']);
@@ -220,85 +178,38 @@ class OutgoingTransactionController extends Controller
     {
         $this->authorize('approve', $sale);
 
-        if (! $sale->canBeApproved()) {
-            return redirect()
-                ->route('sales.show', $sale)
-                ->withErrors(['general' => 'Only pending transactions can be approved.']);
-        }
-
-        DB::beginTransaction();
-
         try {
-            $sale->loadMissing('items.product');
-
-            foreach ($sale->items as $item) {
-                $product = $item->product;
-
-                if ($product === null) {
-                    DB::rollBack();
-
-                    return redirect()
-                        ->route('sales.show', $sale)
-                        ->withErrors(['general' => 'One or more products in this transaction no longer exist.']);
-                }
-
-                if (! $product->hasSufficientStock((int) $item->quantity)) {
-                    DB::rollBack();
-
-                    return redirect()
-                        ->route('sales.show', $sale)
-                        ->withErrors([
-                            'general' => 'Insufficient stock for product: ' . $product->name,
-                        ]);
-                }
-            }
-
-            foreach ($sale->items as $item) {
-                $product = $item->product;
-
-                if ($product === null) {
-                    continue;
-                }
-
-                $product->decreaseStock((int) $item->quantity);
-            }
-
-            $sale->update([
-                'status' => OutgoingTransaction::STATUS_APPROVED,
-                'approved_by' => $request->user()->id,
-            ]);
-
-            DB::commit();
+            $this->transactionService->approveOutgoing($sale, $request->user());
 
             return redirect()
                 ->route('sales.show', $sale)
                 ->with('success', 'Transaction approved and stock updated.');
+        } catch (InsufficientStockException|DomainException|ModelNotFoundException $exception) {
+            return redirect()
+                ->route('sales.show', $sale)
+                ->withErrors(['general' => $exception->getMessage()]);
         } catch (\Throwable $exception) {
-            DB::rollBack();
-
             return redirect()
                 ->route('sales.show', $sale)
                 ->withErrors(['general' => 'Failed to approve transaction. Please try again.']);
         }
     }
 
-    public function ship(OutgoingTransaction $sale): RedirectResponse
+    public function ship(Request $request, OutgoingTransaction $sale): RedirectResponse
     {
         $this->authorize('ship', $sale);
 
-        if (! $sale->canBeShipped()) {
+        try {
+            $this->transactionService->shipOutgoing($sale, $request->user());
+
             return redirect()
                 ->route('sales.show', $sale)
-                ->withErrors(['general' => 'Only approved transactions can be marked as shipped.']);
+                ->with('success', 'Transaction marked as shipped.');
+        } catch (DomainException $exception) {
+            return redirect()
+                ->route('sales.show', $sale)
+                ->withErrors(['general' => $exception->getMessage()]);
         }
-
-        $sale->update([
-            'status' => OutgoingTransaction::STATUS_SHIPPED,
-        ]);
-
-        return redirect()
-            ->route('sales.show', $sale)
-            ->with('success', 'Transaction marked as shipped.');
     }
 
     private function resolvePrefilledProductId(Request $request): ?int

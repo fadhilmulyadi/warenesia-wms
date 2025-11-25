@@ -34,7 +34,7 @@
 
 @section('content')
     <div class="max-w-6xl mx-auto space-y-4 text-xs">
-        @if(session('success'))
+        {{-- @if(session('success'))
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-800">
                 {{ session('success') }}
             </div>
@@ -44,7 +44,7 @@
             <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-red-800">
                 {{ session('error') }}
             </div>
-        @endif
+        @endif --}}
 
         <form method="GET" action="{{ route('suppliers.index') }}" class="flex items-center gap-2">
             <input
@@ -73,9 +73,9 @@
                         <th class="px-4 py-2">Avg rating</th>
                         <th class="px-4 py-2">Rated restocks</th>
                         <th class="px-4 py-2 text-center">Status</th>
-                        @canany(['update', 'delete'], \App\Models\Supplier::class)
+                        @can('create', \App\Models\Supplier::class)
                             <th class="px-4 py-2 text-right">Actions</th>
-                        @endcanany
+                        @endcan
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -128,7 +128,7 @@
                                     </span>
                                 @endif
                             </td>
-                            @canany(['update', 'delete'], \App\Models\Supplier::class)
+                            @can('create', \App\Models\Supplier::class)
                                 <td class="px-4 py-2 text-right">
                                     <div class="inline-flex items-center gap-1">
                                         @can('update', $supplier)
@@ -141,24 +141,22 @@
                                         @endcan
 
                                         @can('delete', $supplier)
-                                            <form
-                                                method="POST"
-                                                action="{{ route('suppliers.destroy', $supplier) }}"
-                                                onsubmit="return confirm('Delete this supplier? This action cannot be undone.');"
+                                            <button
+                                                type="button"
+                                                @click="$dispatch('open-delete-modal', { 
+                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
+                                                    title: 'Delete Supplier',
+                                                    message: 'Delete this supplier? This action cannot be undone.',
+                                                    itemName: '{{ $supplier->name }}'
+                                                })"
+                                                class="rounded-lg border border-red-200 px-2 py-1 text-[11px] text-red-700 hover:bg-red-50"
                                             >
-                                                @csrf
-                                                @method('DELETE')
-                                                <button
-                                                    type="submit"
-                                                    class="rounded-lg border border-red-200 px-2 py-1 text-[11px] text-red-700 hover:bg-red-50"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </form>
+                                                Delete
+                                            </button>
                                         @endcan
                                     </div>
                                 </td>
-                            @endcanany
+                            @endcan
                         </tr>
                     @empty
                         <tr>
@@ -188,4 +186,5 @@
             @endif
         </div>
     </div>
+    <x-confirm-delete-modal />
 @endsection

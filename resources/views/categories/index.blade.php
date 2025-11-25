@@ -12,17 +12,15 @@
 
     <div class="flex items-center gap-2">
         @can('export', \App\Models\Category::class)
-            <a
-               href="{{ route('categories.export', request()->query()) }}"
-               class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-            >
+            <a href="{{ route('categories.export', request()->query()) }}"
+                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
                 <x-lucide-download class="h-3 w-3 mr-1" />
                 Export CSV
             </a>
         @endcan
         @can('create', \App\Models\Category::class)
             <a href="{{ route('categories.create') }}"
-               class="inline-flex items-center rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-teal-600">
+                class="inline-flex items-center rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-teal-600">
                 + Add category
             </a>
         @endcan
@@ -31,17 +29,17 @@
 
 @section('content')
     <div class="space-y-4">
-        @if(session('success'))
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-                {{ session('success') }}
-            </div>
+        {{-- @if(session('success'))
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+            {{ session('success') }}
+        </div>
         @endif
 
         @if(session('error'))
-            <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                {{ session('error') }}
-            </div>
-        @endif
+        <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            {{ session('error') }}
+        </div>
+        @endif --}}
 
         <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm">
             {{-- Search --}}
@@ -52,17 +50,10 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <input
-                            type="text"
-                            name="q"
-                            value="{{ $search ?? '' }}"
-                            placeholder="Search category..."
-                            class="w-full md:w-64 rounded-lg border border-slate-200 px-3 py-1.5 text-xs"
-                        >
-                        <button
-                            type="submit"
-                            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-                        >
+                        <input type="text" name="q" value="{{ $search ?? '' }}" placeholder="Search category..."
+                            class="w-full md:w-64 rounded-lg border border-slate-200 px-3 py-1.5 text-xs">
+                        <button type="submit"
+                            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
                             Search
                         </button>
                     </div>
@@ -77,9 +68,9 @@
                             <th class="px-3 py-2 text-left font-medium">Name</th>
                             <th class="px-3 py-2 text-left font-medium">Description</th>
                             <th class="px-3 py-2 text-right font-medium">Products</th>
-                            @canany(['update', 'delete'], \App\Models\Category::class)
+                            @can('create', \App\Models\Category::class)
                                 <th class="px-3 py-2 text-right font-medium">Actions</th>
-                            @endcanany
+                            @endcan
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -98,30 +89,27 @@
                                         {{ $category->products_count }}
                                     </span>
                                 </td>
-                                @canany(['update', 'delete'], \App\Models\Category::class)
+                                @can('create', \App\Models\Category::class)
                                     <td class="px-3 py-2 align-top">
                                         <div class="flex items-center justify-end gap-1">
                                             @can('update', $category)
                                                 <a href="{{ route('categories.edit', $category) }}"
-                                                   class="inline-flex items-center rounded-lg border border-slate-200 px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">
+                                                    class="inline-flex items-center rounded-lg border border-slate-200 px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">
                                                     Edit
                                                 </a>
                                             @endcan
 
                                             @can('delete', $category)
-                                                <form method="POST"
-                                                      action="{{ route('categories.destroy', $category) }}"
-                                                      onsubmit="return confirm('Yakin ingin menghapus kategori ini?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button
-                                                        type="submit"
-                                                        class="inline-flex items-center rounded-lg border border-red-200 px-2 py-1 text-[11px] text-red-600 hover:bg-red-50"
-                                                        @if($category->products_count > 0) disabled @endif
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </form>
+                                                <button type="button" @click="$dispatch('open-delete-modal', { 
+                                                                        action: '{{ route('categories.destroy', $category) }}',
+                                                                        title: 'Hapus Kategori',
+                                                                        message: 'Yakin ingin menghapus kategori ini?',
+                                                                        itemName: '{{ $category->name }}'
+                                                                    })"
+                                                    class="inline-flex items-center rounded-lg border border-red-200 px-2 py-1 text-[11px] text-red-600 hover:bg-red-50"
+                                                    @if($category->products_count > 0) disabled @endif>
+                                                    Delete
+                                                </button>
                                             @endcan
                                         </div>
                                         @if($category->products_count > 0)
@@ -130,7 +118,7 @@
                                             </div>
                                         @endif
                                     </td>
-                                @endcanany
+                                @endcan
                             </tr>
                         @empty
                             <tr>
@@ -149,4 +137,5 @@
             </div>
         </div>
     </div>
+    <x-confirm-delete-modal />
 @endsection
