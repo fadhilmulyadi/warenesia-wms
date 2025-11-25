@@ -7,11 +7,9 @@
 
     <title>{{ trim($__env->yieldContent('title', 'Warenesia')) }}</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -187,12 +185,18 @@
             {{-- TOPBAR --}}
             <header
                 class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 shrink-0">
-                <div class="flex items-center gap-3">
-                    @yield('page-header')
+
+                {{-- Judul dan Deskripsi --}}
+                <div class="flex-1 min-w-0 flex items-center">
+                    @hasSection('page-header')
+                        <div class="w-full">
+                            @yield('page-header')
+                        </div>
+                    @endif
                 </div>
 
+                {{-- Palette / Appearance --}}
                 <div class="flex items-center gap-4">
-                    {{-- Palette / Appearance --}}
                     <button type="button"
                         class="inline-flex items-center justify-center h-9 w-9 rounded-full border border-slate-300 hover:bg-slate-100"
                         @click="appearanceOpen = true">
@@ -237,7 +241,7 @@
                 </div>
             </header>
 
-            {{-- CONTENT (yang scroll cuma ini) --}}
+            {{-- CONTENT --}}
             <main class="flex-1 overflow-y-auto px-4 py-6 lg:px-8">
                 @yield('content')
             </main>

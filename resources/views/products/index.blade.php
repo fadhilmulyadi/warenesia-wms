@@ -3,10 +3,10 @@
 @section('title', 'Products')
 
 @section('page-header')
-    <div class="flex flex-col">
-        <h1 class="text-2xl font-semibold text-slate-900">Data Produk</h1>
-        <p class="text-sm text-slate-500">Kelola informasi barang, harga, dan ketersediaan stok gudang.</p>
-    </div>
+    <x-page-header
+        title="Data Produk"
+        description="Kelola informasi barang, harga, dan ketersediaan stok gudang."
+    />
 @endsection
 
 @section('content')
@@ -22,25 +22,30 @@
             <form method="GET" action="{{ route('products.index') }}" class="flex-1 max-w-sm">
                 <div class="relative">
                     <input type="text" name="q" placeholder="Cari produk atau SKU..." value="{{ $search }}"
-                        class="w-full rounded-lg border-slate-200 pl-8 pr-3 py-2 text-xs focus:border-teal-500 focus:ring-teal-500">
+                        class="w-full h-9 rounded-lg border-slate-200 pl-8 pr-3 py-2 text-xs focus:border-teal-500 focus:ring-teal-500">
                     <x-lucide-search class="h-3 w-3 text-slate-400 absolute left-2 top-2.5" />
                 </div>
             </form>
 
             <div class="flex items-center gap-2">
                 @can('export', \App\Models\Product::class)
-                    <a href="{{ route('products.export', request()->query()) }}"
-                        class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50">
-                        <x-lucide-download class="h-3 w-3 mr-1.5" />
+                    <x-action-button 
+                        href="{{ route('products.export', request()->query()) }}"
+                        variant="secondary"
+                        icon="download"
+                    >
                         Ekspor CSV
-                    </a>
+                    </x-action-button>
                 @endcan
+                
                 @can('create', \App\Models\Product::class)
-                    <a href="{{ route('products.create') }}"
-                        class="inline-flex items-center gap-2 rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700">
-                        <x-lucide-plus class="h-3 w-3" />
+                    <x-action-button 
+                        href="{{ route('products.create') }}"
+                        variant="primary"
+                        icon="plus"
+                    >
                         Tambah Produk
-                    </a>
+                    </x-action-button>
                 @endcan
             </div>
         </div>

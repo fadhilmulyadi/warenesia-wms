@@ -27,7 +27,6 @@
 @section('content')
     <div class="max-w-6xl mx-auto space-y-4">
         <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            {{-- Tidak perlu form, hanya gunakan mode show (read-only) --}}
             @include('products._tabs', [
                 'mode'       => 'show',
                 'product'    => $product,

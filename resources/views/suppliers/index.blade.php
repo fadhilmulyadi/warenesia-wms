@@ -3,36 +3,35 @@
 @section('title', 'Suppliers')
 
 @section('page-header')
-    <div class="flex flex-col">
-        <h1 class="text-base font-semibold text-slate-900">Suppliers</h1>
-        <p class="text-xs text-slate-500">
-            Manage suppliers used in products, purchases, and restock orders.
-        </p>
-    </div>
+    <x-page-header
+        title="Data Pemasok"
+        description="Kelola informasi supplier, kontak, dan relasi pengadaan barang."
+    />
 
+    @endsection
+    
+    @section('content')
     <div class="flex items-center gap-2">
         @can('export', \App\Models\Supplier::class)
-            <a
+            <x-action-button 
                 href="{{ route('suppliers.export', request()->query()) }}"
-                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+                variant="secondary"
+                icon="download"
             >
-                <x-lucide-download class="h-3 w-3 mr-1" />
-                Export CSV
-            </a>
+                Ekspor CSV
+            </x-action-button>
         @endcan
+
         @can('create', \App\Models\Supplier::class)
-            <a
+            <x-action-button 
                 href="{{ route('suppliers.create') }}"
-                class="inline-flex items-center rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-600"
+                variant="primary"
+                icon="plus"
             >
-                <x-lucide-plus class="h-3 w-3 mr-1" />
-                Add supplier
-            </a>
+                Tambah Pemasok
+            </x-action-button>
         @endcan
     </div>
-@endsection
-
-@section('content')
     <div class="max-w-6xl mx-auto space-y-4 text-xs">
         {{-- @if(session('success'))
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-800">
