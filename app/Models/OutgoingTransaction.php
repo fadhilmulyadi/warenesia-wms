@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\GeneratorService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,23 +40,11 @@ class OutgoingTransaction extends Model
 
     public static function generateNextTransactionNumber(): string
     {
-        $datePart = now()->format('Ymd');
-
-        $lastTransaction = self::whereDate('created_at', now()->toDateString())
-            ->orderByDesc('id')
-            ->first();
-
-        $lastSequence = 0;
-
-        if ($lastTransaction !== null) {
-            $parts = explode('-', $lastTransaction->transaction_number);
-            $lastSequence = isset($parts[2]) ? (int) $parts[2] : 0;
-        }
-
-        $nextSequence = $lastSequence + 1;
-        $sequencePart = str_pad((string) $nextSequence, 4, '0', STR_PAD_LEFT);
-
-        return 'SO-' . $datePart . '-' . $sequencePart;
+        return GeneratorService::generateDailySequence(
+            static::class,
+            'transaction_number',
+            'SO'
+        );
     }
 
     public function createdBy(): BelongsTo

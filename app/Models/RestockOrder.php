@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\GeneratorService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,32 +60,12 @@ class RestockOrder extends Model
      */
     public static function generateNextPurchaseOrderNumber(): string
     {
-        $datePart = now()->format('Ymd');
-
-        $lastOrder = self::whereDate('created_at', now()->toDateString())
-            ->orderByDesc('id')
-            ->first();
-
-        $lastSequence = 0;
-
-        if ($lastOrder !== null) {
-            $parts = explode('-', $lastOrder->po_number);
-
-            if (isset($parts[2])) {
-                $lastSequence = (int) $parts[2];
-            }
-        }
-
-        $nextSequence = $lastSequence + 1;
-
-        $sequencePart = str_pad(
-            (string) $nextSequence,
-            self::SEQUENCE_PAD_LENGTH,
-            '0',
-            STR_PAD_LEFT
+        return GeneratorService::generateDailySequence(
+            static::class,
+            'po_number',
+            self::PURCHASE_ORDER_PREFIX,
+            self::SEQUENCE_PAD_LENGTH
         );
-
-        return self::PURCHASE_ORDER_PREFIX . '-' . $datePart . '-' . $sequencePart;
     }
 
     /**

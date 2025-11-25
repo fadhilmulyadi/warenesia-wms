@@ -62,7 +62,9 @@
                         <th class="px-4 py-2 text-right w-28">Total qty</th>
                         <th class="px-4 py-2 text-right w-32">Total (Rp)</th>
                         <th class="px-4 py-2 text-center w-28">Status</th>
-                        <th class="px-4 py-2 text-right w-24"></th>
+                        @can('viewSupplierRestocks', \App\Models\RestockOrder::class)
+                            <th class="px-4 py-2 text-right w-24"></th>
+                        @endcan
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -91,19 +93,21 @@
                                 {{ number_format($restockOrder->total_amount, 2, ',', '.') }}
                             </td>
                             <td class="px-4 py-2 align-top text-center">
-                                @include('admin.components.status-badge', [
+                                @include('components.status-badge', [
                                     'status' => $restockOrder->status,
                                     'label' => $restockOrder->status_label,
                                 ])
                             </td>
-                            <td class="px-4 py-2 align-top text-right">
-                                <a
-                                    href="{{ route('supplier.restocks.show', $restockOrder) }}"
-                                    class="inline-flex items-center rounded-lg border border-slate-200 px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                                >
-                                    View
-                                </a>
-                            </td>
+                            @can('viewSupplierRestocks', \App\Models\RestockOrder::class)
+                                <td class="px-4 py-2 align-top text-right">
+                                    <a
+                                        href="{{ route('supplier.restocks.show', $restockOrder) }}"
+                                        class="inline-flex items-center rounded-lg border border-slate-200 px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
+                                    >
+                                        View
+                                    </a>
+                                </td>
+                            @endcan
                         </tr>
                     @empty
                         <tr>

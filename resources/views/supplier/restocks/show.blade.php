@@ -13,7 +13,7 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-        @include('admin.components.status-badge', [
+        @include('components.status-badge', [
             'status' => $restock->status,
             'label' => $restock->status_label,
         ])
@@ -25,7 +25,7 @@
             Back to list
         </a>
 
-        @if($restock->isPending())
+        @can('confirmSupplierRestock', $restock)
             <form method="POST" action="{{ route('supplier.restocks.confirm', $restock) }}" class="inline-flex">
                 @csrf
                 @method('PATCH')
@@ -36,7 +36,9 @@
                     Confirm order
                 </button>
             </form>
+        @endcan
 
+        @can('rejectSupplierRestock', $restock)
             <form
                 method="POST"
                 action="{{ route('supplier.restocks.reject', $restock) }}"
@@ -57,7 +59,7 @@
                     Reject order
                 </button>
             </form>
-        @endif
+        @endcan
     </div>
 @endsection
 
@@ -85,7 +87,7 @@
             <h2 class="text-[11px] font-semibold text-slate-800 uppercase tracking-wide">
                 Status timeline
             </h2>
-            @include('admin.components.restock-status-timeline', ['status' => $restock->status])
+            @include('components.restocks-status-timeline', ['status' => $restock->status])
         </div>
 
         {{-- Order info --}}

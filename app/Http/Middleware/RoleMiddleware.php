@@ -17,11 +17,9 @@ class RoleMiddleware
     {
         $user = $request->user();
         if (! $user) {
-            // kalau belum login
             return redirect()->route('login');
         }
 
-        // cek approval kalau suatu saat kita pakai is_approved untuk supplier
         if ($user->role === 'supplier' && ! $user->is_approved) {
             abort(403, 'Your supplier account is not approved yet.');
         }
