@@ -65,17 +65,27 @@
                     <span class="font-medium" x-show="sidebarOpen" x-transition>Dashboard</span>
                 </a>
 
-                {{-- Purchases / Barang Masuk --}}
-                @can('viewAny', \App\Models\IncomingTransaction::class)
-                    <a href="{{ route('purchases.index') }}"
-                        class="{{ sidebar_classes(request()->routeIs('purchases.*')) }}">
-                        <span
-                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-shopping-bag class="h-4 w-4" />
+                {{-- Data Transaksi --}}
+                @php
+                    // Cek permission: Tampilkan jika user boleh melihat Incoming ATAU Outgoing
+                    $canViewIncoming = auth()->user()?->can('viewAny', \App\Models\IncomingTransaction::class);
+                    $canViewOutgoing = auth()->user()?->can('viewAny', \App\Models\OutgoingTransaction::class);
+                @endphp
+
+                @if($canViewIncoming || $canViewOutgoing)
+                    <a href="{{ route('transactions.index') }}" 
+                    class="{{ sidebar_classes(
+                        request()->routeIs('transactions.*') || 
+                        request()->routeIs('purchases.*') || 
+                        request()->routeIs('sales.*')
+                    ) }}">
+                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                            {{-- Ikon panah bolak-balik (Arrow Right Left) untuk merepresentasikan transaksi --}}
+                            <x-lucide-arrow-right-left class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Purchases</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Transaksi</span>
                     </a>
-                @endcan
+                @endif
 
                 {{-- Restocks (PO ke supplier) --}}
                 @can('viewAny', \App\Models\RestockOrder::class)
@@ -99,18 +109,7 @@
                     </a>
                 @endcan
 
-                {{-- Sales / Barang Keluar --}}
-                @can('viewAny', \App\Models\OutgoingTransaction::class)
-                    <a href="{{ route('sales.index') }}" class="{{ sidebar_classes(request()->routeIs('sales.*')) }}">
-                        <span
-                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-shopping-cart class="h-4 w-4" />
-                        </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Sales</span>
-                    </a>
-                @endcan
-
-                {{-- Inventory / Products --}}
+                {{-- Inventory --}}
                 @can('viewAny', \App\Models\Product::class)
                     <a href="{{ route('products.index') }}" class="{{ sidebar_classes(request()->routeIs('products.*')) }}">
                         <span

@@ -4,14 +4,20 @@
 
 @section('page-header')
     <x-page-header
-        title="Data Pemasok"
+        title="Data Supplier"
         description="Kelola informasi supplier, kontak, dan relasi pengadaan barang."
     />
-
-    @endsection
+@endsection
     
-    @section('content')
-    <div class="flex items-center gap-2">
+@section('content')
+    <div class="space-y-4">
+
+        <x-toolbar>
+            <form method="GET" action="{{ route('supplier.index') }}" class="flex-1 max-w-sm">
+                <x-search-bar :value="$search" placeholder="Cari produk atau SKU..." />
+            </form>
+        </x-toolbar>
+
         @can('export', \App\Models\Supplier::class)
             <x-action-button 
                 href="{{ route('suppliers.export', request()->query()) }}"

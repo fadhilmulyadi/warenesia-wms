@@ -6,7 +6,7 @@
     <div class="flex flex-col">
         <h1 class="text-xl md:text-2xl font-semibold text-slate-900">Dashboard</h1>
         <p class="text-xs md:text-sm text-slate-500">
-            Ringkasan cepat untuk {{ $user->name ?? 'user' }} dengan modul yang sesuai izin Anda.
+            Selamat datang, <span class="font-semibold text-slate-700">{{ $user->name ?? 'User' }}</span>. Berikut adalah ringkasan aktivitas operasional dan metrik utama sistem.
         </p>
     </div>
 @endsection

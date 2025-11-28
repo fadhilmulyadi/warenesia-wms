@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestockOrderController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -133,15 +134,16 @@ Route::middleware(['auth', 'role:admin,manager,staff'])
 
         Route::get('purchases/export', [IncomingTransactionController::class, 'export'])
             ->name('purchases.export');
-        // Incoming transactions (barang masuk / purchases)
-        Route::resource('purchases', IncomingTransactionController::class)
-            ->only(['index', 'create', 'store', 'show']);
+
+        Route::resource('purchases', IncomingTransactionController::class);
 
         Route::get('sales/export', [OutgoingTransactionController::class, 'export'])
             ->name('sales.export');
-        // Outgoing transactions (barang keluar / sales)
-        Route::resource('sales', OutgoingTransactionController::class)
-            ->only(['index', 'create', 'store', 'show']);
+
+        Route::resource('sales', OutgoingTransactionController::class);
+
+        Route::get('/transactions', [TransactionController::class, 'index'])
+            ->name('transactions.index');
     });
 
 /*

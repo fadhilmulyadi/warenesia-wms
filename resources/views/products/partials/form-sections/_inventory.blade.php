@@ -29,11 +29,12 @@
                     id="current_stock"
                     name="current_stock" 
                     value="{{ old('current_stock', $product->current_stock) }}"
-                    {{ $product->exists ? 'readonly' : '' }}
+                    @if($product->exists || $readonly) readonly @endif
+                    
                     @class([
                         'mt-1 block w-full rounded-lg text-sm',
-                        'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed' => $product->exists,
-                        'border-slate-300 focus:border-teal-500 focus:ring-teal-500' => !$product->exists
+                        'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $product->exists || $readonly,
+                        'border-slate-300 focus:border-teal-500 focus:ring-teal-500' => !$product->exists && !$readonly
                     ])
                 >
                 @if($product->exists)
@@ -41,7 +42,9 @@
                         <x-lucide-lock class="w-3 h-3"/> Stok dikelola via transaksi.
                     </p>
                 @endif
-                <x-input-error class="mt-2" :messages="$errors->get('current_stock')" />
+                @unless($readonly)
+                    <x-input-error class="mt-2" :messages="$errors->get('current_stock')" />
+                @endunless
             </div>
 
             {{-- Min Stok --}}
@@ -52,7 +55,12 @@
                     id="min_stock"
                     name="min_stock" 
                     value="{{ old('min_stock', $product->min_stock) }}"
-                    class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                    @disabled($readonly)
+                    @class([
+                        'mt-1 block w-full rounded-lg text-sm',
+                        'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $readonly,
+                        'border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-sm' => !$readonly
+                    ])
                 >
             </div>
         </div>
@@ -69,7 +77,12 @@
                     id="rack_location"
                     name="rack_location" 
                     value="{{ old('rack_location', $product->rack_location) }}"
-                    class="block w-full rounded-r-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 sm:text-sm uppercase placeholder:normal-case"
+                    @disabled($readonly)
+                    @class([
+                        'block w-full rounded-r-lg text-sm uppercase placeholder:normal-case',
+                        'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $readonly,
+                        'border-slate-300 focus:border-teal-500 focus:ring-teal-500' => !$readonly
+                    ])
                     placeholder="Contoh: A-01-ROW-2"
                 >
             </div>

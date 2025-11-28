@@ -14,11 +14,18 @@
                     value="{{ old('purchase_price', $product->purchase_price) }}"
                     min="0"
                     step="any"
-                    class="block w-full pl-8 rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 text-sm text-right font-mono"
+                    @disabled($readonly)
+                    @class([
+                        'block w-full pl-8 rounded-lg text-sm text-right font-mono',
+                        'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $readonly,
+                        'border-slate-300 focus:border-teal-500 focus:ring-teal-500' => !$readonly
+                    ])
                     placeholder="0"
                 >
             </div>
-            <x-input-error class="mt-2" :messages="$errors->get('purchase_price')" />
+            @unless($readonly)
+                <x-input-error class="mt-2" :messages="$errors->get('purchase_price')" />
+            @endunless
         </div>
 
         {{-- Harga Jual --}}
@@ -33,11 +40,18 @@
                     value="{{ old('sale_price', $product->sale_price) }}"
                     min="0"
                     step="any"
-                    class="block w-full pl-8 rounded-lg border-slate-300 focus:border-teal-500 focus:ring-teal-500 text-sm font-bold text-slate-800 text-right font-mono"
+                    @disabled($readonly)
+                    @class([
+                        'block w-full pl-8 rounded-lg text-sm font-bold text-slate-800 text-right font-mono',
+                        'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $readonly,
+                        'border-slate-300 focus:border-teal-500 focus:ring-teal-500' => !$readonly
+                    ])
                     placeholder="0"
                 >
             </div>
-            <x-input-error class="mt-2" :messages="$errors->get('sale_price')" />
+            @unless($readonly)
+                <x-input-error class="mt-2" :messages="$errors->get('sale_price')" />
+            @endunless
         </div>
     </div>
 </div>

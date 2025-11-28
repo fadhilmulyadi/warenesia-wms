@@ -20,20 +20,27 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Category::class);
+        $search = $request->get('q'); 
+        $sort = $request->get('sort', 'name'); 
+        $direction = $request->get('direction', 'asc');
 
-        $categoryQuery = $this->buildCategoryIndexQuery($request);
+        $allowedSorts = ['name', 'products_count', 'created_at'];
+        
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'name';
+        }
 
-        $categories = $categoryQuery
-            ->paginate(self::DEFAULT_PER_PAGE)
+        $categories = Category::query()
+            ->withCount('products')
+            ->when($search, function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->orderBy($sort, $direction) 
+            ->paginate(10)
             ->withQueryString();
 
-        $search = (string) $request->query('q', '');
-
-        return view('categories.index', [
-            'categories' => $categories,
-            'search'     => $search,
-        ]);
+        return view('categories.index', compact('categories', 'search'));
     }
 
     /**

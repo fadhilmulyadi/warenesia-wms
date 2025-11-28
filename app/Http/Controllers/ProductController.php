@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Http\Requests\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Support\CsvExporter;
+use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
+    use HasIndexQueryHelpers;
+
     private const DEFAULT_PER_PAGE = 10;
     private const MAX_PER_PAGE = 250;
     private const EXPORT_CHUNK_SIZE = 200;
@@ -23,22 +26,38 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $requestedPerPage = (int) $request->query('per_page', self::DEFAULT_PER_PAGE);
+        $perPage = $this->resolvePerPage(
+            $request,
+            self::DEFAULT_PER_PAGE,
+            self::MAX_PER_PAGE
+        );
 
-            $perPage = min($requestedPerPage, self::MAX_PER_PAGE);
-            if ($perPage <= 0) {
-                $perPage = self::DEFAULT_PER_PAGE;
-            }
-            
-            $productQuery = $this->buildProductIndexQuery($request);
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'sku', 'current_stock', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
 
-            $products = $productQuery
-                ->paginate($perPage)
-                ->withQueryString();
+        $productsQuery = $this->buildProductIndexQuery($request, $sort, $direction);
 
-            $search = (string) $request->query('q', '');
+        $products = $productsQuery
+            ->paginate($perPage)
+            ->withQueryString();
 
-            return view('products.index', compact('products', 'search'));
+        $search = (string) $request->query('q', '');
+        $categories = Category::whereHas('products')->orderBy('name')->get();
+
+        return view('products.index', compact(
+            'products',
+            'search',
+            'categories',
+            'sort',
+            'direction',
+            'perPage'
+        ));
+
+
     }
 
     /**
@@ -130,7 +149,15 @@ class ProductController extends Controller
     {
         $this->authorize('export', Product::class);
 
-        $productQuery = $this->buildProductIndexQuery($request);
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'sku', 'current_stock', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
+
+        $productQuery = $this->buildProductIndexQuery($request, $sort, $direction);
+
         $fileName = 'products-' . now()->format('Ymd-His') . '.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($productQuery): void {
@@ -151,8 +178,6 @@ class ProductController extends Controller
             ]);
 
             $productQuery
-                ->orderBy('name')
-                ->orderBy('id')
                 ->chunk(self::EXPORT_CHUNK_SIZE, static function ($products) use ($output): void {
                     foreach ($products as $product) {
                         $output->fputcsv([
@@ -175,19 +200,66 @@ class ProductController extends Controller
         });
     }
 
-    private function buildProductIndexQuery(Request $request): Builder
-    {
+    private function buildProductIndexQuery(
+        Request $request,
+        string $sort,
+        string $direction
+    ): Builder {
         $search = (string) $request->query('q', '');
 
-        return Product::query()
-            ->with(['category', 'supplier'])
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $innerQuery) use ($search): void {
-                    $innerQuery
-                        ->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('sku', 'like', '%' . $search . '%');
+        $query = Product::query()
+            ->with(['category', 'supplier']);
+
+        $this->applySearch($query, $search, ['name', 'sku']);
+
+        $this->applyFilters($query, $request, [
+            'category_id' => 'category_id',
+
+            'stock_status' => function (Builder $q, $value): void {
+                $statuses = array_values(array_unique(array_filter((array) $value, static function ($val) {
+                    return $val !== null && $val !== '';
+                })));
+
+                if (empty($statuses)) {
+                    return;
+                }
+
+                $clauses = [];
+
+                foreach ($statuses as $status) {
+                    $status = strtolower($status);
+
+                    if ($status === 'available') {
+                        $clauses[] = static function (Builder $stock): void {
+                            $stock->where('current_stock', '>', 0);
+                        };
+                    } elseif ($status === 'low') {
+                        $clauses[] = static function (Builder $stock): void {
+                            $stock->where('current_stock', '>', 0)
+                                  ->whereColumn('current_stock', '<=', 'min_stock');
+                        };
+                    } elseif ($status === 'out') {
+                        $clauses[] = static function (Builder $stock): void {
+                            $stock->where('current_stock', '<=', 0);
+                        };
+                    }
+                }
+
+                if (empty($clauses)) {
+                    return;
+                }
+
+                $q->where(function (Builder $stockQuery) use ($clauses): void {
+                    foreach ($clauses as $clause) {
+                        $stockQuery->orWhere($clause);
+                    }
                 });
-            })
-            ->orderBy('name');
+            },
+        ]);
+
+        $query->orderBy($sort, $direction)
+              ->orderBy('id');
+
+        return $query;
     }
 }

@@ -153,9 +153,22 @@ class OutgoingTransactionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(OutgoingTransaction $sale): View
     {
-        //
+        $this->authorize('update', $sale);
+
+        // Hanya transaksi berstatus 'pending' yang boleh diedit
+        if (! $sale->isPending()) {
+            return redirect()
+                ->route('sales.show', $sale)
+                ->withErrors(['general' => 'Only pending transactions can be edited.']);
+        }
+
+        // Eager load items untuk memastikan data produk tersedia di view
+        $sale->load(['items']); 
+        $products = Product::orderBy('name')->get();
+
+        return view('sales.edit', compact('sale', 'products'));
     }
 
     /**

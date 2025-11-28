@@ -1,10 +1,8 @@
 @php
     $categoryOptions = $categories->pluck('name', 'id')->toArray();
-    
     $supplierOptions = $suppliers->mapWithKeys(function ($item) {
         return [$item->id => $item->name . ($item->contact_person ? ' (' . $item->contact_person . ')' : '')];
     })->toArray();
-
     $units = ['Pcs', 'Box', 'Kg', 'Liter', 'Unit', 'Pack', 'Roll', 'Set', 'Lembar', 'Botol'];
     $unitOptions = array_combine($units, $units);
 @endphp
@@ -27,15 +25,16 @@
                     :options="$categoryOptions" 
                     :value="old('category_id', $product->category_id)" 
                     placeholder="Pilih kategori..."
+                    :disabled="$readonly"
                 />
 
-                <x-quick-action-button 
-                    title="Tambah Kategori Baru"
-                    class="shrink-0"
-                />
+                @unless($readonly)
+                    <x-quick-action-button title="Tambah Kategori Baru" class="shrink-0" />
+                @endunless
             </div>
-
-            <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
+            @unless($readonly)
+                <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
+            @endunless
         </div>
 
         {{-- Supplier --}}
@@ -49,18 +48,20 @@
                     :options="$supplierOptions" 
                     :value="old('supplier_id', $product->supplier_id)" 
                     placeholder="Cari supplier..."
+                    :disabled="$readonly"
                 />
 
-                <x-quick-action-button 
-                    title="Tambah Supplier Baru"
-                    class="shrink-0"
-                />
+                @unless($readonly)
+                    <x-quick-action-button title="Tambah Supplier Baru" class="shrink-0" />
+                @endunless
             </div>
             
-            <p class="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
-                Kosongkan jika barang internal.
-            </p>
-            <x-input-error class="mt-2" :messages="$errors->get('supplier_id')" />
+            @unless($readonly)
+                <p class="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
+                    Kosongkan jika barang internal.
+                </p>
+                <x-input-error class="mt-2" :messages="$errors->get('supplier_id')" />
+            @endunless
         </div>
 
         {{-- Satuan --}}
@@ -74,15 +75,17 @@
                     :options="$unitOptions" 
                     :value="old('unit', $product->unit)" 
                     placeholder="Pilih satuan..."
+                    :disabled="$readonly"
+                    dropUp
                 />
 
-                <x-quick-action-button 
-                    title="Tambah Satuan Baru"
-                    class="shrink-0"
-                />
+                @unless($readonly)
+                    <x-quick-action-button title="Tambah Satuan Baru" class="shrink-0" />
+                @endunless
             </div>
-
-            <x-input-error class="mt-2" :messages="$errors->get('unit')" />
+            @unless($readonly)
+                <x-input-error class="mt-2" :messages="$errors->get('unit')" />
+            @endunless
         </div>
     </div>
 </div>

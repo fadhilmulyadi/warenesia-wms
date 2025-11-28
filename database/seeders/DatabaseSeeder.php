@@ -37,7 +37,10 @@ class DatabaseSeeder extends Seeder
         $products->each(function (Product $product) use ($categories, $suppliers) {
             $product->category_id = $categories->random()->id;
             $product->supplier_id = $suppliers->random()->id;
+            $product->current_stock = 0;
             $product->save();
         });
+
+        $this->call(TransactionSeeder::class);
     }
 }

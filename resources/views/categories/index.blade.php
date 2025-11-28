@@ -3,139 +3,142 @@
 @section('title', 'Kategori Produk')
 
 @section('page-header')
-    <div class="flex flex-col">
-        <h1 class="text-base font-semibold text-slate-900">Categories</h1>
-        <p class="text-xs text-slate-500">
-            Kelola kategori produk untuk gudang Warenesia.
-        </p>
-    </div>
-
-    <div class="flex items-center gap-2">
-        @can('export', \App\Models\Category::class)
-            <a href="{{ route('categories.export', request()->query()) }}"
-                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
-                <x-lucide-download class="h-3 w-3 mr-1" />
-                Export CSV
-            </a>
-        @endcan
-        @can('create', \App\Models\Category::class)
-            <a href="{{ route('categories.create') }}"
-                class="inline-flex items-center rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-teal-600">
-                + Add category
-            </a>
-        @endcan
-    </div>
+    <x-page-header
+        title="Data Kategori"
+        description="Kelola klasifikasi produk untuk mengorganisir inventaris dengan lebih terstruktur."
+    />
 @endsection
 
 @section('content')
     <div class="space-y-4">
-        {{-- @if(session('success'))
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-            {{ session('success') }}
-        </div>
-        @endif
 
-        @if(session('error'))
-        <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-            {{ session('error') }}
-        </div>
-        @endif --}}
-
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm">
-            {{-- Search --}}
-            <form method="GET" action="{{ route('categories.index') }}" class="mb-3">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                    <div class="text-xs text-slate-500">
-                        Total: <span class="font-semibold text-slate-700">{{ $categories->total() }}</span> categories
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <input type="text" name="q" value="{{ $search ?? '' }}" placeholder="Search category..."
-                            class="w-full md:w-64 rounded-lg border border-slate-200 px-3 py-1.5 text-xs">
-                        <button type="submit"
-                            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
-                            Search
-                        </button>
-                    </div>
-                </div>
+        {{-- Toolbar --}}
+        <x-toolbar>
+            <form method="GET" action="{{ route('categories.index') }}" class="flex-1 max-w-sm">
+                <x-search-bar :value="$search" placeholder="Cari kategori..." />
             </form>
 
-            {{-- Table --}}
-            <div class="overflow-x-auto rounded-xl border border-slate-200">
-                <table class="min-w-full text-xs">
-                    <thead class="bg-slate-50 text-slate-500">
-                        <tr>
-                            <th class="px-3 py-2 text-left font-medium">Name</th>
-                            <th class="px-3 py-2 text-left font-medium">Description</th>
-                            <th class="px-3 py-2 text-right font-medium">Products</th>
-                            @can('create', \App\Models\Category::class)
-                                <th class="px-3 py-2 text-right font-medium">Actions</th>
-                            @endcan
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($categories as $category)
-                            <tr>
-                                <td class="px-3 py-2 align-top">
-                                    <div class="flex flex-col">
-                                        <span class="font-medium text-slate-900">{{ $category->name }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-3 py-2 align-top text-slate-600">
-                                    {{ $category->description ?: '-' }}
-                                </td>
-                                <td class="px-3 py-2 align-top text-right">
-                                    <span class="inline-flex items-center justify-end">
-                                        {{ $category->products_count }}
-                                    </span>
-                                </td>
-                                @can('create', \App\Models\Category::class)
-                                    <td class="px-3 py-2 align-top">
-                                        <div class="flex items-center justify-end gap-1">
-                                            @can('update', $category)
-                                                <a href="{{ route('categories.edit', $category) }}"
-                                                    class="inline-flex items-center rounded-lg border border-slate-200 px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50">
-                                                    Edit
-                                                </a>
-                                            @endcan
+            <div class="flex items-center gap-2">
+                @can('export', \App\Models\Category::class)
+                    <x-action-button 
+                        href="{{ route('categories.export', request()->query()) }}"
+                        variant="secondary"
+                        icon="download"
+                    >
+                        Ekspor CSV
+                    </x-action-button>
+                @endcan
+                
+                @can('create', \App\Models\Category::class)
+                    <x-action-button 
+                        href="{{ route('categories.create') }}"
+                        variant="primary"
+                        icon="plus"
+                    >
+                        Tambah Kategori
+                    </x-action-button>
+                @endcan
+            </div>
+        </x-toolbar>
 
-                                            @can('delete', $category)
-                                                <button type="button" @click="$dispatch('open-delete-modal', { 
-                                                                        action: '{{ route('categories.destroy', $category) }}',
-                                                                        title: 'Hapus Kategori',
-                                                                        message: 'Yakin ingin menghapus kategori ini?',
-                                                                        itemName: '{{ $category->name }}'
-                                                                    })"
-                                                    class="inline-flex items-center rounded-lg border border-red-200 px-2 py-1 text-[11px] text-red-600 hover:bg-red-50"
-                                                    @if($category->products_count > 0) disabled @endif>
-                                                    Delete
-                                                </button>
-                                            @endcan
-                                        </div>
-                                        @if($category->products_count > 0)
-                                            <div class="mt-1 text-[10px] text-right text-amber-600">
-                                                Tidak bisa dihapus, masih dipakai {{ $category->products_count }} produk.
+        {{-- Tabel utama --}}
+        <x-table>
+            <x-table.thead>
+                <x-table.th sortable name="name">Nama</x-table.th>
+                <x-table.th>Deskripsi</x-table.th>
+                <x-table.th align="right" sortable name="products_count">Produk</x-table.th>
+                <x-table.th align="right">Aksi</x-table.th>
+            </x-table.thead>
+
+            <x-table.tbody>
+                @forelse($categories as $category)
+                    <x-table.tr>
+                        {{-- Nama --}}
+                        <x-table.td class="align-top">
+                            <span class="font-medium text-slate-900">
+                                {{ $category->name }}
+                            </span>
+                        </x-table.td>
+
+                        {{-- Deskripsi --}}
+                        <x-table.td class="align-top text-slate-600">
+                            {{ $category->description ?: '-' }}
+                        </x-table.td>
+
+                        {{-- Jumlah produk --}}
+                        <x-table.td align="right" class="align-top tabular-nums">
+                            {{ $category->products_count }}
+                        </x-table.td>
+
+                        {{-- Aksi --}}
+                        <x-table.td align="right" class="align-top">
+                            @canany(['update', 'delete'], $category)
+                                <x-table.actions>
+
+                                    {{-- Edit --}}
+                                    @can('update', $category)
+                                        <x-table.action-item
+                                            icon="pencil"
+                                            href="{{ route('categories.edit', $category) }}"
+                                        >
+                                            Edit Kategori
+                                        </x-table.action-item>
+                                    @endcan
+
+                                    {{-- Hapus --}}
+                                    @can('delete', $category)
+                                        @if($category->products_count == 0)
+                                            <x-table.action-item
+                                                icon="trash-2"
+                                                danger="true"
+                                                x-on:click="$dispatch('open-delete-modal', { 
+                                                    action: '{{ route('categories.destroy', $category) }}',
+                                                    title: 'Hapus Kategori',
+                                                    message: 'Yakin ingin menghapus kategori ini?',
+                                                    itemName: '{{ $category->name }}'
+                                                })"
+                                            >
+                                                Hapus
+                                            </x-table.action-item>
+                                        @else
+                                            <x-table.action-item
+                                                icon="trash-2"
+                                                danger="true"
+                                                disabled
+                                                class="opacity-40 cursor-not-allowed"
+                                            >
+                                                Tidak bisa dihapus
+                                            </x-table.action-item>
+
+                                            <div class="px-4 py-1 text-[10px] text-amber-600">
+                                                Masih dipakai {{ $category->products_count }} produk.
                                             </div>
                                         @endif
-                                    </td>
-                                @endcan
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-3 py-8 text-center text-slate-500">
-                                    Belum ada kategori. Tambahkan kategori pertama dengan tombol
-                                    <span class="font-semibold">"Add category"</span> di atas.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                    @endcan
 
-            <div class="mt-3">
-                {{ $categories->links() }}
-            </div>
-        </div>
+                                </x-table.actions>
+                            @else
+                                <span class="text-slate-400 text-sm">-</span>
+                            @endcanany
+                        </x-table.td>
+
+                    </x-table.tr>
+                @empty
+                    <x-table.tr>
+                        <x-table.td colspan="4" class="py-8 text-center text-slate-500">
+                            Belum ada kategori. Tambahkan kategori pertama dengan tombol diatas.
+                            <span class="font-semibold">"Tambah Kategori"</span>
+                        </x-table.td>
+                    </x-table.tr>
+                @endforelse
+            </x-table.tbody>
+        </x-table>
+
+        {{-- Pagination --}}
+        @if($categories->hasPages() || $categories->total() > 0)
+            <x-advanced-pagination :paginator="$categories" />
+        @endif
+
+        <x-confirm-delete-modal />
     </div>
-    <x-confirm-delete-modal />
 @endsection

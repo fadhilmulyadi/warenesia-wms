@@ -1,0 +1,173 @@
+@props([
+    'action',
+    'search' => '',
+    'sort' => null,
+    'direction' => null,
+    'placeholder' => 'Cari data...',
+    'filters' => [],
+])
+
+@php
+    $filterKeys = array_keys($filters);
+
+    $activeStates = collect($filterKeys)->mapWithKeys(function ($key) {
+        $value = request()->query($key);
+
+        if (is_array($value)) {
+            $isActive = collect($value)
+                ->filter(fn ($val) => $val !== null && $val !== '')
+                ->isNotEmpty();
+        } else {
+            $isActive = $value !== null && $value !== '';
+        }
+
+        return [$key => $isActive];
+    });
+
+    $activeFilterCount = $activeStates->filter()->count();
+    $hasActiveFilter = $activeFilterCount > 0;
+@endphp
+
+<form 
+    method="GET"
+    action="{{ $action }}"
+    class="w-full space-y-3"
+    x-data="{
+        filtersVisible: {{ $hasActiveFilter ? 'true' : 'false' }},
+        activeMap: @js($activeStates),
+        activeCount: {{ $activeFilterCount }},
+
+        clearAllFilters() {
+            const container = this.$refs.filters;
+            if (!container) return;
+
+            const triggerChange = (el) => el.dispatchEvent(new Event('change', { bubbles: true }));
+
+            const searchInput = this.$el.querySelector('input[name=q]');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+
+            container.querySelectorAll('input[type=checkbox]').forEach(el => {
+                if (el.checked) {
+                    el.checked = false;
+                    triggerChange(el);
+                }
+            });
+
+            container.querySelectorAll('select').forEach(select => {
+                let changed = false;
+
+                if (select.multiple) {
+                    Array.from(select.options).forEach(opt => {
+                        if (opt.selected) {
+                            opt.selected = false;
+                            changed = true;
+                        }
+                    });
+                } else if (select.selectedIndex !== -1) {
+                    select.selectedIndex = -1;
+                    changed = true;
+                }
+
+                if (changed) {
+                    triggerChange(select);
+                }
+            });
+
+            // Redirect without filter params; keep hidden inputs (e.g., sort/direction) intact
+            const params = new URLSearchParams();
+            this.$el.querySelectorAll('input[type=hidden]').forEach(input => {
+                if (input.name && input.value) {
+                    params.append(input.name, input.value);
+                }
+            });
+
+            const baseUrl = this.$el.getAttribute('action') || window.location.pathname;
+            const query = params.toString();
+            const target = query ? `${baseUrl}?${query}` : baseUrl;
+
+            window.location.href = target;
+        },
+
+        updateActive(detail) {
+            if (!detail || !detail.name) return;
+
+            this.activeMap[detail.name] = !!detail.active;
+            this.activeCount = Object.values(this.activeMap).filter(Boolean).length;
+        }
+    }"
+    @filter-chip-activity.window="updateActive($event.detail)"
+>
+    {{-- BARIS 1: Search & Hidden Inputs --}}
+    <div class="flex items-center justify-between gap-4">
+        {{-- Search Bar --}}
+        <div class="w-full md:max-w-md">
+            <x-search-bar
+                :value="$search"
+                :placeholder="$placeholder"
+                name="q"
+            />
+        </div>
+
+        {{-- Toggle Filters --}}
+        @if(!empty($filters))
+            <button 
+                type="button"
+                @click="filtersVisible = !filtersVisible"
+                class="inline-flex items-center h-10 px-3 rounded-lg text-xs font-semibold border transition-all duration-200"
+                :class="filtersVisible || activeCount > 0
+                    ? 'bg-teal-50 border-teal-200 text-teal-700'
+                    : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'"
+            >
+                <x-lucide-filter class="w-4 h-4 mr-1.5" />
+                <span>Filter</span>
+                <span 
+                    x-show="activeCount > 0"
+                    x-text="activeCount"
+                    class="ml-2 inline-flex items-center justify-center h-5 px-2 rounded-full bg-teal-600 text-white text-[11px] font-bold"
+                ></span>
+            </button>
+        @endif
+
+        {{-- Hidden Sort Preservation --}}
+        @if($sort) <input type="hidden" name="sort" value="{{ $sort }}"> @endif
+        @if($direction) <input type="hidden" name="direction" value="{{ $direction }}"> @endif
+    </div>
+
+    {{-- BARIS 2: Filter Buttons (Hanya muncul jika ada definisi filters) --}}
+    @if(!empty($filters))
+        <div 
+            class="flex flex-wrap items-center gap-2"
+            x-ref="filters"
+            x-show="filtersVisible"
+            x-transition
+            x-cloak
+        >
+            
+            @foreach($filters as $key => $label)
+                @php $slotName = 'filter_' . $key; @endphp
+                <x-filter-chip :label="$label" :name="$key">
+                    @if(isset($$slotName))
+                        {{ $$slotName }}
+                    @else
+                        <p class="text-xs text-slate-400 italic">Slot filter_{{ $key }} tidak ditemukan.</p>
+                    @endif
+                </x-filter-chip>
+            @endforeach
+
+            {{-- CLEAR ALL --}}
+            @if($hasActiveFilter)
+                <button 
+                    type="button" 
+                    @click="clearAllFilters()"
+                    class="ml-2 text-xs text-slate-500 hover:text-red-600 font-medium hover:underline flex items-center gap-1 transition-colors"
+                >
+                    <x-lucide-trash-2 class="w-3 h-3" />
+                    Clear all
+                </button>
+            @endif
+
+        </div>
+    @endif
+</form>

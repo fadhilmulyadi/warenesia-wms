@@ -157,9 +157,21 @@ class IncomingTransactionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(IncomingTransaction $purchase): View
     {
-        //
+        $this->authorize('update', $purchase);
+
+        if (! $purchase->isPending()) {
+            return redirect()
+                ->route('purchases.show', $purchase)
+                ->withErrors(['general' => 'Only pending transactions can be edited.']);
+        }
+
+        $purchase->load(['items']);
+        $suppliers = Supplier::orderBy('name')->get();
+        $products = Product::orderBy('name')->get();
+
+        return view('purchases.edit', compact('purchase', 'suppliers', 'products'));
     }
 
     /**

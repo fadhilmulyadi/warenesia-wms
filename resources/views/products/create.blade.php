@@ -13,26 +13,10 @@
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         
         {{-- Breadcrumb --}}
-        <nav class="flex items-center text-sm text-slate-500 gap-1">
-            <a href="{{ route('dashboard') }}" class="inline-flex items-center text-slate-600 hover:text-teal-600 transition-colors">
-                <x-lucide-home class="w-4 h-4" />
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
-
-            <a href="{{ route('products.index') }}" class="hover:text-teal-600 transition-colors">
-                Inventaris
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
-
-            <a href="{{ route('products.index') }}" class="hover:text-teal-600 transition-colors">
-                Produk
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
-
-            <span class="font-semibold text-teal-700">
-                Buat Baru
-            </span>
-        </nav>
+        <x-breadcrumbs :items="[
+            'Produk' => route('products.index'),
+            'Buat Baru'  => '#'
+        ]" />
 
         {{-- Tombol Action --}}
         <div class="flex items-center gap-2">

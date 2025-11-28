@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'My Restock Orders')
+@section('title', 'Pesanan Saya')
 
 @section('page-header')
     <div class="flex flex-col">
-        <h1 class="text-base font-semibold text-slate-900">My restock orders</h1>
+        <h1 class="text-base font-semibold text-slate-900">Pesanan Saya</h1>
         <p class="text-xs text-slate-500">
-            Monitor purchase orders assigned to your company.
+            Pantau status pesanan pembelian yang ditugaskan kepada perusahaan Anda.
         </p>
     </div>
 @endsection
