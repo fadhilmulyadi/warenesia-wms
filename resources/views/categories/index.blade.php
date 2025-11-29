@@ -14,11 +14,32 @@
 
         {{-- Toolbar --}}
         <x-toolbar>
-            <form method="GET" action="{{ route('categories.index') }}" class="flex-1 max-w-sm">
-                <x-search-bar :value="$search" placeholder="Cari kategori..." />
-            </form>
+            @php
+                $filters = $showNameFilter ? ['name' => 'Nama Kategori'] : [];
+                $resetKeys = array_keys($filters);
+            @endphp
 
-            <div class="flex items-center gap-2">
+            <x-filter-bar
+                :action="route('categories.index', ['per_page' => $perPage])"
+                :search="$search"
+                :sort="$sort"
+                :direction="$direction"
+                :filters="$filters"
+                :resetKeys="$resetKeys"
+                placeholder="Cari kategori..."
+            >
+                @if($showNameFilter)
+                    <x-slot:filter_name>
+                        <x-filter.checkbox-list
+                            name="name"
+                            :options="$nameFilterOptions->map(fn ($category) => ['value' => $category->name, 'label' => $category->name])"
+                            :selected="request()->query('name', [])"
+                        />
+                    </x-slot:filter_name>
+                @endif
+            </x-filter-bar>
+
+            <div class="flex flex-none gap-2">
                 @can('export', \App\Models\Category::class)
                     <x-action-button 
                         href="{{ route('categories.export', request()->query()) }}"
@@ -35,7 +56,7 @@
                         variant="primary"
                         icon="plus"
                     >
-                        Tambah Kategori
+                        Tambah Ayam
                     </x-action-button>
                 @endcan
             </div>

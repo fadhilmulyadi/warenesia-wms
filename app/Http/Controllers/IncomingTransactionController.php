@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Http\Requests\IncomingTransactionRequest;
 use App\Models\IncomingTransaction;
 use App\Models\Product;
@@ -20,6 +21,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class IncomingTransactionController extends Controller
 {
+    use HasIndexQueryHelpers;
+
+    private const DEFAULT_PER_PAGE = IncomingTransaction::DEFAULT_PER_PAGE;
+    private const MAX_PER_PAGE = 250;
     private const ROLE_STAFF = 'staff';
     private const EXPORT_CHUNK_SIZE = 200;
 
@@ -34,17 +39,30 @@ class IncomingTransactionController extends Controller
     {
         $this->authorize('viewAny', IncomingTransaction::class);
 
-        $transactionsQuery = $this->buildIncomingTransactionIndexQuery($request);
+        $perPage = $this->resolvePerPage(
+            $request,
+            self::DEFAULT_PER_PAGE,
+            self::MAX_PER_PAGE
+        );
+
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['transaction_date', 'transaction_number', 'status', 'total_items', 'total_quantity', 'total_amount', 'created_at'],
+            defaultSort: 'transaction_date',
+            defaultDirection: 'desc'
+        );
+
+        $transactionsQuery = $this->buildIncomingTransactionIndexQuery($request, $sort, $direction);
 
         $transactions = $transactionsQuery
-            ->paginate(IncomingTransaction::DEFAULT_PER_PAGE)
+            ->paginate($perPage)
             ->withQueryString();
 
         $search = (string) $request->query('q', '');
         $statusFilter = (string) $request->query('status', '');
         $statusOptions = $this->incomingStatusOptions();
 
-        return view('purchases.index', compact('transactions', 'search', 'statusFilter', 'statusOptions'));
+        return view('purchases.index', compact('transactions', 'search', 'statusFilter', 'statusOptions', 'sort', 'direction', 'perPage'));
     }
 
     /**
@@ -97,7 +115,14 @@ class IncomingTransactionController extends Controller
     {
         $this->authorize('export', IncomingTransaction::class);
 
-        $transactionQuery = $this->buildIncomingTransactionIndexQuery($request);
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['transaction_date', 'transaction_number', 'status', 'total_items', 'total_quantity', 'total_amount', 'created_at'],
+            defaultSort: 'transaction_date',
+            defaultDirection: 'desc'
+        );
+
+        $transactionQuery = $this->buildIncomingTransactionIndexQuery($request, $sort, $direction);
         $user = $request->user();
 
         if ($user !== null && $user->role === self::ROLE_STAFF) {
@@ -121,8 +146,6 @@ class IncomingTransactionController extends Controller
             ]);
 
             $transactionQuery
-                ->orderBy('transaction_date')
-                ->orderBy('id')
                 ->chunk(self::EXPORT_CHUNK_SIZE, function (Collection $transactions) use ($output): void {
                     foreach ($transactions as $transaction) {
                         $output->fputcsv([
@@ -256,35 +279,35 @@ class IncomingTransactionController extends Controller
         return is_numeric($productId) ? (int) $productId : null;
     }
 
-    private function buildIncomingTransactionIndexQuery(Request $request): Builder
-    {
+    private function buildIncomingTransactionIndexQuery(
+        Request $request,
+        string $sort,
+        string $direction
+    ): Builder {
         $search = (string) $request->query('q', '');
-        $statusFilter = (string) $request->query('status', '');
-        $dateFrom = $request->query('date_from');
-        $dateTo = $request->query('date_to');
 
-        return IncomingTransaction::query()
-            ->with(['supplier', 'createdBy', 'verifiedBy'])
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $innerQuery) use ($search): void {
-                    $innerQuery
-                        ->where('transaction_number', 'like', '%' . $search . '%')
-                        ->orWhereHas('supplier', function (Builder $supplierQuery) use ($search): void {
-                            $supplierQuery->where('name', 'like', '%' . $search . '%');
-                        });
+        $query = IncomingTransaction::query()
+            ->with(['supplier', 'createdBy', 'verifiedBy']);
+
+        if ($search !== '') {
+            $query->where(function (Builder $searchQuery) use ($search): void {
+                $this->applySearch($searchQuery, $search, ['transaction_number']);
+                $searchQuery->orWhereHas('supplier', function (Builder $supplierQuery) use ($search): void {
+                    $supplierQuery->where('name', 'like', '%' . $search . '%');
                 });
-            })
-            ->when($statusFilter !== '', function (Builder $query) use ($statusFilter): void {
-                $query->where('status', $statusFilter);
-            })
-            ->when($dateFrom, function (Builder $query) use ($dateFrom): void {
-                $query->whereDate('transaction_date', '>=', $dateFrom);
-            })
-            ->when($dateTo, function (Builder $query) use ($dateTo): void {
-                $query->whereDate('transaction_date', '<=', $dateTo);
-            })
-            ->orderByDesc('transaction_date')
-            ->orderByDesc('id');
+            });
+        }
+
+        $this->applyFilters($query, $request, [
+            'status' => 'status',
+        ]);
+
+        $this->applyDateRange($query, $request, 'transaction_date');
+
+        $query->orderBy($sort, $direction)
+            ->orderBy('id');
+
+        return $query;
     }
 
     private function incomingStatusOptions(): array

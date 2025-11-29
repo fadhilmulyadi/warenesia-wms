@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use App\Support\CsvExporter;
@@ -12,35 +13,50 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CategoryController extends Controller
 {
+    use HasIndexQueryHelpers;
+
     private const DEFAULT_PER_PAGE = 10;
+    private const MAX_PER_PAGE = 250;
     private const EXPORT_CHUNK_SIZE = 200;
+    private const NAME_FILTER_THRESHOLD = 8;
 
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $search = $request->get('q'); 
-        $sort = $request->get('sort', 'name'); 
-        $direction = $request->get('direction', 'asc');
+        $perPage = $this->resolvePerPage(
+            $request,
+            self::DEFAULT_PER_PAGE,
+            self::MAX_PER_PAGE
+        );
 
-        $allowedSorts = ['name', 'products_count', 'created_at'];
-        
-        if (!in_array($sort, $allowedSorts)) {
-            $sort = 'name';
-        }
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'products_count', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
 
-        $categories = Category::query()
-            ->withCount('products')
-            ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
-            })
-            ->orderBy($sort, $direction) 
-            ->paginate(10)
+        $categoriesQuery = $this->buildCategoryIndexQuery($request, $sort, $direction);
+
+        $categories = $categoriesQuery
+            ->paginate($perPage)
             ->withQueryString();
 
-        return view('categories.index', compact('categories', 'search'));
+        $search = (string) $request->query('q', '');
+        $nameFilterOptions = Category::orderBy('name')->get(['id', 'name']);
+        $showNameFilter = $nameFilterOptions->count() >= self::NAME_FILTER_THRESHOLD;
+
+        return view('categories.index', compact(
+            'categories',
+            'search',
+            'sort',
+            'direction',
+            'perPage',
+            'nameFilterOptions',
+            'showNameFilter'
+        ));
     }
 
     /**
@@ -143,7 +159,14 @@ class CategoryController extends Controller
     {
         $this->authorize('viewAny', Category::class);
 
-        $categoryQuery = $this->buildCategoryIndexQuery($request);
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'products_count', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
+
+        $categoryQuery = $this->buildCategoryIndexQuery($request, $sort, $direction);
         $fileName = 'categories-' . now()->format('Ymd-His') . '.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($categoryQuery): void {
@@ -156,8 +179,6 @@ class CategoryController extends Controller
             ]);
 
             $categoryQuery
-                ->orderBy('name')
-                ->orderBy('id')
                 ->chunk(self::EXPORT_CHUNK_SIZE, static function ($categories) use ($output): void {
                     foreach ($categories as $category) {
                         $output->fputcsv([
@@ -172,16 +193,26 @@ class CategoryController extends Controller
         });
     }
 
-    private function buildCategoryIndexQuery(Request $request): Builder
-    {
-        $search = (string) $request->input('q', '');
+    private function buildCategoryIndexQuery(
+        Request $request,
+        string $sort,
+        string $direction
+    ): Builder {
+        $search = (string) $request->query('q', '');
 
-        return Category::query()
-            ->withCount('products')
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where('name', 'like', '%' . $search . '%');
-            })
-            ->orderBy('name');
+        $query = Category::query()
+            ->withCount('products');
+
+        $this->applySearch($query, $search, ['name', 'description']);
+
+        $this->applyFilters($query, $request, [
+            'name' => 'name',
+        ]);
+
+        $query->orderBy($sort, $direction)
+            ->orderBy('id');
+
+        return $query;
     }
 
 }

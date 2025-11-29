@@ -76,10 +76,10 @@
     <button 
         type="button"
         @click="open = !open"
-        class="inline-flex items-center h-8 rounded-lg text-xs font-medium border transition-all duration-200"
+        class="inline-flex items-center justify-center h-9 px-4 rounded-lg text-xs font-semibold border transition-all duration-200"
         :class="isActive 
-            ? 'bg-teal-50 border-teal-200 text-teal-700 pl-3 pr-1 gap-1' 
-            : 'bg-white border-slate-300 text-slate-600 px-3 hover:bg-slate-50'"
+            ? 'bg-teal-50 border-teal-200 text-teal-700' 
+            : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'"
     >
         <span x-text="labelText"></span>
         <x-lucide-chevron-down class="w-3.5 h-3.5 ml-1 transition-transform" x-bind:class="open ? 'rotate-180' : ''" x-show="!isActive" />

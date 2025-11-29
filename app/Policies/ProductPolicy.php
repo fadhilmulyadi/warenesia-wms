@@ -40,7 +40,6 @@ class ProductPolicy
 
     public function export(User $user): bool
     {
-        // Controllers should scope exported data per role (e.g., staff only their own rows).
         return $this->canView($user);
     }
 

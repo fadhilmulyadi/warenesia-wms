@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Http\Requests\SupplierRequest;
 use App\Models\Supplier;
 use App\Support\CsvExporter;
@@ -14,6 +15,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupplierController extends Controller
 {
+    use HasIndexQueryHelpers;
+
+    private const DEFAULT_PER_PAGE = Supplier::DEFAULT_PER_PAGE;
+    private const MAX_PER_PAGE = 250;
     private const EXPORT_CHUNK_SIZE = 200;
 
     /**
@@ -23,14 +28,28 @@ class SupplierController extends Controller
     {
         $this->authorize('viewAny', Supplier::class);
 
-        $suppliersQuery = $this->buildSupplierIndexQuery($request);
+        $perPage = $this->resolvePerPage(
+            $request,
+            self::DEFAULT_PER_PAGE,
+            self::MAX_PER_PAGE
+        );
 
-        $suppliers = $suppliersQuery->paginate(Supplier::DEFAULT_PER_PAGE)
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'average_rating', 'rated_restock_count', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
+
+        $suppliersQuery = $this->buildSupplierIndexQuery($request, $sort, $direction);
+
+        $suppliers = $suppliersQuery
+            ->paginate($perPage)
             ->withQueryString();
 
         $search = (string) $request->query('q', '');
 
-        return view('suppliers.index', compact('suppliers', 'search'));
+        return view('suppliers.index', compact('suppliers', 'search', 'sort', 'direction', 'perPage'));
     }
 
     /**
@@ -113,7 +132,14 @@ class SupplierController extends Controller
     {
         $this->authorize('export', Supplier::class);
 
-        $supplierQuery = $this->buildSupplierIndexQuery($request);
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'average_rating', 'rated_restock_count', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
+
+        $supplierQuery = $this->buildSupplierIndexQuery($request, $sort, $direction);
         $fileName = 'suppliers-' . now()->format('Ymd-His') . '.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($supplierQuery): void {
@@ -135,8 +161,6 @@ class SupplierController extends Controller
             ]);
 
             $supplierQuery
-                ->orderBy('name')
-                ->orderBy('id')
                 ->chunk(self::EXPORT_CHUNK_SIZE, static function ($suppliers) use ($output): void {
                     foreach ($suppliers as $supplier) {
                         $output->fputcsv([
@@ -160,20 +184,14 @@ class SupplierController extends Controller
         });
     }
 
-    private function buildSupplierIndexQuery(Request $request): Builder
-    {
+    private function buildSupplierIndexQuery(
+        Request $request,
+        string $sort,
+        string $direction
+    ): Builder {
         $search = (string) $request->query('q', '');
 
-        return Supplier::query()
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $innerQuery) use ($search): void {
-                    $innerQuery
-                        ->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('contact_person', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%');
-                });
-            })
+        $query = Supplier::query()
             ->withCount([
                 'restockOrders as rated_restock_count' => function ($query): void {
                     $query->whereNotNull('rating');
@@ -182,7 +200,13 @@ class SupplierController extends Controller
             ->withAvg(
                 'restockOrders as average_rating',
                 'rating'
-            )
-            ->orderBy('name');
+            );
+
+        $this->applySearch($query, $search, ['name', 'contact_person', 'email', 'phone']);
+
+        $query->orderBy($sort, $direction)
+            ->orderBy('id');
+
+        return $query;
     }
 }

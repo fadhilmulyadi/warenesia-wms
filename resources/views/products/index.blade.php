@@ -14,64 +14,45 @@
 
         {{-- TOOLBAR & FILTER --}}
         <x-toolbar>
+            @php
+                $filters = [
+                    'category_id' => 'Kategori',
+                    'stock_status' => 'Status Stok',
+                ];
+                $resetKeys = ['category_id', 'stock_status'];
+            @endphp
+
             <x-filter-bar
-                :action="route('products.index')"
+                :action="route('products.index', ['per_page' => $perPage])"
                 :search="$search"
                 :sort="$sort"
                 :direction="$direction"
+                :filters="$filters"
+                :resetKeys="$resetKeys"
                 placeholder="Cari produk atau SKU..."
-                :filters="[
-                    'category_id' => 'Kategori',
-                    'stock_status' => 'Status Stok',
-                ]"
-            >                
-                {{-- Slot Kategori --}}
+            >
                 <x-slot:filter_category_id>
-                    <div class="flex flex-col gap-1.5">
-                        @foreach($categories as $cat)
-                            <label class="flex items-center gap-2 cursor-pointer group p-1 rounded">
-                                <input 
-                                    type="checkbox" 
-                                    name="category_id[]" 
-                                    value="{{ $cat->id }}" 
-                                    @checked(in_array($cat->id, (array)request()->query('category_id', [])))
-                                    class="rounded border-slate-300 text-teal-600 shadow-sm focus:ring-teal-500 w-3.5 h-3.5"
-                                >
-                                <span class="text-xs text-slate-600 group-hover:text-slate-900">{{ $cat->name }}</span>
-                            </label>
-                        @endforeach
-                    </div>
+                    <x-filter.checkbox-list
+                        name="category_id"
+                        :options="$categories->map(fn ($cat) => ['value' => $cat->id, 'label' => $cat->name])"
+                        :selected="request()->query('category_id', [])"
+                    />
                 </x-slot:filter_category_id>
-                
-                {{-- Slot Stok --}}
+
                 <x-slot:filter_stock_status>
-                    <div class="flex flex-col gap-1.5">
-                        @php
-                            $stockOptions = [
-                                'available' => 'Tersedia',
-                                'low' => 'Low Stock',
-                                'out' => 'Habis'
-                            ];
-                            $currentStocks = (array)request()->query('stock_status', []);
-                        @endphp
-                        
-                        @foreach($stockOptions as $val => $lbl)
-                            <label class="flex items-center gap-2 cursor-pointer group p-1 rounded">
-                                <input 
-                                    type="checkbox" 
-                                    name="stock_status[]" 
-                                    value="{{ $val }}" 
-                                    @checked(in_array($val, $currentStocks))
-                                    class="rounded border-slate-300 text-teal-600 shadow-sm focus:ring-teal-500 w-3.5 h-3.5"
-                                >
-                                <span class="text-xs text-slate-600 group-hover:text-slate-900">{{ $lbl }}</span>
-                            </label>
-                        @endforeach
-                    </div>
+                    <x-filter.checkbox-list
+                        name="stock_status"
+                        :options="[
+                            ['value' => 'available', 'label' => 'Tersedia'],
+                            ['value' => 'low', 'label' => 'Low Stock'],
+                            ['value' => 'out', 'label' => 'Habis'],
+                        ]"
+                        :selected="request()->query('stock_status', [])"
+                    />
                 </x-slot:filter_stock_status>
             </x-filter-bar>
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-none gap-2">
                 @can('export', \App\Models\Product::class)
                     <x-action-button 
                         href="{{ route('products.export', request()->query()) }}"
@@ -97,7 +78,7 @@
         {{-- TABLE --}}
         <x-table>
             <x-table.thead>
-                <x-table.th>SKU</x-table.th>
+                <x-table.th sortable name="sku">SKU</x-table.th>
                 <x-table.th sortable name="name">Produk</x-table.th>
                 <x-table.th>Kategori</x-table.th>
                 <x-table.th>Supplier</x-table.th>

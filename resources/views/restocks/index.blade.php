@@ -13,11 +13,82 @@
     <div class="space-y-4 text-xs max-w-6xl mx-auto">
         
         <x-toolbar>
-            <form method="GET" action="{{ route('restocks.index') }}" class="flex-1 max-w-sm">
-                <x-search-bar :value="$search" placeholder="Cari Nomor PO..." />
-            </form>
+            @php
+                $filters = [
+                    'status' => 'Status',
+                    'date_range' => 'Rentang Tanggal',
+                ];
+                $resetKeys = ['status', 'date_from', 'date_to', 'date_range'];
+            @endphp
 
-            <div class="flex items-center gap-2">
+            <x-filter-bar
+                :action="route('restocks.index', ['per_page' => $perPage])"
+                :search="$search"
+                :sort="$sort"
+                :direction="$direction"
+                :filters="$filters"
+                :resetKeys="$resetKeys"
+                placeholder="Cari Nomor PO atau Supplier..."
+            >
+                <x-slot:filter_status>
+                    <x-filter.checkbox-list
+                        name="status"
+                        :options="$statusOptions"
+                        :selected="request()->query('status', [])"
+                    />
+                </x-slot:filter_status>
+
+                <x-slot:filter_date_range>
+                    <div
+                        x-data="{
+                            updateMeta() {
+                                const from = this.$refs.from?.value || '';
+                                const to = this.$refs.to?.value || '';
+                                const hasRange = !!(from || to);
+
+                                if (this.$refs.flag) {
+                                    this.$refs.flag.value = hasRange ? '1' : '';
+                                }
+
+                                if (this.$refs.option && this.$refs.display) {
+                                    this.$refs.option.textContent = hasRange
+                                        ? [from || 'Dari', to || 'Sampai'].join(' - ')
+                                        : '';
+                                    this.$refs.display.value = hasRange ? 'applied' : '';
+                                    this.$refs.display.dispatchEvent(new Event('change', { bubbles: true }));
+                                }
+                            }
+                        }"
+                        x-init="updateMeta()"
+                        class="space-y-2"
+                    >
+                        <input type="hidden" name="date_range" x-ref="flag">
+                        <select class="hidden" x-ref="display">
+                            <option value=""></option>
+                            <option value="applied" x-ref="option"></option>
+                        </select>
+
+                        <div class="flex items-center gap-2">
+                            <x-form.date
+                                name="date_from"
+                                x-ref="from"
+                                :value="request('date_from')"
+                                placeholder="Dari tanggal"
+                                x-on:change="updateMeta()"
+                            />
+                            <x-form.date
+                                name="date_to"
+                                x-ref="to"
+                                :value="request('date_to')"
+                                placeholder="Sampai tanggal"
+                                x-on:change="updateMeta()"
+                            />
+                        </div>
+                    </div>
+                </x-slot:filter_date_range>
+            </x-filter-bar>
+
+            <div class="flex flex-none gap-2">
                 @can('export', \App\Models\RestockOrder::class)
                     <x-action-button 
                         href="{{ route('restocks.export', request()->query()) }}"
@@ -42,8 +113,8 @@
 
         <x-table>
             <x-table.thead>
-                <x-table.th class="w-24">Nomor PO</x-table.th>
-                <x-table.th class="w-32">Tanggal Pemesanan</x-table.th>
+                <x-table.th class="w-24" sortable name="po_number">Nomor PO</x-table.th>
+                <x-table.th class="w-32" sortable name="order_date">Tanggal Pemesanan</x-table.th>
                 <x-table.th>Supplier</x-table.th>
                 <x-table.th class="w-32">Tanggal Kedatangan</x-table.th>
                 <x-table.th class="text-center w-28">Status</x-table.th>

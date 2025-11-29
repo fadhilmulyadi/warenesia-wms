@@ -18,8 +18,8 @@
 <x-table>
     {{-- Header Tabel --}}
     <x-table.thead>
-        <x-table.th>No. Transaksi</x-table.th>
-        <x-table.th>Tanggal</x-table.th>
+        <x-table.th sortable name="transaction_number">No. Transaksi</x-table.th>
+        <x-table.th sortable name="transaction_date">Tanggal</x-table.th>
         <x-table.th>{{ $counterpartyLabel }}</x-table.th>
         <x-table.th align="right">Item</x-table.th>
         <x-table.th align="right">Qty</x-table.th>

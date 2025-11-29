@@ -115,7 +115,7 @@
             <button 
                 type="button"
                 @click="filtersVisible = !filtersVisible"
-                class="inline-flex items-center h-10 px-3 rounded-lg text-xs font-semibold border transition-all duration-200"
+                class="inline-flex justify-center items-center h-9 px-4 rounded-lg text-xs font-semibold border transition-all duration-200"
                 :class="filtersVisible || activeCount > 0
                     ? 'bg-teal-50 border-teal-200 text-teal-700'
                     : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'"

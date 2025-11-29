@@ -38,6 +38,11 @@ class CategoryPolicy
         return $this->canManage($user);
     }
 
+    public function export(User $user): bool
+    {
+        return $this->canView($user);
+    }
+
     private function canView(User $user): bool
     {
         return in_array($user->role, self::VIEW_ROLES, true);

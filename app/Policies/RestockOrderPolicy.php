@@ -52,7 +52,6 @@ class RestockOrderPolicy
 
     public function export(User $user): bool
     {
-        // Scope exported rows appropriately in controllers (staff should only see their own data).
         return in_array($user->role, ['admin', 'manager', 'staff'], true);
     }
 
