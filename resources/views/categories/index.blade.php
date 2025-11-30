@@ -40,7 +40,7 @@
                 @endif
             </x-filter-bar>
 
-            <div class="flex flex-none gap-2">
+            <div class="flex flex-wrap flex-none gap-2 justify-end">
                 @can('export', \App\Models\Category::class)
                     <x-action-button 
                         href="{{ route('categories.export', request()->query()) }}"

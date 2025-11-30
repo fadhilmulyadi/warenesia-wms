@@ -13,12 +13,10 @@ use App\Policies\CategoryPolicy;
 use App\Policies\IncomingTransactionPolicy;
 use App\Policies\OutgoingTransactionPolicy;
 use App\Policies\ProductPolicy;
-use App\Policies\ReportPolicy;
 use App\Policies\RestockOrderPolicy;
 use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -35,7 +33,6 @@ class AuthServiceProvider extends ServiceProvider
         OutgoingTransaction::class => OutgoingTransactionPolicy::class,
         RestockOrder::class        => RestockOrderPolicy::class,
         User::class                => UserPolicy::class,
-        // ReportPolicy is wired through a Gate (non-model ability) below.
     ];
 
     /**
@@ -44,7 +41,5 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-
-        Gate::define('view-transactions-report', [ReportPolicy::class, 'viewTransactionsReport']);
     }
 }

@@ -133,7 +133,7 @@
         </x-filter-bar>
 
         {{-- ACTION BUTTON (RIGHT) --}}
-        <div class="flex-none">
+        <div class="flex flex-wrap gap-2 justify-end w-full md:w-auto">
             @if($activeTab === 'incoming')
                 @can('create', \App\Models\IncomingTransaction::class)
                     <x-action-button href="{{ route('purchases.create') }}" variant="primary" icon="plus">

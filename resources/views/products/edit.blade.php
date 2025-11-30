@@ -20,7 +20,7 @@
         ]" />
 
         {{-- Action Buttons --}}
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 justify-end">
             <a href="{{ route('products.index') }}"
                 class="inline-flex items-center justify-center h-9 px-3 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
                 Batal

@@ -71,7 +71,6 @@ class AdminDashboardService
             ['title' => 'Produk', 'description' => 'Kelola Katalog dan Stok', 'icon' => 'box', 'href' => route('products.index')],
             ['title' => 'Transaksi', 'description' => 'Barang Masuk dan Keluar', 'icon' => 'arrow-right-left', 'href' => route('transactions.index')],
             ['title' => 'Pesanan Restok', 'description' => 'Permintaan Pembelian', 'icon' => 'repeat', 'href' => route('restocks.index')],
-            ['title' => 'Laporan', 'description' => 'Ringkasan Bulanan', 'icon' => 'bar-chart-3', 'href' => route('reports.transactions')],
         ];
     }
 

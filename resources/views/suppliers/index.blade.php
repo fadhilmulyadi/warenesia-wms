@@ -18,25 +18,27 @@
             </form>
         </x-toolbar>
 
-        @can('export', \App\Models\Supplier::class)
-            <x-action-button 
-                href="{{ route('suppliers.export', request()->query()) }}"
-                variant="secondary"
-                icon="download"
-            >
-                Ekspor CSV
-            </x-action-button>
-        @endcan
+        <div class="flex flex-wrap items-center gap-2">
+            @can('export', \App\Models\Supplier::class)
+                <x-action-button 
+                    href="{{ route('suppliers.export', request()->query()) }}"
+                    variant="secondary"
+                    icon="download"
+                >
+                    Ekspor CSV
+                </x-action-button>
+            @endcan
 
-        @can('create', \App\Models\Supplier::class)
-            <x-action-button 
-                href="{{ route('suppliers.create') }}"
-                variant="primary"
-                icon="plus"
-            >
-                Tambah Pemasok
-            </x-action-button>
-        @endcan
+            @can('create', \App\Models\Supplier::class)
+                <x-action-button 
+                    href="{{ route('suppliers.create') }}"
+                    variant="primary"
+                    icon="plus"
+                >
+                    Tambah Pemasok
+                </x-action-button>
+            @endcan
+        </div>
     </div>
     <div class="max-w-6xl mx-auto space-y-4 text-xs">
         {{-- @if(session('success'))
@@ -51,7 +53,7 @@
             </div>
         @endif --}}
 
-        <form method="GET" action="{{ route('suppliers.index') }}" class="flex items-center gap-2">
+        <form method="GET" action="{{ route('suppliers.index') }}" class="flex flex-wrap items-center gap-2">
             <input
                 type="text"
                 name="q"
@@ -67,8 +69,8 @@
             </button>
         </form>
 
-        <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-            <table class="min-w-full text-left text-xs">
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <table class="min-w-[720px] w-full text-left text-xs">
                 <thead class="bg-slate-50 text-[11px] text-slate-500 uppercase tracking-wide">
                     <tr>
                         <th class="px-4 py-2">Name</th>

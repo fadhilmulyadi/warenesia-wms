@@ -12,7 +12,7 @@
 @php
     $supplierOptions = $suppliers?->pluck('name', 'id')->toArray() ?? [];
     $productOptions = $products?->mapWithKeys(
-        fn ($p) => [$p->id => "{$p->name} ({$p->sku}) — Stok: {$p->current_stock}"]
+        fn ($p) => [$p->id => "{$p->name} ({$p->sku}) - Stok: {$p->current_stock}"]
     )->toArray() ?? [];
     $productStocks = $products?->mapWithKeys(
         fn ($p) => [$p->id => (int) $p->current_stock]
@@ -21,20 +21,10 @@
 @endphp
 
 @section('content')
-<div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-6 gap-6">
+<div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
     
     {{-- LEFT SIDE --}}
     <div class="space-y-6 lg:col-span-3">
-
-        <!-- <x-dashboard.quick-entry
-            :supplierOptions="$supplierOptions"
-            :productOptions="$productOptions"
-            :prefilledType="$prefilledType"
-            :prefilledSupplierId="$prefilledSupplierId"
-            :prefilledProductId="$prefilledProductId"
-            :prefilledCustomerName="$prefilledCustomerName"
-            :prefilledQuantity="$prefilledQuantity"
-        /> -->
         <x-dashboard.quick-entry
             :supplierOptions="$supplierOptions"
             :productOptions="$productOptions"
@@ -45,7 +35,6 @@
             :prefilledCustomerName="$prefilledCustomerName"
             :prefilledQuantity="$prefilledQuantity"
         />
-
     </div>
 
     {{-- RIGHT SIDE --}}
@@ -53,7 +42,7 @@
 
         <x-dashboard.card 
             title="Transaksi Hari Ini"
-            subtitle="5–10 transaksi yang kamu buat hari ini."
+            subtitle="5-10 transaksi yang kamu buat hari ini."
             padding="p-4"
         >
             @if(count($todayList) === 0)

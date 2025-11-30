@@ -10,19 +10,19 @@
 @endsection
 
 @section('content')
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         
-        {{-- Breadcrumb --}}
-        <x-breadcrumbs :items="[
-            'Produk' => route('products.index'),
-            'Buat Baru'  => '#'
-        ]" />
+            {{-- Breadcrumb --}}
+            <x-breadcrumbs :items="[
+                'Produk' => route('products.index'),
+                'Buat Baru'  => '#'
+            ]" />
 
-        {{-- Tombol Action --}}
-        <div class="flex items-center gap-2">
-            {{-- Menggunakan component action-button agar lebih rapi (opsional) --}}
-            <x-action-button href="{{ route('products.index') }}" variant="secondary">
-                Batal
+            {{-- Tombol Action --}}
+            <div class="flex flex-wrap items-center gap-2 justify-end">
+                {{-- Menggunakan component action-button agar lebih rapi (opsional) --}}
+                <x-action-button href="{{ route('products.index') }}" variant="secondary">
+                    Batal
             </x-action-button>
 
             <x-action-button type="button" onclick="document.getElementById('product-form').submit()" variant="primary" icon="save">

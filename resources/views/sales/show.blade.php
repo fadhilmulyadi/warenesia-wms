@@ -17,7 +17,7 @@
                 'Detail Barang Keluar' => route('sales.show', $sale),
             ]" />
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2 justify-end">
                 <x-action-button href="{{ route('transactions.index', ['tab' => 'outgoing']) }}" variant="secondary" icon="arrow-left">
                     Kembali
                 </x-action-button>
@@ -70,7 +70,7 @@
             </x-card>
         @endcanany
 
-        <div class="grid gap-6 lg:grid-cols-3">
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <x-card class="p-6 space-y-6 lg:col-span-2">
                 <div class="space-y-3">
                     <p class="text-base font-semibold text-slate-900">Informasi Customer</p>
@@ -181,7 +181,7 @@
         </div>
 
         <x-card class="p-6 space-y-4">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-start justify-between gap-3">
                 <p class="text-base font-semibold text-slate-900">Produk</p>
             </div>
 

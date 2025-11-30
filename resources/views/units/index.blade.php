@@ -16,7 +16,7 @@
                 <x-search-bar name="q" :value="$search" placeholder="Cari satuan..." class="w-full sm:w-72" />
             </form>
 
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2 justify-end">
                 <x-action-button href="{{ route('units.create') }}" variant="primary" icon="plus">
                     Tambah Satuan
                 </x-action-button>

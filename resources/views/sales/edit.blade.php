@@ -23,7 +23,7 @@
     @endphp
 
     <div class="max-w-5xl mx-auto">
-        <div class="flex items-center justify-end gap-2 mb-4">
+        <div class="flex flex-wrap items-center justify-end gap-2 mb-4">
             <x-action-button href="{{ route('transactions.index') }}" variant="secondary">
                 Batal
             </x-action-button>

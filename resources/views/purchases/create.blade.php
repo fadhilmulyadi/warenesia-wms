@@ -31,7 +31,7 @@
         ]" />
 
         {{-- Action Buttons --}}
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 justify-end">
             <x-action-button href="{{ route('transactions.index') }}" variant="secondary" icon="arrow-left">
                 Kembali
             </x-action-button>

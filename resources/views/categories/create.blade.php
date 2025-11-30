@@ -13,7 +13,7 @@
     <x-card class="p-6 space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <x-breadcrumbs :items="['Kategori' => route('categories.index'), 'Tambah' => '#']" />
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2 justify-end">
                 <x-action-button href="{{ route('categories.index') }}" variant="secondary" icon="arrow-left">
                     Kembali
                 </x-action-button>
@@ -35,7 +35,7 @@
             class="space-y-6"
         >
             @csrf
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 space-y-6">
                     @include('categories.form.general', ['category' => new \App\Models\Category()])
                 </div>

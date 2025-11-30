@@ -28,7 +28,7 @@
                 'Detail Produk' => route('products.show', $product),
             ]" />
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2 justify-end">
                 <x-action-button href="{{ route('products.index') }}" variant="secondary" icon="arrow-left">
                     Kembali
                 </x-action-button>
@@ -43,7 +43,7 @@
             </div>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-2">
+        <div class="grid gap-6 md:grid-cols-2">
 
             <x-card class="p-6 space-y-6 h-full">
 

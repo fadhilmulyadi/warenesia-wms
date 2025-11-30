@@ -30,7 +30,7 @@
                 'Buat Restock' => '#',
             ]" />
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2 justify-end">
                 <x-action-button href="{{ route('restocks.index') }}" variant="secondary" icon="arrow-left">
                     Kembali
                 </x-action-button>
@@ -66,15 +66,15 @@
                         :value="$selectedSupplier"
                         placeholder="Pilih Supplier..."
                     />
-                    <x-input-error class="mt-1" :messages="$errors->get('supplier_id')" />
-                </div>
+                <x-input-error class="mt-1" :messages="$errors->get('supplier_id')" />
+            </div>
 
-                <div class="grid gap-4 md:grid-cols-3">
-                    <div class="space-y-2">
-                        <x-input-label value="Tanggal Order" />
-                        <input
-                            type="date"
-                            name="order_date"
+            <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                <div class="space-y-2">
+                    <x-input-label value="Tanggal Order" />
+                    <input
+                        type="date"
+                        name="order_date"
                             value="{{ $orderDate }}"
                             class="w-full rounded-lg border-slate-200 text-sm"
                             required
@@ -107,7 +107,7 @@
             </x-card>
 
             <x-card class="p-6 space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-wrap items-start justify-between gap-3">
                     <p class="text-base font-semibold text-slate-900">Daftar Item</p>
                     <p class="text-xs font-medium text-slate-500">Isi produk dan jumlah yang akan dipesan.</p>
                 </div>

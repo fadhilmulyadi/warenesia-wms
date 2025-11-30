@@ -33,7 +33,7 @@
                 'Edit Restock' => route('restocks.edit', $restock),
             ]" />
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2 justify-end">
                 <x-action-button href="{{ route('restocks.index') }}" variant="secondary" icon="arrow-left">
                     Kembali
                 </x-action-button>
@@ -62,7 +62,7 @@
             <x-card class="p-6 space-y-6">
                 <p class="text-base font-semibold text-slate-900">Informasi Pesanan</p>
 
-                <div class="grid gap-4 md:grid-cols-3">
+                <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
                     <div class="md:col-span-2 space-y-2">
                         <x-input-label value="Supplier" />
                         <x-custom-select
@@ -111,7 +111,7 @@
             </x-card>
 
             <x-card class="p-6 space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-wrap items-start justify-between gap-3">
                     <p class="text-base font-semibold text-slate-900">Daftar Item</p>
                     <p class="text-xs font-medium text-slate-500">Perbarui item yang dipesan.</p>
                 </div>

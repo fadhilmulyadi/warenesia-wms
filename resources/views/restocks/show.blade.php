@@ -17,7 +17,7 @@
                 'Detail Restock' => route('restocks.show', $restock),
             ]" />
 
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2 justify-end">
                 <x-action-button href="{{ route('restocks.index') }}" variant="secondary" icon="arrow-left">
                     Kembali
                 </x-action-button>
@@ -72,7 +72,7 @@
         @endif
 
         <x-card class="p-6 space-y-4">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-start justify-between gap-3">
                 <p class="text-base font-semibold text-slate-900">Status Restock</p>
                 @include('components.status-badge', [
                     'status' => $restock->status,
@@ -86,7 +86,7 @@
         <x-card class="p-6 space-y-4">
             <p class="text-base font-semibold text-slate-900">Informasi Pesanan</p>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="space-y-1">
                     <p class="text-sm text-slate-500">Nomor PO</p>
                     <p class="text-sm font-semibold text-slate-900">{{ $restock->po_number }}</p>
@@ -146,7 +146,7 @@
         </x-card>
 
         <x-card class="p-6 space-y-4">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-start justify-between gap-3">
                 <p class="text-base font-semibold text-slate-900">Daftar Item</p>
             </div>
 
@@ -193,7 +193,7 @@
         </x-card>
 
         <x-card class="p-6 space-y-4">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-start justify-between gap-3">
                 <p class="text-base font-semibold text-slate-900">Rating Supplier</p>
                 @if($restock->hasRating())
                     <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
@@ -240,7 +240,7 @@
                             <x-input-error class="mt-1" :messages="$errors->get('rating_notes')" />
                         </div>
 
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
                             <x-action-button type="submit" variant="primary" icon="star">
                                 Simpan Rating
                             </x-action-button>

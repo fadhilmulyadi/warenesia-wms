@@ -9,7 +9,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductScanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestockOrderController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TransactionController;
@@ -125,12 +124,6 @@ Route::middleware(['auth', 'role:admin,manager'])
 
         Route::patch('restocks/{restock}/cancel', [RestockOrderController::class, 'cancel'])
             ->name('restocks.cancel');
-
-        Route::get('reports/transactions', [ReportController::class, 'transactions'])
-            ->name('reports.transactions');
-
-        Route::get('reports/transactions/export', [ReportController::class, 'exportTransactions'])
-            ->name('reports.transactions.export');
     });
 
 /*
