@@ -28,6 +28,25 @@
 @endphp
 
 <script>
+if (! window.submitFormWithValidation) {
+    window.submitFormWithValidation = function(formId) {
+        const form = document.getElementById(formId);
+
+        if (! form) return;
+
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+            return;
+        }
+
+        const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
+
+        if (form.dispatchEvent(submitEvent)) {
+            form.submit();
+        }
+    };
+}
+
 function itemsTable(initialItems = []) {
     return {
         items: initialItems.length > 0 ? initialItems : [{ 
@@ -42,6 +61,11 @@ function itemsTable(initialItems = []) {
         currentIndex: null,
 
         init() {
+            const parentForm = this.$el.closest('form');
+            if (parentForm) {
+                parentForm.addEventListener('submit', (event) => this.validateBeforeSubmit(event));
+            }
+
             window.addEventListener('custom-select-opened', (event) => {
                 const inputName = event.detail;
                 
@@ -77,6 +101,35 @@ function itemsTable(initialItems = []) {
             this.items[index].{{ $priceField }} = this.productPrices[productId] ?? 0;
         },
 
+        isStockInsufficient(index) {
+            if (! this.shouldCheckStock) {
+                return false;
+            }
+
+            const item = this.items[index];
+
+            if (! item || ! item.product_id) {
+                return false;
+            }
+
+            const availableStock = Number(this.productStocks[item.product_id] ?? 0);
+            const requestedQty = Number(item.quantity ?? 0);
+
+            return Number.isFinite(requestedQty) && Number.isFinite(availableStock) && requestedQty > availableStock;
+        },
+
+        validateBeforeSubmit(event) {
+            if (! this.shouldCheckStock) {
+                return;
+            }
+
+            const hasShortage = this.items.some((_, idx) => this.isStockInsufficient(idx));
+
+            if (hasShortage) {
+                event.preventDefault();
+            }
+        },
+
         stockError(index) {
             const backendError = this.quantityErrors && Object.prototype.hasOwnProperty.call(this.quantityErrors, index)
                 ? this.quantityErrors[index]
@@ -92,10 +145,8 @@ function itemsTable(initialItems = []) {
                 return backendError;
             }
 
-            const availableStock = Number(this.productStocks[item.product_id] ?? 0);
-            const requestedQty = Number(item.quantity ?? 0);
-
-            if (Number.isFinite(requestedQty) && requestedQty > availableStock) {
+            if (this.isStockInsufficient(index)) {
+                const availableStock = Number(this.productStocks[item.product_id] ?? 0);
                 return `Stok tidak mencukupi. Tersedia: ${availableStock}.`;
             }
 

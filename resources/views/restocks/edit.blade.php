@@ -1,33 +1,36 @@
 @extends('layouts.app')
 
-@section('title', 'Buat Restock')
+@section('title', 'Edit Restock')
 
 @section('page-header')
     <x-page-header
-        title="Buat Restock Baru"
-        description="Input pembelian barang dari supplier."
+        title="Edit Restock"
+        :description="'Restock #' . $restock->po_number"
     />
 @endsection
 
 @section('content')
     @php
-        $initialItems = old('items', [[
-            'product_id' => null,
-            'quantity' => 1,
-            'unit_cost' => 0,
-        ]]);
+        $restockItems = $restock->items->map(function ($item) {
+            return [
+                'product_id' => $item->product_id,
+                'quantity' => (int) $item->quantity,
+                'unit_cost' => (float) $item->unit_cost,
+            ];
+        })->values()->toArray();
 
-        $selectedSupplier = old('supplier_id');
-        $orderDate = old('order_date', $today);
-        $expectedDelivery = old('expected_delivery_date');
-        $notes = old('notes');
+        $initialItems = old('items', $restockItems);
+        $selectedSupplier = old('supplier_id', $restock->supplier_id);
+        $orderDate = old('order_date', optional($restock->order_date)->format('Y-m-d'));
+        $expectedDelivery = old('expected_delivery_date', optional($restock->expected_delivery_date)->format('Y-m-d'));
+        $notes = old('notes', $restock->notes);
     @endphp
 
     <div class="max-w-6xl mx-auto space-y-6 text-sm text-slate-700">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <x-breadcrumbs :items="[
                 'Transaksi' => route('transactions.index', ['tab' => 'restocks']),
-                'Buat Restock' => '#',
+                'Edit Restock' => route('restocks.edit', $restock),
             ]" />
 
             <div class="flex items-center gap-2">
@@ -52,24 +55,25 @@
             </x-card>
         @endif
 
-        <form id="restock-form" action="{{ route('restocks.store') }}" method="POST" class="space-y-6">
+        <form id="restock-form" method="POST" action="{{ route('restocks.update', $restock) }}" class="space-y-6">
             @csrf
+            @method('PUT')
 
             <x-card class="p-6 space-y-6">
                 <p class="text-base font-semibold text-slate-900">Informasi Pesanan</p>
 
-                <div class="space-y-2">
-                    <x-input-label value="Supplier" />
-                    <x-custom-select
-                        name="supplier_id"
-                        :options="$suppliers->pluck('name', 'id')->toArray()"
-                        :value="$selectedSupplier"
-                        placeholder="Pilih Supplier..."
-                    />
-                    <x-input-error class="mt-1" :messages="$errors->get('supplier_id')" />
-                </div>
-
                 <div class="grid gap-4 md:grid-cols-3">
+                    <div class="md:col-span-2 space-y-2">
+                        <x-input-label value="Supplier" />
+                        <x-custom-select
+                            name="supplier_id"
+                            :options="$suppliers->pluck('name', 'id')->toArray()"
+                            :value="$selectedSupplier"
+                            placeholder="Pilih Supplier..."
+                        />
+                        <x-input-error class="mt-1" :messages="$errors->get('supplier_id')" />
+                    </div>
+
                     <div class="space-y-2">
                         <x-input-label value="Tanggal Order" />
                         <input
@@ -109,7 +113,7 @@
             <x-card class="p-6 space-y-4">
                 <div class="flex items-center justify-between">
                     <p class="text-base font-semibold text-slate-900">Daftar Item</p>
-                    <p class="text-xs font-medium text-slate-500">Isi produk dan jumlah yang akan dipesan.</p>
+                    <p class="text-xs font-medium text-slate-500">Perbarui item yang dipesan.</p>
                 </div>
 
                 <x-transactions.items-table

@@ -37,7 +37,7 @@
                 Kembali
             </x-action-button>
 
-            <x-action-button type="button" onclick="document.getElementById('transaction-form').submit()" variant="primary" icon="save">
+            <x-action-button type="button" onclick="submitFormWithValidation('transaction-form')" variant="primary" icon="save">
                 Simpan Data
             </x-action-button>
         </div>
@@ -45,7 +45,7 @@
 
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 max-w-5xl mx-auto">
 
-        <form id="transaction-form" action="{{ route('sales.store') }}" method="POST">
+        <form id="transaction-form" action="{{ route('sales.store') }}" method="POST" >
             @csrf
 
             <x-transactions.form-header :value="['date' => $transactionDate, 'notes' => $notes]">

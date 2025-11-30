@@ -27,7 +27,7 @@
             <x-action-button href="{{ route('transactions.index') }}" variant="secondary">
                 Batal
             </x-action-button>
-            <x-action-button type="button" onclick="document.getElementById('edit-form').submit()" variant="primary" icon="save">
+            <x-action-button type="button" onclick="submitFormWithValidation('edit-form')" variant="primary" icon="save">
                 Simpan Perubahan
             </x-action-button>
         </div>

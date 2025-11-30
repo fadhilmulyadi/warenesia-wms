@@ -19,13 +19,13 @@ class ProductBarcodeController extends Controller
 
         $payload = $product->getBarcodePayload();
 
-        $image = QrCode::format('png')
+        $image = QrCode::format('svg')
             ->size(self::QR_SIZE)
             ->margin(self::QR_MARGIN)
             ->generate($payload);
 
         return response($image, 200, [
-            'Content-Type' => 'image/png',
+            'Content-Type' => 'image/svg+xml',
             'Content-Disposition' => 'inline; filename="product-' . $product->id . '-qrcode.png"',
         ]);
     }

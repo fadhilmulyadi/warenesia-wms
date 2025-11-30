@@ -54,9 +54,17 @@
 
                 this.stockMessage = '';
             },
+            handleSubmit(event) {
+                this.refreshStockMessage();
+
+                if (this.stockMessage) {
+                    event.preventDefault();
+                }
+            },
         }"
         x-bind:action="action()"
         x-effect="refreshStockMessage()"
+        x-on:submit="handleSubmit($event)"
         
         class="space-y-4"
     >

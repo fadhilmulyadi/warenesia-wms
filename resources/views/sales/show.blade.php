@@ -1,201 +1,238 @@
 @extends('layouts.app')
 
-@section('title', 'Outgoing Transaction Detail')
+@section('title', 'Detail Barang Keluar')
 
 @section('page-header')
-    <div class="flex flex-col">
-        <h1 class="text-base font-semibold text-slate-900">
-            Outgoing transaction
-        </h1>
-        <p class="text-xs text-slate-500">
-            Detail barang keluar ke customer.
-        </p>
-    </div>
-
-    <div class="flex items-center gap-2">
-        <a
-            href="{{ route('sales.index') }}"
-            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-        >
-            Back to list
-        </a>
-    </div>
+    <x-page-header
+        title="Detail Barang Keluar"
+        :description="'Transaksi #' . $sale->transaction_number"
+    />
 @endsection
 
 @section('content')
-    <div class="max-w-5xl mx-auto space-y-4 text-xs">
-        @if(session('success'))
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-700">
-                {{ session('success') }}
-            </div>
-        @endif
+    <div class="max-w-6xl mx-auto space-y-6 text-sm text-slate-700">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <x-breadcrumbs :items="[
+                'Transaksi' => route('transactions.index', ['tab' => 'outgoing']),
+                'Detail Barang Keluar' => route('sales.show', $sale),
+            ]" />
 
-        @if($errors->any())
-            <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-red-700">
-                <ul class="list-disc list-inside space-y-0.5">
-                    @foreach($errors->all() as $errorMessage)
-                        <li>{{ $errorMessage }}</li>
-                    @endforeach
-                </ul>
+            <div class="flex items-center gap-2">
+                <x-action-button href="{{ route('transactions.index', ['tab' => 'outgoing']) }}" variant="secondary" icon="arrow-left">
+                    Kembali
+                </x-action-button>
+
+                @if($sale->isPending())
+                    <x-action-button href="{{ route('sales.edit', $sale) }}" variant="primary" icon="edit">
+                        Edit Data
+                    </x-action-button>
+                @endif
             </div>
-        @endif
+        </div>
 
         @canany(['approve', 'ship'], $sale)
-            <div class="rounded-2xl border border-slate-200 bg-white p-3 mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
-                <div class="text-[11px] text-slate-600">
-                    Manage status
-                </div>
+            <x-card class="p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <p class="text-base font-semibold text-slate-900">Kelola Status</p>
 
-                <div class="flex flex-wrap items-center gap-2">
-                    @can('approve', $sale)
-                        <form
-                            method="POST"
-                            action="{{ route('sales.approve', $sale) }}"
-                            onsubmit="return confirm('Approve this transaction and reduce stock?');"
-                        >
-                            @csrf
-                            @method('PATCH')
-                            <button
-                                type="submit"
-                                class="inline-flex items-center rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-600"
-                            >
-                                Approve & reduce stock
-                            </button>
-                        </form>
-                    @endcan
-                    @can('ship', $sale)
-                        <form
-                            method="POST"
-                            action="{{ route('sales.ship', $sale) }}"
-                            onsubmit="return confirm('Mark this transaction as shipped?');"
-                        >
-                            @csrf
-                            @method('PATCH')
-                            <button
-                                type="submit"
-                                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-800 hover:bg-slate-50"
-                            >
-                                Mark as shipped
-                            </button>
-                        </form>
-                    @endcan
+                    <div class="flex flex-wrap items-center gap-2">
+                        @can('approve', $sale)
+                            <form method="POST" action="{{ route('sales.approve', $sale) }}">
+                                @csrf
+                                @method('PATCH')
+                                <x-action-button
+                                    type="button"
+                                    variant="primary"
+                                    icon="check"
+                                    onclick="return confirm('Approve this transaction and reduce stock?')"
+                                >
+                                    Approve & kurangi stok
+                                </x-action-button>
+                            </form>
+                        @endcan
+
+                        @can('ship', $sale)
+                            <form method="POST" action="{{ route('sales.ship', $sale) }}">
+                                @csrf
+                                @method('PATCH')
+                                <x-action-button
+                                    type="button"
+                                    variant="secondary"
+                                    icon="send"
+                                    onclick="return confirm('Mark this transaction as shipped?')"
+                                >
+                                    Tandai terkirim
+                                </x-action-button>
+                            </form>
+                        @endcan
+                    </div>
                 </div>
-            </div>
+            </x-card>
         @endcanany
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-1">
-                    <div class="text-[11px] text-slate-500">Transaction #</div>
-                    <div class="font-mono text-[12px] text-slate-900">
-                        {{ $sale->transaction_number }}
-                    </div>
+        <div class="grid gap-6 lg:grid-cols-3">
+            <x-card class="p-6 space-y-6 lg:col-span-2">
+                <div class="space-y-3">
+                    <p class="text-base font-semibold text-slate-900">Informasi Customer</p>
 
-                    <div class="mt-2 text-[11px] text-slate-500">Date</div>
-                    <div class="text-[12px] text-slate-900">
-                        {{ $sale->transaction_date->format('d M Y') }}
-                    </div>
-
-                    <div class="mt-2 text-[11px] text-slate-500">Status</div>
-                    <div>
-                        @if($sale->isPending())
-                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                                Pending
-                            </span>
-                        @elseif($sale->isApproved())
-                            <span class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
-                                Approved
-                            </span>
-                        @elseif($sale->isShipped())
-                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                                Shipped
-                            </span>
-                        @endif
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="text-slate-500">Nama</div>
+                        <div class="font-medium text-slate-900">{{ $sale->customer_name ?? '-' }}</div>
                     </div>
                 </div>
 
-                <div class="space-y-1">
-                    <div class="text-[11px] text-slate-500">Customer</div>
-                    <div class="text-[12px] text-slate-900">
-                        {{ $sale->customer_name }}
-                    </div>
+                <div class="space-y-3">
+                    <p class="text-base font-semibold text-slate-900">Informasi Transaksi</p>
 
-                    <div class="mt-2 text-[11px] text-slate-500">Created by</div>
-                    <div class="text-[12px] text-slate-900">
-                        {{ optional($sale->createdBy)->name ?? '-' }}
-                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="text-slate-500">Nomor Transaksi</div>
+                        <div class="font-medium text-slate-900">{{ $sale->transaction_number }}</div>
 
-                    <div class="mt-2 text-[11px] text-slate-500">Approved by</div>
-                    <div class="text-[12px] text-slate-900">
-                        {{ optional($sale->approvedBy)->name ?? '-' }}
-                    </div>
+                        <div class="text-slate-500">Jenis</div>
+                        <div class="font-medium text-slate-900">Barang Keluar</div>
 
-                    <div class="mt-2 text-[11px] text-slate-500">Totals</div>
-                    <div class="text-[12px] text-slate-900">
-                        {{ number_format($sale->total_quantity, 0, ',', '.') }} items |
-                        Rp {{ number_format($sale->total_amount, 2, ',', '.') }}
+                        <div class="text-slate-500">Tanggal</div>
+                        <div class="font-medium text-slate-900">{{ $sale->transaction_date->format('d M Y') }}</div>
+
+                        <div class="text-slate-500">Catatan</div>
+                        <div class="text-slate-900">{{ $sale->notes ?? '-' }}</div>
                     </div>
                 </div>
-            </div>
 
-            @if($sale->notes)
-                <div class="pt-2 border-t border-slate-100">
-                    <div class="text-[11px] text-slate-500 mb-1">Notes</div>
-                    <div class="text-[12px] text-slate-800 whitespace-pre-line">
-                        {{ $sale->notes }}
+                <div class="space-y-3">
+                    <p class="text-base font-semibold text-slate-900">Informasi Tambahan</p>
+
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="text-slate-500">Disetujui oleh</div>
+                        <div class="font-medium text-slate-900">{{ optional($sale->approvedBy)->name ?? '-' }}</div>
                     </div>
                 </div>
-            @endif
-        </div>
+            </x-card>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            <h2 class="text-[11px] font-semibold text-slate-800 uppercase tracking-wide mb-2">
-                Products
-            </h2>
+            <div class="space-y-3">
+                <x-card class="p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                            <x-lucide-package class="h-5 w-5" />
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-slate-500">Total Items</p>
+                            <p class="text-base font-semibold text-slate-900">
+                                {{ $sale->total_items ?? $sale->items->count() }}
+                            </p>
+                        </div>
+                    </div>
+                </x-card>
 
-            <div class="rounded-xl border border-slate-200 overflow-hidden">
-                <table class="min-w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-[11px] text-slate-500 uppercase tracking-wide">
-                        <tr>
-                            <th class="px-3 py-2">Product</th>
-                            <th class="px-3 py-2 text-right w-20">Qty</th>
-                            <th class="px-3 py-2 text-right w-32">Unit price (Rp)</th>
-                            <th class="px-3 py-2 text-right w-32">Line total (Rp)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @forelse($sale->items as $item)
-                            <tr>
-                                <td class="px-3 py-2">
-                                    <div class="text-[12px] text-slate-900">
-                                        {{ optional($item->product)->name ?? '-' }}
-                                    </div>
-                                    @if($item->product)
-                                        <div class="text-[11px] text-slate-500">
-                                            SKU: {{ $item->product->sku }}
-                                        </div>
-                                    @endif
-                                </td>
-                                <td class="px-3 py-2 text-right text-[11px] text-slate-800">
-                                    {{ number_format($item->quantity, 0, ',', '.') }}
-                                </td>
-                                <td class="px-3 py-2 text-right text-[11px] text-slate-800">
-                                    {{ number_format($item->unit_price, 2, ',', '.') }}
-                                </td>
-                                <td class="px-3 py-2 text-right text-[11px] text-slate-800">
-                                    {{ number_format($item->line_total, 2, ',', '.') }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-3 py-4 text-center text-[11px] text-slate-500">
-                                    No products in this transaction.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                <x-card class="p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                            <x-lucide-layers class="h-5 w-5" />
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-slate-500">Total Qty</p>
+                            <p class="text-base font-semibold text-slate-900">
+                                {{ number_format($sale->total_quantity, 0, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+                </x-card>
+
+                <x-card class="p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                            <x-lucide-dollar-sign class="h-5 w-5" />
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-slate-500">Total Value</p>
+                            <p class="text-base font-semibold text-slate-900">
+                                Rp {{ number_format($sale->total_amount, 2, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+                </x-card>
+
+                <x-card class="p-4">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                            @if($sale->isPending())
+                                <x-lucide-clock class="h-5 w-5" />
+                            @elseif($sale->isApproved())
+                                <x-lucide-check-circle class="h-5 w-5" />
+                            @elseif($sale->isShipped())
+                                <x-lucide-check-circle-2 class="h-5 w-5" />
+                            @endif
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-slate-500">Status</p>
+                            <p class="text-base font-semibold text-slate-900">
+                                @if($sale->isPending())
+                                    Pending
+                                @elseif($sale->isApproved())
+                                    Approved
+                                @elseif($sale->isShipped())
+                                    Shipped
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                </x-card>
             </div>
         </div>
+
+        <x-card class="p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <p class="text-base font-semibold text-slate-900">Produk</p>
+            </div>
+
+            <x-table>
+                <x-table.thead>
+                    <x-table.th>Product Name</x-table.th>
+                    <x-table.th>SKU</x-table.th>
+                    <x-table.th align="right">Qty</x-table.th>
+                    <x-table.th align="right">Unit Price (Rp)</x-table.th>
+                    <x-table.th align="right">Subtotal (Rp)</x-table.th>
+                </x-table.thead>
+
+                <x-table.tbody>
+                    @forelse($sale->items as $item)
+                        <x-table.tr>
+                            <x-table.td>
+                                <p class="font-medium text-slate-900">
+                                    {{ optional($item->product)->name ?? '-' }}
+                                </p>
+                            </x-table.td>
+                            <x-table.td class="text-slate-500">
+                                {{ optional($item->product)->sku ?? '-' }}
+                            </x-table.td>
+                            <x-table.td align="right" class="font-semibold text-slate-900">
+                                {{ number_format($item->quantity, 0, ',', '.') }}
+                            </x-table.td>
+                            <x-table.td align="right">
+                                {{ number_format($item->unit_price, 2, ',', '.') }}
+                            </x-table.td>
+                            <x-table.td align="right" class="font-semibold text-slate-900">
+                                {{ number_format($item->line_total, 2, ',', '.') }}
+                            </x-table.td>
+                        </x-table.tr>
+                    @empty
+                        <x-table.tr>
+                            <x-table.td colspan="5" class="text-center text-slate-500">
+                                Tidak ada produk pada transaksi ini.
+                            </x-table.td>
+                        </x-table.tr>
+                    @endforelse
+
+                    @if($sale->items->count() > 0)
+                        <x-table.tr class="bg-slate-50 font-semibold">
+                            <x-table.td colspan="4" align="right" class="text-slate-900">Total</x-table.td>
+                            <x-table.td align="right" class="text-slate-900">
+                                Rp {{ number_format($sale->total_amount, 2, ',', '.') }}
+                            </x-table.td>
+                        </x-table.tr>
+                    @endif
+                </x-table.tbody>
+            </x-table>
+        </x-card>
     </div>
 @endsection
