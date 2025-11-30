@@ -9,6 +9,7 @@ use App\Models\IncomingTransaction;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Support\CsvExporter;
+use App\Support\TransactionPrefill;
 use App\Services\TransactionService;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
@@ -77,11 +78,23 @@ class IncomingTransactionController extends Controller
 
         $today = now()->toDateString();
 
-        $prefilledProductId = $this->resolvePrefilledProductId($request);
+        $prefill = TransactionPrefill::forPurchases($request);
+        $prefilledProductId = $prefill['product_id'];
+        $prefilledSupplierId = $prefill['supplier_id'];
+        $prefilledQuantity = $prefill['quantity'];
+        $prefilledUnitCost = $prefill['unit_cost'];
 
         return view(
             'purchases.create',
-            compact('suppliers', 'products', 'today', 'prefilledProductId')
+            compact(
+                'suppliers', 
+                'products', 
+                'today', 
+                'prefilledProductId',
+                'prefilledSupplierId',
+                'prefilledQuantity',
+                'prefilledUnitCost'
+            )
         );
     }
 
@@ -180,7 +193,7 @@ class IncomingTransactionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(IncomingTransaction $purchase): View
+    public function edit(IncomingTransaction $purchase): View|RedirectResponse
     {
         $this->authorize('update', $purchase);
 
@@ -251,33 +264,22 @@ class IncomingTransactionController extends Controller
         }
     }
 
-    public function reject(Request $request, IncomingTransaction $purchase): RedirectResponse
-    {
-        $this->authorize('reject', $purchase);
+    // public function reject(Request $request, IncomingTransaction $purchase): RedirectResponse
+    // {
+    //     $this->authorize('reject', $purchase);
 
-        try {
-            $this->transactionService->rejectIncoming($purchase, $request->user(), $request->input('reason'));
+    //     try {
+    //         $this->transactionService->rejectIncoming($purchase, $request->user(), $request->input('reason'));
 
-            return redirect()
-                ->route('purchases.show', $purchase)
-                ->with('success', 'Transaction rejected.');
-        } catch (DomainException $exception) {
-            return redirect()
-                ->route('purchases.show', $purchase)
-                ->withErrors(['general' => $exception->getMessage()]);
-        }
-    }
-
-    private function resolvePrefilledProductId(Request $request): ?int
-    {
-        $productId = $request->query('product_id');
-
-        if ($productId === null || $productId === '') {
-            return null;
-        }
-
-        return is_numeric($productId) ? (int) $productId : null;
-    }
+    //         return redirect()
+    //             ->route('purchases.show', $purchase)
+    //             ->with('success', 'Transaction rejected.');
+    //     } catch (DomainException $exception) {
+    //         return redirect()
+    //             ->route('purchases.show', $purchase)
+    //             ->withErrors(['general' => $exception->getMessage()]);
+    //     }
+    // }
 
     private function buildIncomingTransactionIndexQuery(
         Request $request,
@@ -316,7 +318,7 @@ class IncomingTransactionController extends Controller
             IncomingTransaction::STATUS_PENDING => 'Pending',
             IncomingTransaction::STATUS_VERIFIED => 'Verified',
             IncomingTransaction::STATUS_COMPLETED => 'Completed',
-            IncomingTransaction::STATUS_REJECTED => 'Rejected',
+            // IncomingTransaction::STATUS_REJECTED => 'Rejected',
         ];
     }
 

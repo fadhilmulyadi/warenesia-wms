@@ -39,6 +39,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
+    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])
+        ->middleware('role:admin')
+        ->name('dashboard.admin');
+
+    Route::get('/dashboard/manager', [DashboardController::class, 'manager'])
+        ->middleware('role:manager')
+        ->name('dashboard.manager');
+
+    Route::get('/dashboard/staff', [DashboardController::class, 'staff'])
+        ->middleware('role:staff')
+        ->name('dashboard.staff');
+
+    Route::get('/dashboard/supplier', [DashboardController::class, 'supplier'])
+        ->middleware('role:supplier')
+        ->name('dashboard.supplier');
+
     Route::redirect('/admin/dashboard', '/dashboard');
     Route::redirect('/manager/dashboard', '/dashboard');
     Route::redirect('/staff/dashboard', '/dashboard');

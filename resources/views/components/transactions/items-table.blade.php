@@ -12,10 +12,19 @@
         : 'sale_price';
 
     $pricesData = $products->pluck($masterPriceColumn, 'id');
+    $stockData = $products->pluck('current_stock', 'id')->map(fn ($stock) => (int) $stock);
     
     $productOptions = $products->mapWithKeys(function($product) {
         return [$product->id => "{$product->name} (Stok: {$product->current_stock})"];
     })->toArray();
+
+    $quantityErrorMap = collect($errors?->getMessages() ?? [])
+        ->filter(fn ($messages, $key) => preg_match('/^items\.(\d+)\.quantity$/', $key))
+        ->mapWithKeys(function ($messages, $key) {
+            preg_match('/^items\.(\d+)\.quantity$/', $key, $matches);
+
+            return [$matches[1] => $messages[0] ?? null];
+        });
 @endphp
 
 <script>
@@ -26,7 +35,30 @@ function itemsTable(initialItems = []) {
             quantity: 1,
             {{ $priceField }}: 0,
         }],
-        productPrices: {},
+        productPrices: {{ \Illuminate\Support\Js::from($pricesData) }},
+        productStocks: {{ \Illuminate\Support\Js::from($stockData) }},
+        quantityErrors: {{ \Illuminate\Support\Js::from($quantityErrorMap) }},
+        shouldCheckStock: @js($priceField === 'unit_price'),
+        currentIndex: null,
+
+        init() {
+            window.addEventListener('custom-select-opened', (event) => {
+                const inputName = event.detail;
+                
+                if (!inputName) {
+                    this.currentIndex = null;
+                    return;
+                }
+
+                const match = String(inputName).match(/items\[(\d+)\]/);
+                this.currentIndex = match ? Number(match[1]) : null;
+            });
+
+            window.addEventListener('product-selected', (event) => {
+                if (this.currentIndex === null) return;
+                this.onProductChange(this.currentIndex, event.detail);
+            });
+        },
 
         addItem() {
             this.items.push({
@@ -43,6 +75,31 @@ function itemsTable(initialItems = []) {
         onProductChange(index, productId) {
             this.items[index].product_id = productId;
             this.items[index].{{ $priceField }} = this.productPrices[productId] ?? 0;
+        },
+
+        stockError(index) {
+            const backendError = this.quantityErrors && Object.prototype.hasOwnProperty.call(this.quantityErrors, index)
+                ? this.quantityErrors[index]
+                : '';
+
+            if (! this.shouldCheckStock) {
+                return backendError;
+            }
+
+            const item = this.items[index];
+
+            if (! item || ! item.product_id) {
+                return backendError;
+            }
+
+            const availableStock = Number(this.productStocks[item.product_id] ?? 0);
+            const requestedQty = Number(item.quantity ?? 0);
+
+            if (Number.isFinite(requestedQty) && requestedQty > availableStock) {
+                return `Stok tidak mencukupi. Tersedia: ${availableStock}.`;
+            }
+
+            return backendError;
         }
     }
 }
@@ -52,8 +109,11 @@ function itemsTable(initialItems = []) {
     class="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm"
     x-data="itemsTable({{ \Illuminate\Support\Js::from($initialItems) }})"
     x-init="
-        productPrices = {{ \Illuminate\Support\Js::from($pricesData) }};
+        items.forEach((item, i) => {
+            onProductChange(i, item.product_id);
+        });
     "
+
 >
     {{-- Header Toolbar --}}
     <div class="flex items-center justify-between p-3 bg-slate-50 border-b border-slate-200">
@@ -85,19 +145,17 @@ function itemsTable(initialItems = []) {
                         
                         {{-- Produk --}}
                         <x-table.td>
-                            <div @change="onProductChange(index, $event.detail)">
-                                <x-custom-select
-                                    dynamic_name="`items[${index}][product_id]`"
-                                    :options="$productOptions"
-                                    placeholder="Pilih Produk"
-                                    x-model="item.product_id"
-                                    :value="null"
-                                    :disabled="$readonly"
-                                    :required="true"
-                                    width="w-full"
-                                    dropUp
-                                />
-                            </div>
+                            <x-custom-select
+                                x-bind:data-name="'items[' + index + '][product_id]'"
+                                :options="$productOptions"
+                                placeholder="Pilih Produk"
+                                x-model="item.product_id"
+                                x-bind:value="String(item.product_id || '')"
+                                :disabled="$readonly"
+                                :required="true"
+                                width="w-full"
+                                dropUp
+                            />
                         </x-table.td>
 
                         {{-- Qty --}}
@@ -111,6 +169,10 @@ function itemsTable(initialItems = []) {
                                 :disabled="@js($readonly)"
                                 required
                             >
+                            <x-form-error 
+                                :message="null"
+                                x-bind:message="stockError(index)"
+                            />
                         </x-table.td>
 
                         {{-- Harga --}}

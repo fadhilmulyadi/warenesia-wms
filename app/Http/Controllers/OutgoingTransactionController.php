@@ -9,6 +9,7 @@ use App\Exceptions\InsufficientStockException;
 use App\Models\OutgoingTransaction;
 use App\Models\Product;
 use App\Support\CsvExporter;
+use App\Support\TransactionPrefill;
 use App\Services\TransactionService;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
@@ -76,9 +77,23 @@ class OutgoingTransactionController extends Controller
         $products = Product::orderBy('name')->get();
         $today = now()->toDateString();
 
-        $prefilledProductId = $this->resolvePrefilledProductId($request);
+        $prefill = TransactionPrefill::forSales($request);
+        $prefilledProductId = $prefill['product_id'];
+        $prefilledCustomerName = $prefill['customer_name'];
+        $prefilledQuantity = $prefill['quantity'];
+        $prefilledUnitPrice = $prefill['unit_price'];
 
-        return view('sales.create', compact('products', 'today', 'prefilledProductId'));
+        return view(
+            'sales.create',
+            compact(
+                'products', 
+                'today', 
+                'prefilledProductId',
+                'prefilledCustomerName',
+                'prefilledQuantity',
+                'prefilledUnitPrice'
+            )
+        );
     }
 
     /**
@@ -176,7 +191,7 @@ class OutgoingTransactionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(OutgoingTransaction $sale): View
+    public function edit(OutgoingTransaction $sale): View|RedirectResponse
     {
         $this->authorize('update', $sale);
 
@@ -246,17 +261,6 @@ class OutgoingTransactionController extends Controller
                 ->route('sales.show', $sale)
                 ->withErrors(['general' => $exception->getMessage()]);
         }
-    }
-
-    private function resolvePrefilledProductId(Request $request): ?int
-    {
-        $productId = $request->query('product_id');
-
-        if ($productId === null || $productId === '') {
-            return null;
-        }
-
-        return is_numeric($productId) ? (int) $productId : null;
     }
 
     private function buildOutgoingTransactionIndexQuery(

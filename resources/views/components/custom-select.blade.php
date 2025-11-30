@@ -18,28 +18,42 @@
     $id = $id ?? $name;
     $currentValue = (string) $value;
     $initialLabel = array_key_exists($currentValue, $options) ? $options[$currentValue] : '';
+    $inputName = $dynamic_name ?? $name;
 @endphp
 
-<div
-    x-data="{
-        open: false,
-        value: @js($currentValue),
+    <div
+        x-data="{
+            open: false,
+            value: @js($currentValue),
+            inputName: @js($inputName),
         search: @js($initialLabel),
         options: @js($options),
         searchable: @js($searchable),
         dropUp: @js($dropUp),
         dropdownStyle: { top: '0px', left: '0px', width: '0px' },
         
+        setInputNameFromAttr() {
+            const attr = this.$el.getAttribute('data-name') || this.$el.getAttribute('dynamic_name');
+            if (attr) {
+                this.inputName = attr;
+            }
+        },
+
         init() {
-            const sync = (val) => {
-                const clean = val == null ? '' : String(val);
-                this.value = clean;
-                this.search = this.options[clean] ?? '';
-            };
+            if (this.value && this.options[this.value]) {
+                this.search = this.options[this.value];
+            }
 
-            sync(this.value);
+            this.setInputNameFromAttr();
+            this.$nextTick(() => this.setInputNameFromAttr());
 
-            this.$watch('value', sync);
+            this.$watch('value', (val) => {
+                if (val && this.options[val]) {
+                    this.search = this.options[val];
+                } else {
+                    this.search = '';
+                }
+            });
         },
 
         get filteredOptions() {
@@ -61,19 +75,15 @@
         },
 
         calculatePosition() {
-            // Ambil koordinat input saat ini
             let rect = this.$refs.container.getBoundingClientRect();
             
-            // Set lebar agar sama dengan input
             this.dropdownStyle.width = rect.width + 'px';
             this.dropdownStyle.left = rect.left + 'px';
 
             if (this.dropUp) {
-                // Bottom menu = Tinggi Layar - Jarak Top Input
                 this.dropdownStyle.top = 'auto';
                 this.dropdownStyle.bottom = (window.innerHeight - rect.top + 4) + 'px'; 
             } else {
-                // Posisi DropDown (Di bawah input)
                 this.dropdownStyle.bottom = 'auto';
                 this.dropdownStyle.top = (rect.bottom + 4) + 'px';
             }
@@ -85,7 +95,9 @@
             this.open = false;
             
             this.$dispatch('input', key);
-            $dispatch('change', key);
+            window.dispatchEvent(new CustomEvent('product-selected', {
+                detail: key
+            }));
 
             @if($onChange)
                 {!! $onChange !!}
@@ -98,9 +110,14 @@
         
         toggle() {
             if (@js($disabled)) return;
-            
+                
             if (!this.open) {
                 this.calculatePosition();
+                this.setInputNameFromAttr();
+                
+                window.dispatchEvent(new CustomEvent('custom-select-opened', {
+                    detail: this.inputName
+                }));
             }
             
             this.open = !this.open;
@@ -111,6 +128,7 @@
         }
     }"
     x-modelable="value"
+    data-name="{{ $inputName }}"
     {{ $attributes->merge(['class' => "relative {$width} h-[42px]"]) }}
     x-ref="container"
     @click.outside="close()"
@@ -118,8 +136,9 @@
 >
     <input 
         type="hidden" 
-        :name="dynamic_name ? dynamic_name : '{{ $name }}'"
-        :value="value"
+        name="{{ $inputName }}"
+        x-bind:name="inputName"
+        x-model="value"
         @if($required) required @endif
     >
 
@@ -177,7 +196,7 @@
                     >
                         <span class="block truncate" x-text="label"></span>
                         <span x-show="value == key" class="absolute inset-y-0 right-0 flex items-center pr-4 text-teal-600">
-                            <x-lucide-check class="h-4 w-4" />
+                            <x-lucide-check class="h-4 h-4" />
                         </span>
                     </li>
                 </template>
