@@ -15,6 +15,9 @@
         $totalIncoming = $total_incoming ?? $totalIncoming ?? 0;
         $totalOutgoing = $total_outgoing ?? $totalOutgoing ?? 0;
         $recentTransactions = collect($recent_transactions ?? $recentTransactions ?? []);
+        $imageUrl = $product->image_path
+            ? \Illuminate\Support\Facades\Storage::url($product->image_path)
+            : null;
     @endphp
 
     <div class="max-w-6xl mx-auto space-y-6 text-sm text-slate-700">
@@ -52,8 +55,8 @@
 
                     <div class="flex flex-col gap-4 md:flex-row md:items-start">
                         <div class="aspect-square rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center w-full">
-                            @if($product->image_path)
-                                <img src="{{ $product->image_path }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
+                            @if($imageUrl)
+                                <img src="{{ $imageUrl }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
                             @else
                                 <x-lucide-image class="h-10 w-10 text-slate-300" />
                             @endif

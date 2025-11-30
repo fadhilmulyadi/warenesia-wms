@@ -33,9 +33,29 @@
 
     {{-- Form --}}
     <div class="max-w-7xl mx-auto">
+        @php
+            $categoryOptions = $categories->mapWithKeys(function ($cat) {
+                return [$cat->id => [
+                    'label' => $cat->name, 
+                    'prefix' => $cat->sku_prefix,
+                ]];
+            })->toArray();
+            $supplierOptions = $suppliers->mapWithKeys(function ($item) {
+                return [$item->id => $item->name . ($item->contact_person ? ' (' . $item->contact_person . ')' : '')];
+            })->toArray();
+            $unitOptions = $units->mapWithKeys(fn ($unit) => [$unit->name => ['label' => $unit->name]])->toArray();
+        @endphp
         <form id="product-form" action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            @include('products.partials._form', ['product' => null])
+            @include('products.form.form', [
+                'product' => null,
+                'categories' => $categories,
+                'suppliers' => $suppliers,
+                'units' => $units,
+                'categoryOptions' => $categoryOptions,
+                'supplierOptions' => $supplierOptions,
+                'unitOptions' => $unitOptions,
+            ])
         </form>
     </div>
 @endsection

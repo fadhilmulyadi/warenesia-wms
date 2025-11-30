@@ -33,7 +33,7 @@ class CategoryController extends Controller
 
         [$sort, $direction] = $this->resolveSortAndDirection(
             $request,
-            allowedSorts: ['name', 'products_count', 'created_at'],
+            allowedSorts: ['name', 'sku_prefix', 'products_count', 'created_at'],
             defaultSort: 'name',
             defaultDirection: 'asc'
         );
@@ -76,7 +76,13 @@ class CategoryController extends Controller
     {
         $this->authorize('create', Category::class);
 
-        Category::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('image_path')) {
+            $data['image_path'] = $request->file('image_path')->store('categories', 'public');
+        }
+
+        Category::create($data);
 
         return redirect()
             ->route('categories.index')
@@ -110,7 +116,15 @@ class CategoryController extends Controller
     {
         $this->authorize('update', $category);
 
-        $category->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('image_path')) {
+            $data['image_path'] = $request->file('image_path')->store('categories', 'public');
+        } else {
+            unset($data['image_path']);
+        }
+
+        $category->update($data);
 
         return redirect()
             ->route('categories.index')
@@ -140,13 +154,16 @@ class CategoryController extends Controller
     {
         $this->authorize('create', Category::class);
 
-        $category = Category::create($request->validated());
+        $data = $request->validated();
+
+        $category = Category::create($data);
 
         if ($request->wantsJson()) {
             return response()->json([
-                'id'   => $category->id,
-                'name' => $category->name,
-            ]);
+                'id'         => $category->id,
+                'name'       => $category->name,
+                'sku_prefix' => $category->sku_prefix,
+            ], 201);
         }
 
         return redirect()
@@ -161,7 +178,7 @@ class CategoryController extends Controller
 
         [$sort, $direction] = $this->resolveSortAndDirection(
             $request,
-            allowedSorts: ['name', 'products_count', 'created_at'],
+            allowedSorts: ['name', 'sku_prefix', 'products_count', 'created_at'],
             defaultSort: 'name',
             defaultDirection: 'asc'
         );
@@ -173,6 +190,7 @@ class CategoryController extends Controller
             $output->fputcsv([
                 'ID',
                 'Name',
+                'SKU Prefix',
                 'Description',
                 'Created At',
                 'Updated At',
@@ -184,6 +202,7 @@ class CategoryController extends Controller
                         $output->fputcsv([
                             $category->id,
                             $category->name,
+                            $category->sku_prefix,
                             (string) $category->description,
                             optional($category->created_at)->toDateTimeString(),
                             optional($category->updated_at)->toDateTimeString(),
@@ -203,7 +222,7 @@ class CategoryController extends Controller
         $query = Category::query()
             ->withCount('products');
 
-        $this->applySearch($query, $search, ['name', 'description']);
+        $this->applySearch($query, $search, ['name', 'description', 'sku_prefix']);
 
         $this->applyFilters($query, $request, [
             'name' => 'name',

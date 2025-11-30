@@ -2,7 +2,12 @@
 
 <div class="flex items-center gap-3">
     {{-- Thumbnail --}}
-    <x-thumbnail :src="$product->image_path" :alt="$product->name" />
+    @php
+        $imageUrl = $product->image_path
+            ? \Illuminate\Support\Facades\Storage::url($product->image_path)
+            : null;
+    @endphp
+    <x-thumbnail :src="$imageUrl" :alt="$product->name" />
 
     <div class="flex flex-col">
         {{-- Nama Produk --}}

@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductBarcodeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductScanController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestockOrderController;
 use App\Http\Controllers\SupplierController;
@@ -93,6 +94,12 @@ Route::middleware(['auth', 'role:admin,manager'])
         Route::get('categories/export', [CategoryController::class, 'export'])
             ->name('categories.export');
         Route::resource('categories', CategoryController::class)
+            ->except(['show']);
+
+        // Unit management
+        Route::post('units/quick-store', [UnitController::class, 'quickStore'])
+            ->name('units.quick-store');
+        Route::resource('units', UnitController::class)
             ->except(['show']);
 
         Route::get('suppliers/export', [SupplierController::class, 'export'])

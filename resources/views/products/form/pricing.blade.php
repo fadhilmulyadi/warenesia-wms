@@ -4,7 +4,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {{-- Harga Beli --}}
         <div>
-            <x-input-label for="purchase_price" value="Harga Beli (HPP)" />
+            <x-input-label for="purchase_price" value="Harga Beli (HPP)" class="text-sm font-semibold text-slate-700" />
             <div class="relative mt-1">
                 <span class="absolute left-3 top-2.5 text-slate-500 text-xs font-bold">Rp</span>
                 <input 
@@ -30,7 +30,7 @@
 
         {{-- Harga Jual --}}
         <div>
-            <x-input-label for="sale_price" value="Harga Jual" />
+            <x-input-label for="sale_price" value="Harga Jual" class="text-sm font-semibold text-slate-700" />
             <div class="relative mt-1">
                 <span class="absolute left-3 top-2.5 text-slate-500 text-xs font-bold">Rp</span>
                 <input 

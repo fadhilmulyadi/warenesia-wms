@@ -8,8 +8,10 @@ use App\Http\Requests\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Models\Unit;
 use App\Support\CsvExporter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -69,8 +71,9 @@ class ProductController extends Controller
 
         $categories = Category::orderBy('name')->get();
         $suppliers  = Supplier::orderBy('name')->get();
+        $units      = Unit::orderBy('name')->get();
 
-        return view('products.create', compact('categories', 'suppliers'));
+        return view('products.create', compact('categories', 'suppliers', 'units'));
     }
 
     /**
@@ -81,6 +84,14 @@ class ProductController extends Controller
         $this->authorize('create', Product::class);
 
         $data = $request->validated();
+
+        unset($data['image_path']);
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('products', 'public');
+        }
+
+        unset($data['image']);
 
         Product::create($data);
 
@@ -98,8 +109,9 @@ class ProductController extends Controller
 
         $categories = Category::orderBy('name')->get();
         $suppliers  = Supplier::orderBy('name')->get();
+        $units      = Unit::orderBy('name')->get();
 
-        return view('products.show', compact('product', 'categories', 'suppliers'));
+        return view('products.show', compact('product', 'categories', 'suppliers', 'units'));
     }
 
     /**
@@ -111,8 +123,9 @@ class ProductController extends Controller
 
         $categories = Category::orderBy('name')->get();
         $suppliers  = Supplier::orderBy('name')->get();
+        $units      = Unit::orderBy('name')->get();
 
-        return view('products.edit', compact('product', 'categories', 'suppliers'));
+        return view('products.edit', compact('product', 'categories', 'suppliers', 'units'));
     }
 
     /**
@@ -123,6 +136,18 @@ class ProductController extends Controller
         $this->authorize('update', $product);
 
         $data = $request->validated();
+
+        unset($data['image_path']);
+
+        if ($request->hasFile('image')) {
+            if ($product->image_path) {
+                Storage::disk('public')->delete($product->image_path);
+            }
+
+            $data['image_path'] = $request->file('image')->store('products', 'public');
+        }
+
+        unset($data['image']);
 
         $product->update($data);
 

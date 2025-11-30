@@ -1,19 +1,25 @@
+@php
+    /** @var \App\Models\Product $product */
+    $product = $product ?? new \App\Models\Product();
+    $readonly = $readonly ?? false;
+@endphp
+
 <div class="p-6">
     <h3 class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider border-b border-slate-100 pb-2">Informasi Dasar</h3>
     
     <div class="space-y-4">
         {{-- Nama Produk --}}
         <div>
-            <x-input-label for="name" value="Nama Produk *" />
+            <x-input-label for="name" value="Nama Produk *" class="text-sm font-semibold text-slate-700" />
             <x-text-input 
                 id="name" 
                 name="name" 
                 type="text" 
-                :value="$product->name"
+                :value="old('name', $product->name)"
                 required 
                 placeholder="Contoh: Kemeja Flannel Premium"
                 :disabled="$readonly"
-                class="mt-1 block w-full {{ $readonly ? 'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' : '' }}"
+                class="mt-1 block w-full {{ $readonly ? 'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' : 'border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-sm' }}"
             />
             @unless($readonly)
                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
@@ -21,39 +27,31 @@
         </div>
 
         {{-- SKU --}}
-        <div>
+        <div class="space-y-1">
             <div class="flex justify-between items-center mb-1">
-                <x-input-label for="sku" value="SKU (Stock Keeping Unit) *" />
-                
-                @if(!$product->exists && !$readonly)
-                    <label class="flex items-center cursor-pointer gap-2 select-none">
-                        <input type="checkbox" x-model="autoSku" class="w-3.5 h-3.5 text-teal-600 border-gray-300 rounded focus:ring-teal-500">
-                        <span class="text-[11px] font-medium text-slate-500">Auto-generate SKU</span>
-                    </label>
-                @endif
+                <x-input-label for="sku" value="SKU (Stock Keeping Unit)" class="text-sm font-semibold text-slate-700" />
+                <span class="text-[11px] text-slate-500">Dibuat otomatis dari kategori</span>
             </div>
             
             <input 
                 type="text" 
                 id="sku"
                 name="sku" 
-                value="{{ old('sku', $product->sku) }}"
-                @blur="checkSku()"
-                :readonly="autoSku || isReadOnly"
-                :class="autoSku || isReadOnly
-                    ? 'bg-slate-50 text-slate-500 cursor-not-allowed border-slate-200 focus:border-slate-200 focus:ring-0' 
-                    : 'bg-white border-slate-300 focus:border-teal-500 focus:ring-teal-500'"
+                x-model="form.sku"
+                :readonly="true"
+                :class="'bg-slate-50 text-slate-700 cursor-not-allowed border-slate-200 focus:border-slate-200 focus:ring-0'"
                 class="block w-full rounded-lg text-sm font-mono transition-colors duration-200"
-                :placeholder="autoSku ? 'Kode akan dibuat otomatis oleh sistem' : 'Masukkan kode unik SKU'"
+                x-bind:placeholder="skuHint"
             >
+            <p class="text-[11px] text-slate-500" x-text="skuHint"></p>
             @unless($readonly)
-                <x-input-error class="mt-2" :messages="$errors->get('sku')" />
+                <x-input-error class="mt-1.5" :messages="$errors->get('sku')" />
             @endunless
         </div>
 
         {{-- Deskripsi --}}
         <div>
-            <x-input-label for="description" value="Deskripsi" />
+            <x-input-label for="description" value="Deskripsi" class="text-sm font-semibold text-slate-700" />
             <textarea 
                 id="description"
                 name="description" 

@@ -22,7 +22,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {{-- Stok --}}
             <div>
-                <x-input-label for="current_stock" :value="$product->exists ? 'Stok Saat Ini (Terkunci) *' : 'Stok Awal *'" />
+                <x-input-label for="current_stock" :value="$product->exists ? 'Stok Saat Ini (Terkunci) *' : 'Stok Awal *'" class="text-sm font-semibold text-slate-700" />
                 
                 <input 
                     type="number" 
@@ -49,7 +49,7 @@
 
             {{-- Min Stok --}}
             <div>
-                <x-input-label for="min_stock" value="Stok Minimum (Alert)" />
+                <x-input-label for="min_stock" value="Stok Minimum (Alert)" class="text-sm font-semibold text-slate-700" />
                 <input 
                     type="number" 
                     id="min_stock"
@@ -67,7 +67,7 @@
 
         {{-- Lokasi Rak --}}
         <div>
-            <x-input-label for="rack_location" value="Lokasi Rak Gudang" />
+            <x-input-label for="rack_location" value="Lokasi Rak Gudang" class="text-sm font-semibold text-slate-700" />
             <div class="flex mt-1">
                 <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 text-slate-500">
                     <x-lucide-map-pin class="w-4 h-4" />

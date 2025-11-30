@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Category;
+use App\Services\ProductSkuGenerator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductRequest extends FormRequest
 {
@@ -25,7 +28,7 @@ class ProductRequest extends FormRequest
 
         return [
             'name'           => ['required', 'string', 'max:255'],
-            'sku'            => ['required', 'string', 'max:100', 'unique:products,sku,' . $productId],
+            'sku'            => ['required', 'string', 'max:100', Rule::unique('products', 'sku')->ignore($productId)],
             'category_id'    => ['required', 'exists:categories,id'],
             'supplier_id'    => ['nullable', 'exists:suppliers,id'],
             'description'    => ['nullable', 'string'],
@@ -33,8 +36,9 @@ class ProductRequest extends FormRequest
             'sale_price'     => ['required', 'numeric', 'min:0'],
             'min_stock'      => ['required', 'integer', 'min:0'],
             'current_stock'  => ['required', 'integer', 'min:0'],
-            'unit'           => ['required', 'string', 'max:20'],
+            'unit'           => ['required', 'string', 'max:80', Rule::exists('units', 'name')],
             'rack_location'  => ['nullable', 'string', 'max:50'],
+            'image'          => ['nullable', 'image', 'max:2048'],
             'image_path'     => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -53,5 +57,27 @@ class ProductRequest extends FormRequest
             'unit'           => 'unit',
             'rack_location'  => 'lokasi rak',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $product = $this->route('product');
+        $categoryId = $this->input('category_id');
+        $sku = $this->input('sku');
+
+        if ($product) {
+            $sku = $product->sku;
+        } elseif (!$sku && $categoryId && Category::whereKey($categoryId)->exists()) {
+            $sku = app(ProductSkuGenerator::class)
+                ->generate((int) $categoryId);
+        }
+
+        if ($sku) {
+            $sku = strtoupper(trim((string) $sku));
+        }
+
+        $this->merge([
+            'sku' => $sku,
+        ]);
     }
 }

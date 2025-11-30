@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@php use Illuminate\Support\Facades\Storage; @endphp
 
 @section('title', 'Kategori Produk')
 
@@ -56,7 +57,7 @@
                         variant="primary"
                         icon="plus"
                     >
-                        Tambah Ayam
+                        Tambah Kategori
                     </x-action-button>
                 @endcan
             </div>
@@ -65,8 +66,9 @@
         {{-- Tabel utama --}}
         <x-table>
             <x-table.thead>
+                <x-table.th align="left">Gambar</x-table.th>
                 <x-table.th sortable name="name">Nama</x-table.th>
-                <x-table.th>Deskripsi</x-table.th>
+                <x-table.th align="center" sortable name="sku_prefix">Prefix</x-table.th>
                 <x-table.th align="right" sortable name="products_count">Produk</x-table.th>
                 <x-table.th align="right">Aksi</x-table.th>
             </x-table.thead>
@@ -74,16 +76,24 @@
             <x-table.tbody>
                 @forelse($categories as $category)
                     <x-table.tr>
+                        {{-- Gambar --}}
+                        <x-table.td class="align-top">
+                            <x-thumbnail :src="$category->image_path ? Storage::url($category->image_path) : null" :alt="$category->name" />
+                        </x-table.td>
+
                         {{-- Nama --}}
                         <x-table.td class="align-top">
                             <span class="font-medium text-slate-900">
                                 {{ $category->name }}
                             </span>
+                            <p class="text-xs text-slate-500 mt-1">{{ $category->description ?: 'Tidak ada deskripsi' }}</p>
                         </x-table.td>
 
-                        {{-- Deskripsi --}}
-                        <x-table.td class="align-top text-slate-600">
-                            {{ $category->description ?: '-' }}
+                        {{-- Prefix --}}
+                        <x-table.td class="align-top text-center">
+                            <span class="px-3 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 text-slate-700 tracking-[0.2em]">
+                                {{ $category->sku_prefix }}
+                            </span>
                         </x-table.td>
 
                         {{-- Jumlah produk --}}
@@ -146,7 +156,7 @@
                     </x-table.tr>
                 @empty
                     <x-table.tr>
-                        <x-table.td colspan="4" class="py-8 text-center text-slate-500">
+                        <x-table.td colspan="5" class="py-8 text-center text-slate-500">
                             Belum ada kategori. Tambahkan kategori pertama dengan tombol diatas.
                             <span class="font-semibold">"Tambah Kategori"</span>
                         </x-table.td>
