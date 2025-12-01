@@ -42,7 +42,7 @@
         normalizeOption(option) {
             if (typeof option === 'object' && option !== null) {
                 return {
-                    label: option.label ?? '',
+                    label: option.label ?? option.name ?? '',
                     image: option.image ?? null,
                     prefix: option.prefix ?? option.prefixLabel ?? null,
                 };
@@ -87,6 +87,22 @@
                     this.search = '';
                 }
             });
+
+            window.addEventListener('scroll', (e) => {
+                if (!this.open) return;
+
+                const dropdownRect = this.$refs.dropdown?.getBoundingClientRect();
+
+                if (dropdownRect) {
+                    const within =
+                        e.target === this.$refs.dropdown ||
+                        this.$refs.dropdown.contains(e.target);
+
+                    if (within) return;
+                }
+
+                this.close();
+            }, true);
         },
 
         get filteredOptions() {
@@ -110,7 +126,7 @@
         },
 
         calculatePosition() {
-            let rect = this.$refs.container.getBoundingClientRect();
+            let rect = this.$el.getBoundingClientRect();
             
             this.dropdownStyle.width = rect.width + 'px';
             this.dropdownStyle.left = rect.left + 'px';
@@ -144,6 +160,7 @@
         },
         
         toggle() {
+        
             if (@js($disabled)) return;
                 
             if (!this.open) {
@@ -211,6 +228,7 @@
     <template x-teleport="body">
         <div 
             x-show="open"
+            x-ref="dropdown"
             :style="dropdownStyle"
             x-transition:enter="transition ease-out duration-100"
             x-transition:enter-start="opacity-0 scale-95"

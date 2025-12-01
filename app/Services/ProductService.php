@@ -168,7 +168,7 @@ class ProductService
             'sku',
             $prefix,
             4,
-            static function (Builder $query) use ($category): void {
+            static function ($query) use ($category): void {
                 $query->where('category_id', $category->id);
             }
         );

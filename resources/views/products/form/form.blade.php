@@ -142,7 +142,7 @@
 @push('scripts')
     @once
         <script>
-            document.addEventListener('alpine:init', () => {
+            const registerProductForm = () => {
                 window.rackLocationField = function (initial) {
                     return {
                         value: initial || '',
@@ -365,7 +365,13 @@
                         },
                     };
                 };
-            });
+            };
+
+            if (window.Alpine) {
+                registerProductForm();
+            } else {
+                document.addEventListener('alpine:init', registerProductForm);
+            }
         </script>
     @endonce
 @endpush
