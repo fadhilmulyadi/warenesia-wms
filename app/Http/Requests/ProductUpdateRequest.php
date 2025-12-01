@@ -32,7 +32,7 @@ class ProductUpdateRequest extends FormRequest
             'min_stock' => ['required', 'integer', 'min:0'],
             'current_stock' => ['sometimes', 'integer', 'min:0'],
             'unit_id' => ['required', 'exists:units,id'],
-            'rack_location' => ['nullable', 'string', 'max:50'],
+            'rack_location' => ['nullable', 'regex:/^[A-Z][0-9]{2}-[0-9]{2}$/'],
             'image' => ['sometimes', 'nullable', 'image', 'max:2048'],
         ];
     }
@@ -49,6 +49,13 @@ class ProductUpdateRequest extends FormRequest
             'current_stock' => 'stok saat ini',
             'unit_id' => 'satuan',
             'rack_location' => 'lokasi rak',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'rack_location.regex' => 'Format lokasi rak tidak valid. Gunakan format ZRR-BB, misalnya A12-03.',
         ];
     }
 }

@@ -66,26 +66,36 @@
         </div>
 
         {{-- Lokasi Rak --}}
-        <div>
+        <div
+            x-data="rackLocationField('{{ old('rack_location', $product->rack_location ?? '') }}')"
+            class="space-y-1"
+        >
             <x-input-label for="rack_location" value="Lokasi Rak Gudang" class="text-sm font-semibold text-slate-700" />
             <div class="flex mt-1">
                 <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 text-slate-500">
                     <x-lucide-map-pin class="w-4 h-4" />
                 </span>
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     id="rack_location"
-                    name="rack_location" 
-                    value="{{ old('rack_location', $product->rack_location) }}"
+                    name="rack_location"
+                    x-model="value"
+                    x-on:input="format()"
+                    maxlength="7"
+                    autocomplete="off"
+                    placeholder="Contoh: A12-03"
                     @disabled($readonly)
                     @class([
                         'block w-full rounded-r-lg text-sm uppercase placeholder:normal-case',
                         'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $readonly,
                         'border-slate-300 focus:border-teal-500 focus:ring-teal-500' => !$readonly
                     ])
-                    placeholder="Contoh: A-01-ROW-2"
                 >
             </div>
+            <p class="text-[11px] text-slate-500">Format: ZRR-BB (Zone-Rack-Bin), contoh: <span class="font-mono">A12-03</span>.</p>
+            @unless($readonly)
+                <x-input-error class="mt-1" :messages="$errors->get('rack_location')" />
+            @endunless
         </div>
     </div>
 </div>

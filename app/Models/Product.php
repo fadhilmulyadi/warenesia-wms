@@ -55,6 +55,37 @@ class Product extends Model
         return $this->hasMany(RestockOrderItem::class);
     }
 
+    public function setRackLocationAttribute($value): void
+    {
+        if (! $value) {
+            $this->attributes['rack_location'] = null;
+            return;
+        }
+
+        $value = strtoupper(trim((string) $value));
+        $value = str_replace(' ', '', $value);
+
+        if (preg_match('/^([A-Z])(\d{2})(\d{2})$/', $value, $matches)) {
+            $zone = $matches[1];
+            $rack = $matches[2];
+            $bin = $matches[3];
+
+            $this->attributes['rack_location'] = "{$zone}{$rack}-{$bin}";
+            return;
+        }
+
+        if (preg_match('/^([A-Z])(\d{2})-(\d{1,2})$/', $value, $matches)) {
+            $zone = $matches[1];
+            $rack = $matches[2];
+            $bin = str_pad($matches[3], 2, '0', STR_PAD_LEFT);
+
+            $this->attributes['rack_location'] = "{$zone}{$rack}-{$bin}";
+            return;
+        }
+
+        $this->attributes['rack_location'] = $value;
+    }
+
     public function getBarcodePayload(): string
     {
         return (string) $this->sku;

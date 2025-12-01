@@ -143,6 +143,53 @@
     @once
         <script>
             document.addEventListener('alpine:init', () => {
+                window.rackLocationField = function (initial) {
+                    return {
+                        value: initial || '',
+                        format() {
+                            if (!this.value) {
+                                return;
+                            }
+
+                            let raw = this.value
+                                .toUpperCase()
+                                .replace(/[^A-Z0-9]/g, '');
+
+                            if (!raw.length) {
+                                this.value = '';
+                                return;
+                            }
+
+                            const zone = raw[0];
+                            const rest = raw.slice(1);
+
+                            if (!/[A-Z]/.test(zone)) {
+                                this.value = raw;
+                                return;
+                            }
+
+                            const rack = rest.slice(0, 2);
+                            const bin = rest.slice(2, 4);
+
+                            let out = zone;
+
+                            if (rack.length > 0) {
+                                out += rack.replace(/\D/g, '');
+                            }
+
+                            if (rack.length === 2) {
+                                out += '-';
+                            }
+
+                            if (bin.length > 0) {
+                                out += bin.replace(/\D/g, '');
+                            }
+
+                            this.value = out;
+                        },
+                    };
+                };
+
                 window.productForm = function (config) {
                     return {
                         readonly: config.readonly,

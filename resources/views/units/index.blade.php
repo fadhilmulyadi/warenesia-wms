@@ -10,19 +10,33 @@
 @endsection
 
 @section('content')
-    <x-card class="p-6 space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <form method="GET" action="{{ route('units.index') }}" class="w-full sm:w-auto">
-                <x-search-bar name="q" :value="$search" placeholder="Cari satuan..." class="w-full sm:w-72" />
-            </form>
+    <div class="space-y-4 text-xs max-w-6xl mx-auto">
 
-            <div class="flex flex-wrap gap-2 justify-end">
-                <x-action-button href="{{ route('units.create') }}" variant="primary" icon="plus">
-                    Tambah Satuan
-                </x-action-button>
+        {{-- Toolbar: search + tombol tambah (mirip restock index) --}}
+        <x-toolbar>
+            <div class="flex flex-wrap items-center justify-between gap-3 w-full">
+                <form method="GET" action="{{ route('units.index') }}" class="w-full sm:w-auto">
+                    <x-search-bar
+                        name="q"
+                        :value="$search"
+                        placeholder="Cari satuan..."
+                        class="w-full sm:w-72"
+                    />
+                </form>
+
+                <div class="flex flex-wrap gap-2 justify-end">
+                    <x-action-button
+                        href="{{ route('units.create') }}"
+                        variant="primary"
+                        icon="plus"
+                    >
+                        Tambah Satuan
+                    </x-action-button>
+                </div>
             </div>
-        </div>
+        </x-toolbar>
 
+        {{-- Tabel data satuan --}}
         <x-table>
             <x-table.thead>
                 <x-table.th>Nama</x-table.th>
@@ -34,12 +48,24 @@
             <x-table.tbody>
                 @forelse($units as $unit)
                     <x-table.tr>
-                        <x-table.td class="font-semibold text-slate-900">{{ $unit->name }}</x-table.td>
-                        <x-table.td class="text-slate-600">{{ $unit->description ?: '-' }}</x-table.td>
-                        <x-table.td align="right" class="tabular-nums text-slate-900">{{ $unit->products_count }}</x-table.td>
+                        <x-table.td class="font-semibold text-slate-900">
+                            {{ $unit->name }}
+                        </x-table.td>
+
+                        <x-table.td class="text-slate-600">
+                            {{ $unit->description ?: '-' }}
+                        </x-table.td>
+
+                        <x-table.td align="right" class="tabular-nums text-slate-900">
+                            {{ $unit->products_count }}
+                        </x-table.td>
+
                         <x-table.td align="right">
                             <x-table.actions>
-                                <x-table.action-item icon="pencil" href="{{ route('units.edit', $unit) }}">
+                                <x-table.action-item
+                                    icon="pencil"
+                                    href="{{ route('units.edit', $unit) }}"
+                                >
                                     Edit
                                 </x-table.action-item>
 
@@ -77,5 +103,5 @@
         @endif
 
         <x-confirm-delete-modal />
-    </x-card>
+    </div>
 @endsection

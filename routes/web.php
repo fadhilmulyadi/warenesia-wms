@@ -90,13 +90,13 @@ Route::middleware(['auth', 'role:admin,manager'])
 
         Route::get('suppliers/export', [SupplierController::class, 'export'])
             ->name('suppliers.export');
-        // Supplier master data
+
         Route::resource('suppliers', SupplierController::class)
             ->except(['show']);
 
         Route::get('restocks/export', [RestockOrderController::class, 'export'])
             ->name('restocks.export');
-        // Restock orders (PO ke supplier)
+            
         Route::resource('restocks', RestockOrderController::class)
             ->only(['index', 'create', 'store', 'show']);
 
