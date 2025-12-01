@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
-use App\Http\Requests\ProductRequest;
+use App\Http\Requests\ProductStoreRequest;
+use App\Http\Requests\ProductUpdateRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Unit;
+use App\Services\ProductService;
 use App\Support\CsvExporter;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Builder;
+use DomainException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
@@ -23,11 +24,17 @@ class ProductController extends Controller
     private const MAX_PER_PAGE = 250;
     private const EXPORT_CHUNK_SIZE = 200;
 
+    public function __construct(private readonly ProductService $products)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Product::class);
+
         $perPage = $this->resolvePerPage(
             $request,
             self::DEFAULT_PER_PAGE,
@@ -41,11 +48,16 @@ class ProductController extends Controller
             defaultDirection: 'asc'
         );
 
-        $productsQuery = $this->buildProductIndexQuery($request, $sort, $direction);
+        $filters = [
+            'search' => (string) $request->query('q', ''),
+            'category_id' => $request->query('category_id'),
+            'stock_status' => (array) $request->query('stock_status', []),
+            'sort' => $sort,
+            'direction' => $direction,
+            'per_page' => $perPage,
+        ];
 
-        $products = $productsQuery
-            ->paginate($perPage)
-            ->withQueryString();
+        $products = $this->products->index($filters);
 
         $search = (string) $request->query('q', '');
         $categories = Category::whereHas('products')->orderBy('name')->get();
@@ -79,21 +91,17 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductRequest $request)
+    public function store(ProductStoreRequest $request)
     {
         $this->authorize('create', Product::class);
 
-        $data = $request->validated();
-
-        unset($data['image_path']);
-
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('products', 'public');
+        try {
+            $this->products->create($request->validated());
+        } catch (\Throwable $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['store' => $exception->getMessage()]);
         }
-
-        unset($data['image']);
-
-        Product::create($data);
 
         return redirect()
             ->route('products.index')
@@ -106,6 +114,8 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $this->authorize('view', $product);
+
+        $product->loadMissing(['category', 'supplier', 'unit']);
 
         $categories = Category::orderBy('name')->get();
         $suppliers  = Supplier::orderBy('name')->get();
@@ -131,25 +141,17 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductRequest $request, Product $product)
+    public function update(ProductUpdateRequest $request, Product $product)
     {
         $this->authorize('update', $product);
 
-        $data = $request->validated();
-
-        unset($data['image_path']);
-
-        if ($request->hasFile('image')) {
-            if ($product->image_path) {
-                Storage::disk('public')->delete($product->image_path);
-            }
-
-            $data['image_path'] = $request->file('image')->store('products', 'public');
+        try {
+            $this->products->update($product, $request->validated());
+        } catch (\Throwable $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['update' => $exception->getMessage()]);
         }
-
-        unset($data['image']);
-
-        $product->update($data);
 
         return redirect()
             ->route('products.index')
@@ -163,7 +165,11 @@ class ProductController extends Controller
     {
         $this->authorize('delete', $product);
 
-        $product->delete();
+        try {
+            $this->products->delete($product);
+        } catch (DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
 
         return redirect()
             ->route('products.index')
@@ -181,7 +187,13 @@ class ProductController extends Controller
             defaultDirection: 'asc'
         );
 
-        $productQuery = $this->buildProductIndexQuery($request, $sort, $direction);
+        $productQuery = $this->products->query([
+            'search' => (string) $request->query('q', ''),
+            'category_id' => $request->query('category_id'),
+            'stock_status' => (array) $request->query('stock_status', []),
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
 
         $fileName = 'products-' . now()->format('Ymd-His') . '.csv';
 
@@ -215,7 +227,7 @@ class ProductController extends Controller
                             (float) $product->sale_price,
                             (int) $product->min_stock,
                             (int) $product->current_stock,
-                            $product->unit,
+                            $product->unit->name ?? '',
                             $product->rack_location,
                             optional($product->created_at)->toDateTimeString(),
                             optional($product->updated_at)->toDateTimeString(),
@@ -223,68 +235,5 @@ class ProductController extends Controller
                     }
                 });
         });
-    }
-
-    private function buildProductIndexQuery(
-        Request $request,
-        string $sort,
-        string $direction
-    ): Builder {
-        $search = (string) $request->query('q', '');
-
-        $query = Product::query()
-            ->with(['category', 'supplier']);
-
-        $this->applySearch($query, $search, ['name', 'sku']);
-
-        $this->applyFilters($query, $request, [
-            'category_id' => 'category_id',
-
-            'stock_status' => function (Builder $q, $value): void {
-                $statuses = array_values(array_unique(array_filter((array) $value, static function ($val) {
-                    return $val !== null && $val !== '';
-                })));
-
-                if (empty($statuses)) {
-                    return;
-                }
-
-                $clauses = [];
-
-                foreach ($statuses as $status) {
-                    $status = strtolower($status);
-
-                    if ($status === 'available') {
-                        $clauses[] = static function (Builder $stock): void {
-                            $stock->where('current_stock', '>', 0);
-                        };
-                    } elseif ($status === 'low') {
-                        $clauses[] = static function (Builder $stock): void {
-                            $stock->where('current_stock', '>', 0)
-                                  ->whereColumn('current_stock', '<=', 'min_stock');
-                        };
-                    } elseif ($status === 'out') {
-                        $clauses[] = static function (Builder $stock): void {
-                            $stock->where('current_stock', '<=', 0);
-                        };
-                    }
-                }
-
-                if (empty($clauses)) {
-                    return;
-                }
-
-                $q->where(function (Builder $stockQuery) use ($clauses): void {
-                    foreach ($clauses as $clause) {
-                        $stockQuery->orWhere($clause);
-                    }
-                });
-            },
-        ]);
-
-        $query->orderBy($sort, $direction)
-              ->orderBy('id');
-
-        return $query;
     }
 }

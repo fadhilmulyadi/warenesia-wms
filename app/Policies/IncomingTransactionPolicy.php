@@ -20,6 +20,10 @@ class IncomingTransactionPolicy
 
     public function view(User $user, IncomingTransaction $transaction): bool
     {
+        if ($user->role === 'staff') {
+            return (int) $transaction->created_by === (int) $user->id;
+        }
+
         return $this->canCreateOrView($user);
     }
 
@@ -63,8 +67,7 @@ class IncomingTransactionPolicy
 
     public function export(User $user): bool
     {
-        // Scope exported rows appropriately in controllers (staff should only see their own data).
-        return $this->canCreateOrView($user);
+        return $this->isApprover($user);
     }
 
     private function canCreateOrView(User $user): bool

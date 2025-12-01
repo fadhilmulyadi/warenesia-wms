@@ -50,6 +50,24 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user && $user->isPending()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda masih menunggu persetujuan admin.',
+            ]);
+        }
+
+        if ($user && $user->isSuspended()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda sedang ditangguhkan. Silakan hubungi admin.',
+            ]);
+        }
     }
 
     /**

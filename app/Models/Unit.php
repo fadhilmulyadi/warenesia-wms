@@ -16,8 +16,13 @@ class Unit extends Model
         'description',
     ];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function products(): HasMany
     {
-        return $this->hasMany(Product::class, 'unit', 'name');
+        return $this->hasMany(Product::class);
     }
 }

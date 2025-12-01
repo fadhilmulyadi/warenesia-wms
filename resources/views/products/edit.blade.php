@@ -45,7 +45,7 @@
             $supplierOptions = $suppliers->mapWithKeys(function ($item) {
                 return [$item->id => $item->name . ($item->contact_person ? ' (' . $item->contact_person . ')' : '')];
             })->toArray();
-            $unitOptions = $units->mapWithKeys(fn ($unit) => [$unit->name => ['label' => $unit->name]])->toArray();
+            $unitOptions = $units->mapWithKeys(fn ($unit) => [$unit->id => ['label' => $unit->name]])->toArray();
         @endphp
         <form id="product-form" action="{{ route('products.update', $product) }}" method="POST" enctype="multipart/form-data">
             @csrf

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Services\CategoryService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,16 +16,14 @@ return new class extends Migration
             });
         }
 
-        $categories = Category::all();
-        foreach ($categories as $category) {
-            if ($category->sku_prefix) {
-                continue;
-            }
+        $service = app(CategoryService::class);
 
-            $prefix = Category::generatePrefix($category->name);
-            $category->sku_prefix = Category::ensureUniquePrefix($prefix, $category->id);
-            $category->saveQuietly();
-        }
+        Category::query()
+            ->whereNull('sku_prefix')
+            ->each(static function (Category $category) use ($service): void {
+                $prefix = $service->generatePrefix($category->name, $category->id);
+                $category->forceFill(['sku_prefix' => $prefix])->saveQuietly();
+            });
 
         Schema::table('categories', function (Blueprint $table) {
             $table->string('sku_prefix')->unique()->change();

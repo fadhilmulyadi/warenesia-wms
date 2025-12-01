@@ -8,6 +8,7 @@ use App\Http\Requests\IncomingTransactionRequest;
 use App\Models\IncomingTransaction;
 use App\Models\Product;
 use App\Models\Supplier;
+use App\Models\User;
 use App\Support\CsvExporter;
 use App\Support\TransactionPrefill;
 use App\Services\TransactionService;
@@ -54,6 +55,8 @@ class IncomingTransactionController extends Controller
         );
 
         $transactionsQuery = $this->buildIncomingTransactionIndexQuery($request, $sort, $direction);
+
+        $this->applyStaffScope($transactionsQuery, $request->user());
 
         $transactions = $transactionsQuery
             ->paginate($perPage)
@@ -136,11 +139,7 @@ class IncomingTransactionController extends Controller
         );
 
         $transactionQuery = $this->buildIncomingTransactionIndexQuery($request, $sort, $direction);
-        $user = $request->user();
-
-        if ($user !== null && $user->role === self::ROLE_STAFF) {
-            $transactionQuery->where('created_by', $user->id);
-        }
+        $this->applyStaffScope($transactionQuery, $request->user());
 
         $fileName = 'purchases-' . now()->format('Ymd-His') . '.csv';
 
@@ -231,7 +230,7 @@ class IncomingTransactionController extends Controller
         $this->authorize('verify', $purchase);
 
         try {
-            $this->transactionService->verifyIncoming($purchase, $request->user());
+            $this->transactionService->approveIncoming($purchase, $request->user());
 
             return redirect()
                 ->route('purchases.show', $purchase)
@@ -310,6 +309,13 @@ class IncomingTransactionController extends Controller
             ->orderBy('id');
 
         return $query;
+    }
+
+    private function applyStaffScope(Builder $query, ?User $user): void
+    {
+        if ($user !== null && $user->role === self::ROLE_STAFF) {
+            $query->where('created_by', $user->id);
+        }
     }
 
     private function incomingStatusOptions(): array

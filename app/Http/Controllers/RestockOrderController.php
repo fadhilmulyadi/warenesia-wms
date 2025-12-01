@@ -8,16 +8,17 @@ use App\Http\Requests\RestockOrderRequest;
 use App\Http\Requests\RestockOrderRatingRequest;
 use App\Models\Product;
 use App\Models\RestockOrder;
-use App\Models\RestockOrderItem;
 use App\Models\Supplier;
+use App\Services\RestockService;
 use App\Support\CsvExporter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use InvalidArgumentException;
+use DomainException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RestockOrderController extends Controller
@@ -33,6 +34,10 @@ class RestockOrderController extends Controller
         RestockOrder::STATUS_IN_TRANSIT,
         RestockOrder::STATUS_RECEIVED,
     ];
+
+    public function __construct(private readonly RestockService $restockService)
+    {
+    }
 
     /**
      * Display a listing of the resource.
@@ -90,77 +95,20 @@ class RestockOrderController extends Controller
         $this->authorize('create', RestockOrder::class);
 
         $validated = $request->validated();
-        $itemsData = $validated['items'] ?? [];
-
-        if (count($itemsData) === 0) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'items' => 'At least one product must be added to the restock order.',
-                ]);
-        }
-
-        $purchaseOrderNumber = RestockOrder::generateNextPurchaseOrderNumber();
-
-        DB::beginTransaction();
 
         try {
-            $totalItems = count($itemsData);
-            $totalQuantity = 0;
-            $totalAmount = 0.0;
-
-            $restockOrder = RestockOrder::create([
-                'po_number' => $purchaseOrderNumber,
-                'supplier_id' => $validated['supplier_id'],
-                'created_by' => $request->user()->id,
-                'confirmed_by' => null,
-                'order_date' => $validated['order_date'],
-                'expected_delivery_date' => $validated['expected_delivery_date'] ?? null,
-                'status' => RestockOrder::STATUS_PENDING,
-                'total_items' => 0,
-                'total_quantity' => 0,
-                'total_amount' => 0,
-                'notes' => $validated['notes'] ?? null,
-            ]);
-
-            foreach ($itemsData as $itemData) {
-                $quantity = (int) $itemData['quantity'];
-                $unitCost = isset($itemData['unit_cost'])
-                    ? (float) $itemData['unit_cost']
-                    : 0.0;
-
-                $lineTotal = $quantity * $unitCost;
-
-                $totalQuantity += $quantity;
-                $totalAmount += $lineTotal;
-
-                RestockOrderItem::create([
-                    'restock_order_id' => $restockOrder->id,
-                    'product_id' => $itemData['product_id'],
-                    'quantity' => $quantity,
-                    'unit_cost' => $unitCost,
-                    'line_total' => $lineTotal,
-                ]);
-            }
-
-            $restockOrder->update([
-                'total_items' => $totalItems,
-                'total_quantity' => $totalQuantity,
-                'total_amount' => $totalAmount,
-            ]);
-
-            DB::commit();
+            $restockOrder = $this->restockService->create($validated, $request->user());
 
             return redirect()
                 ->route('restocks.show', $restockOrder)
                 ->with('success', 'Restock order created successfully. Waiting for supplier confirmation.');
+        } catch (InvalidArgumentException $exception) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'items' => $exception->getMessage(),
+                ]);
         } catch (\Throwable $exception) {
-            DB::rollBack();
-
-            Log::error('Failed to create restock order', [
-                'message' => $exception->getMessage(),
-            ]);
-
             return back()
                 ->withInput()
                 ->withErrors([
@@ -214,63 +162,63 @@ class RestockOrderController extends Controller
     {
         $this->authorize('markInTransit', $restock);
 
-        if (! $restock->canBeMarkedInTransit()) {
+        try {
+            $this->restockService->markInTransit($restock, auth()->user());
+
+            return redirect()
+                ->route('restocks.show', $restock)
+                ->with('success', 'Restock order marked as in transit.');
+        } catch (DomainException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
                 ->withErrors([
-                    'general' => 'Only confirmed orders can be marked as in transit.',
+                    'general' => $exception->getMessage(),
                 ]);
         }
-
-        $restock->update([
-            'status' => RestockOrder::STATUS_IN_TRANSIT,
-        ]);
-
-        return redirect()
-            ->route('restocks.show', $restock)
-            ->with('success', 'Restock order marked as in transit.');
     }
 
     public function markReceived(RestockOrder $restock): RedirectResponse
     {
         $this->authorize('markReceived', $restock);
 
-        if (! $restock->canBeMarkedReceived()) {
+        try {
+            $this->restockService->markReceived($restock, auth()->user());
+
+            return redirect()
+                ->route('restocks.show', $restock)
+                ->with('success', 'Restock order marked as received.');
+        } catch (DomainException|ModelNotFoundException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
                 ->withErrors([
-                    'general' => 'Only in transit orders can be marked as received.',
+                    'general' => $exception->getMessage(),
+                ]);
+        } catch (\Throwable $exception) {
+            return redirect()
+                ->route('restocks.show', $restock)
+                ->withErrors([
+                    'general' => 'Failed to mark restock as received.',
                 ]);
         }
-
-        $restock->update([
-            'status' => RestockOrder::STATUS_RECEIVED,
-        ]);
-
-        return redirect()
-            ->route('restocks.show', $restock)
-            ->with('success', 'Restock order marked as received.');
     }
 
     public function cancel(RestockOrder $restock): RedirectResponse
     {
         $this->authorize('cancel', $restock);
 
-        if (! $restock->canBeCancelled()) {
+        try {
+            $this->restockService->cancel($restock, auth()->user());
+
+            return redirect()
+                ->route('restocks.show', $restock)
+                ->with('success', 'Restock order cancelled.');
+        } catch (DomainException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
                 ->withErrors([
-                    'general' => 'Only pending or confirmed orders can be cancelled.',
+                    'general' => $exception->getMessage(),
                 ]);
         }
-
-        $restock->update([
-            'status' => RestockOrder::STATUS_CANCELLED,
-        ]);
-
-        return redirect()
-            ->route('restocks.show', $restock)
-            ->with('success', 'Restock order cancelled.');
     }
 
     public function export(Request $request): StreamedResponse
@@ -376,20 +324,17 @@ class RestockOrderController extends Controller
 
         $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
 
-        if (! $restock->canBeConfirmedBySupplier()) {
+        try {
+            $this->restockService->supplierConfirm($restock, $request->user());
+
             return redirect()
                 ->route('supplier.restocks.show', $restock)
-                ->withErrors(['general' => 'Only pending orders can be confirmed.']);
+                ->with('success', 'Restock order confirmed.');
+        } catch (DomainException $exception) {
+            return redirect()
+                ->route('supplier.restocks.show', $restock)
+                ->withErrors(['general' => $exception->getMessage()]);
         }
-
-        $restock->update([
-            'status' => RestockOrder::STATUS_CONFIRMED,
-            'confirmed_by' => $request->user()->id,
-        ]);
-
-        return redirect()
-            ->route('supplier.restocks.show', $restock)
-            ->with('success', 'Restock order confirmed.');
     }
 
     public function supplierReject(Request $request, RestockOrder $restock): RedirectResponse
@@ -398,26 +343,17 @@ class RestockOrderController extends Controller
 
         $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
 
-        if (! $restock->canBeConfirmedBySupplier()) {
+        try {
+            $this->restockService->supplierReject($restock, $request->user(), $request->input('reject_reason'));
+
             return redirect()
                 ->route('supplier.restocks.show', $restock)
-                ->withErrors(['general' => 'Only pending orders can be rejected.']);
+                ->with('success', 'Restock order rejected.');
+        } catch (DomainException $exception) {
+            return redirect()
+                ->route('supplier.restocks.show', $restock)
+                ->withErrors(['general' => $exception->getMessage()]);
         }
-
-        $rejectReason = trim((string) $request->input('reject_reason', ''));
-        $updates = ['status' => RestockOrder::STATUS_CANCELLED];
-
-        if ($rejectReason !== '') {
-            $existingNotes = (string) ($restock->notes ?? '');
-            $notePrefix = $existingNotes !== '' ? $existingNotes . PHP_EOL : '';
-            $updates['notes'] = $notePrefix . 'Supplier rejection reason: ' . $rejectReason;
-        }
-
-        $restock->update($updates);
-
-        return redirect()
-            ->route('supplier.restocks.show', $restock)
-            ->with('success', 'Restock order rejected.');
     }
 
     private function buildRestockOrderIndexQuery(

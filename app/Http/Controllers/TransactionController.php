@@ -27,6 +27,12 @@ class TransactionController extends Controller
     public function index(Request $request): View
     {
         $activeTab = $this->resolveTransactionMode($request);
+        $policyTarget = $activeTab === 'incoming'
+            ? IncomingTransaction::class
+            : OutgoingTransaction::class;
+
+        $this->authorize('viewAny', $policyTarget);
+
         $typeParam = $activeTab === 'incoming' ? self::TYPE_INCOMING : self::TYPE_OUTGOING;
         $tabs = $this->transactionTabs();
 
@@ -46,6 +52,8 @@ class TransactionController extends Controller
         $transactionsQuery = $activeTab === 'incoming'
             ? $this->buildIncomingIndexQuery($request, $sort, $direction)
             : $this->buildOutgoingIndexQuery($request, $sort, $direction);
+
+        $this->applyStaffScope($transactionsQuery, $request);
 
         $transactions = $transactionsQuery
             ->paginate($perPage)
@@ -211,6 +219,15 @@ class TransactionController extends Controller
             ->orderBy('id');
 
         return $query;
+    }
+
+    private function applyStaffScope(Builder $query, Request $request): void
+    {
+        $user = $request->user();
+
+        if ($user !== null && $user->role === 'staff') {
+            $query->where('created_by', $user->id);
+        }
     }
 
     private function resolveTransactionMode(Request $request): string

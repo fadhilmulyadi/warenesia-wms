@@ -12,15 +12,12 @@
 @section('content')
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         
-            {{-- Breadcrumb --}}
             <x-breadcrumbs :items="[
                 'Produk' => route('products.index'),
                 'Buat Baru'  => '#'
             ]" />
 
-            {{-- Tombol Action --}}
             <div class="flex flex-wrap items-center gap-2 justify-end">
-                {{-- Menggunakan component action-button agar lebih rapi (opsional) --}}
                 <x-action-button href="{{ route('products.index') }}" variant="secondary">
                     Batal
             </x-action-button>
@@ -43,7 +40,7 @@
             $supplierOptions = $suppliers->mapWithKeys(function ($item) {
                 return [$item->id => $item->name . ($item->contact_person ? ' (' . $item->contact_person . ')' : '')];
             })->toArray();
-            $unitOptions = $units->mapWithKeys(fn ($unit) => [$unit->name => ['label' => $unit->name]])->toArray();
+            $unitOptions = $units->mapWithKeys(fn ($unit) => [$unit->id => ['label' => $unit->name]])->toArray();
         @endphp
         <form id="product-form" action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf

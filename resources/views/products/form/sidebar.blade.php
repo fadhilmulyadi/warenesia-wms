@@ -22,6 +22,7 @@
                 <x-custom-select 
                     name="category_id" 
                     class="flex-1"
+                    x-ref="categorySelect"
                     :options="$categoryOptions" 
                     :value="old('category_id', $product->category_id)" 
                     placeholder="Pilih kategori..."
@@ -64,14 +65,15 @@
 
         {{-- Satuan --}}
         <div class="relative space-y-2">
-            <x-input-label for="unit" value="Satuan Dasar" class="mb-1.5 text-sm font-semibold text-slate-700" />
+            <x-input-label for="unit_id" value="Satuan Dasar" class="mb-1.5 text-sm font-semibold text-slate-700" />
             
             <div class="flex items-center gap-2">
                 <x-custom-select 
-                    name="unit" 
+                    name="unit_id" 
                     class="flex-1"
+                    x-ref="unitSelect"
                     :options="$unitOptions" 
-                    :value="old('unit', $product->unit)" 
+                    :value="old('unit_id', $product->unit_id)" 
                     placeholder="Pilih satuan..."
                     :disabled="$readonly"
                     dropUp
@@ -82,7 +84,7 @@
                 @endunless
             </div>
             @unless($readonly)
-                <x-input-error class="mt-1" :messages="$errors->get('unit')" />
+                <x-input-error class="mt-1" :messages="$errors->get('unit_id')" />
             @endunless
         </div>
     </div>

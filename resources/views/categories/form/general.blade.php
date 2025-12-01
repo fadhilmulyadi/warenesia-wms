@@ -83,7 +83,6 @@
             :readonly="@js($readonly)"
             class="w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 uppercase tracking-[0.2em] font-semibold"
             placeholder="ELE, PDA"
-            required
         />
         <x-input-error class="mt-1" :messages="$errors->get('sku_prefix')" />
     </div>

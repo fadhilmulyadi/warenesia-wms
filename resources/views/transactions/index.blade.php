@@ -92,7 +92,7 @@
                         <option value="applied" x-ref="option"></option>
                     </select>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-col gap-2 w-full">
                         <x-form.date
                             name="date_from"
                             x-ref="from"
@@ -111,7 +111,6 @@
                 </div>
             </x-slot:filter_date_range>
 
-            {{-- SUPPLIER OR CUSTOMER --}}
             @if($activeTab === 'incoming')
                 <x-slot:filter_supplier_id>
                     <x-filter.checkbox-list
@@ -132,7 +131,6 @@
 
         </x-filter-bar>
 
-        {{-- ACTION BUTTON (RIGHT) --}}
         <div class="flex flex-wrap gap-2 justify-end w-full md:w-auto">
             @if($activeTab === 'incoming')
                 @can('create', \App\Models\IncomingTransaction::class)
@@ -151,7 +149,6 @@
 
     </x-toolbar>
 
-    {{-- TABLE --}}
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <x-transactions.table 
             :transactions="$currentPaginator"

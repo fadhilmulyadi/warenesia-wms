@@ -2,7 +2,8 @@
     'icon' => null,
     'href' => null,
     'danger' => false,
-    'onClick' => null
+    'onClick' => null,
+    'type' => 'button'
 ])
 
 @php
@@ -20,7 +21,7 @@
         {{ $slot }}
     </a>
 @else
-    <button type="button" @if($onClick) @click="{{ $onClick }}" @endif {{ $attributes->merge(['class' => "$baseClasses $textClass"]) }}>
+    <button type="{{ $type }}" @if($onClick) @click="{{ $onClick }}" @endif {{ $attributes->merge(['class' => "$baseClasses $textClass"]) }}>
         @if($icon)
             <x-dynamic-component :component="'lucide-'.$icon" class="{{ $iconBase }} {{ $iconColor }}" />
         @endif

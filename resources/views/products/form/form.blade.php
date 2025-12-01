@@ -12,7 +12,7 @@
         return [$item->id => $item->name . ($item->contact_person ? ' (' . $item->contact_person . ')' : '')];
     })->toArray();
 
-    $unitOptions = $unitOptions ?? $units->pluck('name', 'name')->toArray();
+    $unitOptions = $unitOptions ?? $units->pluck('name', 'id')->toArray();
 
     $categoryPrefixes = $categoryPrefixes ?? $categories->pluck('sku_prefix', 'id')->filter()->toArray();
     $initialSku = old('sku', $target->sku);
@@ -29,7 +29,7 @@
         initialSku: @js($initialSku),
         initialSkuNumber: @js($initialSkuNumber),
         initialCategory: @js(old('category_id', $target->category_id)),
-        initialUnit: @js(old('unit', $target->unit)),
+        initialUnit: @js(old('unit_id', $target->unit_id)),
         categories: @js($categoryOptions),
         units: @js($unitOptions),
         categoryPrefixes: @js($categoryPrefixes),
@@ -149,7 +149,7 @@
                         form: {
                             sku: config.initialSku || '',
                             category_id: config.initialCategory ? String(config.initialCategory) : '',
-                            unit: config.initialUnit || '',
+                            unit_id: config.initialUnit ? String(config.initialUnit) : '',
                         },
                         categoryOptions: { ...(config.categories || {}) },
                         unitOptions: { ...(config.units || {}) },
@@ -301,9 +301,9 @@
                                 return;
                             }
 
-                            this.unitOptions[data.name] = data.name;
-                            this.form.unit = data.name;
-                            this.refreshSelect('unitSelect', this.unitOptions, this.form.unit);
+                            this.unitOptions[data.id] = data.name;
+                            this.form.unit_id = String(data.id);
+                            this.refreshSelect('unitSelect', this.unitOptions, this.form.unit_id);
                             this.$dispatch('close-modal', 'quick-unit-modal');
                         },
                         handleImage(event) {

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\GeneratorService;
+use App\Services\NumberGeneratorService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,8 +41,8 @@ class IncomingTransaction extends Model
 
     public static function generateNextTransactionNumber(): string
     {
-        return GeneratorService::generateDailySequence(
-            static::class,
+        return app(NumberGeneratorService::class)->generateDailySequence(
+            (new static())->getTable(),
             'transaction_number',
             'PO'
         );

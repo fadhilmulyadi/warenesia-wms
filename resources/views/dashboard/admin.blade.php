@@ -3,10 +3,7 @@
 @section('title', 'Dashboard Admin')
 
 @section('page-header')
-    <x-page-header
-        title="Dashboard Admin"
-        description="Ringkasan stok, transaksi, dan notifikasi"
-    />
+    <x-page-header title="Dashboard Admin" description="Ringkasan stok, transaksi, dan notifikasi" />
 @endsection
 
 @section('content')
@@ -14,12 +11,8 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($kpis as $stat)
                 <x-dashboard.card>
-                    <x-dashboard.stat
-                        :title="$stat['title']"
-                        :value="$stat['value']"
-                        :subtitle="$stat['subtitle']"
-                        :icon="$stat['icon']"
-                    />
+                    <x-dashboard.stat :title="$stat['title']" :value="$stat['value']" :subtitle="$stat['subtitle']"
+                        :icon="$stat['icon']" />
                 </x-dashboard.card>
             @endforeach
         </div>

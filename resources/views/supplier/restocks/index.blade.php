@@ -3,127 +3,166 @@
 @section('title', 'Pesanan Saya')
 
 @section('page-header')
-    <div class="flex flex-col">
-        <h1 class="text-base font-semibold text-slate-900">Pesanan Saya</h1>
-        <p class="text-xs text-slate-500">
-            Pantau status pesanan pembelian yang ditugaskan kepada perusahaan Anda.
-        </p>
-    </div>
+    <x-page-header
+        title="Pesanan Saya"
+        description="Pantau status pesanan pembelian yang ditugaskan kepada perusahaan Anda."
+    />
 @endsection
 
 @section('content')
-    <div class="space-y-4 text-xs max-w-5xl mx-auto">
-        <form
-            method="GET"
-            class="rounded-2xl border border-slate-200 bg-white p-3 flex flex-wrap items-center gap-3"
-        >
-            <div class="flex-1 min-w-[180px]">
-                <input
-                    type="text"
-                    name="q"
-                    value="{{ $search }}"
-                    class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-[11px]"
-                    placeholder="Search by PO number"
-                >
-            </div>
+    <div class="space-y-4 text-xs max-w-6xl mx-auto">
 
-            <div>
-                <select
-                    name="status"
-                    class="rounded-lg border border-slate-200 px-3 py-1.5 text-[11px]"
-                >
-                    <option value="">All status</option>
-                    @foreach($statusOptions as $value => $label)
-                        <option
-                            value="{{ $value }}"
-                            @selected($statusFilter === $value)
-                        >
-                            {{ $label }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+        {{-- 
+            1. TOOLBAR + FILTER BAR 
+            Sama persis seperti Admin Restocks Index
+        --}}
+        <x-toolbar>
+            @php
+                $filters = [
+                    'status' => 'Status',
+                    'date_range' => 'Rentang Tanggal',
+                ];
+                $resetKeys = ['status', 'date_from', 'date_to', 'date_range'];
+            @endphp
 
-            <button
-                type="submit"
-                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50"
+            {{-- FILTER BAR --}}
+            <x-filter-bar
+                :action="route('supplier.restocks.index')"
+                :search="$search"
+                :sort="$sort"
+                :direction="$direction"
+                :filters="$filters"
+                :resetKeys="$resetKeys"
+                placeholder="Cari Nomor PO..."
             >
-                Filter
-            </button>
-        </form>
+                {{-- STATUS CHECKBOX FILTER --}}
+                <x-slot:filter_status>
+                    <x-filter.checkbox-list
+                        name="status"
+                        :options="$statusOptions"
+                        :selected="request()->query('status', [])"
+                    />
+                </x-slot:filter_status>
 
-        <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-            <table class="min-w-full text-left text-xs">
-                <thead class="bg-slate-50 text-[11px] text-slate-500 uppercase tracking-wide">
-                    <tr>
-                        <th class="px-4 py-2 w-40">PO #</th>
-                        <th class="px-4 py-2 w-32">Order date</th>
-                        <th class="px-4 py-2 w-32">Expected date</th>
-                        <th class="px-4 py-2 text-right w-28">Total qty</th>
-                        <th class="px-4 py-2 text-right w-32">Total (Rp)</th>
-                        <th class="px-4 py-2 text-center w-28">Status</th>
-                        @can('viewSupplierRestocks', \App\Models\RestockOrder::class)
-                            <th class="px-4 py-2 text-right w-24"></th>
-                        @endcan
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($restockOrders as $restockOrder)
-                        <tr>
-                            <td class="px-4 py-2 align-top">
-                                <div class="font-mono text-[11px] text-slate-800">
-                                    <a
-                                        href="{{ route('supplier.restocks.show', $restockOrder) }}"
-                                        class="hover:underline"
-                                    >
-                                        {{ $restockOrder->po_number }}
-                                    </a>
-                                </div>
-                            </td>
-                            <td class="px-4 py-2 align-top text-[11px] text-slate-600">
-                                {{ $restockOrder->order_date?->format('d M Y') ?? '-' }}
-                            </td>
-                            <td class="px-4 py-2 align-top text-[11px] text-slate-600">
-                                {{ $restockOrder->expected_delivery_date?->format('d M Y') ?? '-' }}
-                            </td>
-                            <td class="px-4 py-2 align-top text-right text-[11px] text-slate-700">
-                                {{ number_format($restockOrder->total_quantity, 0, ',', '.') }}
-                            </td>
-                            <td class="px-4 py-2 align-top text-right text-[11px] text-slate-700">
-                                {{ number_format($restockOrder->total_amount, 2, ',', '.') }}
-                            </td>
-                            <td class="px-4 py-2 align-top text-center">
-                                @include('components.status-badge', [
-                                    'status' => $restockOrder->status,
-                                    'label' => $restockOrder->status_label,
-                                ])
-                            </td>
-                            @can('viewSupplierRestocks', \App\Models\RestockOrder::class)
-                                <td class="px-4 py-2 align-top text-right">
-                                    <a
-                                        href="{{ route('supplier.restocks.show', $restockOrder) }}"
-                                        class="inline-flex items-center rounded-lg border border-slate-200 px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                                    >
-                                        View
-                                    </a>
-                                </td>
-                            @endcan
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-[11px] text-slate-500">
-                                No restock orders assigned to you.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                {{-- DATE RANGE FILTER --}}
+                <x-slot:filter_date_range>
+                    <div
+                        x-data="{
+                            updateMeta() {
+                                const from = this.$refs.from?.value || '';
+                                const to = this.$refs.to?.value || '';
+                                const hasRange = !!(from || to);
 
-            @if($restockOrders->hasPages())
-                <div class="border-t border-slate-100 px-4 py-2">
-                    {{ $restockOrders->links() }}
-                </div>
-            @endif
-        </div>
+                                if (this.$refs.flag) {
+                                    this.$refs.flag.value = hasRange ? '1' : '';
+                                }
+
+                                if (this.$refs.option && this.$refs.display) {
+                                    this.$refs.option.textContent = hasRange
+                                        ? [from || 'Dari', to || 'Sampai'].join(' - ')
+                                        : '';
+                                    this.$refs.display.value = hasRange ? 'applied' : '';
+                                    this.$refs.display.dispatchEvent(new Event('change', { bubbles: true }));
+                                }
+                            }
+                        }"
+                        x-init="updateMeta()"
+                        class="space-y-2"
+                    >
+                        <input type="hidden" name="date_range" x-ref="flag">
+                        <select class="hidden" x-ref="display">
+                            <option value=""></option>
+                            <option value="applied" x-ref="option"></option>
+                        </select>
+
+                        <div class="flex items-center gap-2">
+                            <x-form.date
+                                name="date_from"
+                                x-ref="from"
+                                :value="request('date_from')"
+                                placeholder="Dari tanggal"
+                                x-on:change="updateMeta()"
+                            />
+                            <x-form.date
+                                name="date_to"
+                                x-ref="to"
+                                :value="request('date_to')"
+                                placeholder="Sampai tanggal"
+                                x-on:change="updateMeta()"
+                            />
+                        </div>
+                    </div>
+                </x-slot:filter_date_range>
+            </x-filter-bar>
+
+            {{-- Tidak ada tombol Export / Tambah Pesanan untuk Supplier --}}
+        </x-toolbar>
+
+
+        {{-- 
+            2. TABEL 
+            100% sama seperti tabel Restocks Admin
+            Tetapi kolom Supplier dihapus (karena supplier tidak perlu melihat dirinya sendiri)
+        --}}
+        <x-table>
+            <x-table.thead>
+                <x-table.th class="w-24" sortable name="po_number">Nomor PO</x-table.th>
+                <x-table.th class="w-32" sortable name="order_date">Tanggal Pemesanan</x-table.th>
+                <x-table.th class="w-32">Tanggal Kedatangan</x-table.th>
+                <x-table.th class="text-center w-28">Status</x-table.th>
+                <x-table.th align="right" class="w-24">Kuantitas</x-table.th>
+                <x-table.th align="right" class="w-32">Total (Rp)</x-table.th>
+                {{-- Tidak ada kolom aksi --}}
+            </x-table.thead>
+
+            <x-table.tbody>
+                @forelse($restockOrders as $restockOrder)
+                    {{-- ROW CLICKABLE --}}
+                    <x-table.tr :href="route('supplier.restocks.show', $restockOrder)">
+
+                        <x-table.td class="font-mono whitespace-nowrap">
+                            {{ $restockOrder->po_number }}
+                        </x-table.td>
+
+                        <x-table.td>
+                            {{ $restockOrder->order_date?->format('d M Y') ?? '-' }}
+                        </x-table.td>
+
+                        <x-table.td>
+                            {{ $restockOrder->expected_delivery_date?->format('d M Y') ?? '-' }}
+                        </x-table.td>
+
+                        <x-table.td align="center">
+                            @include('components.status-badge', [
+                                'status' => $restockOrder->status,
+                                'label' => $restockOrder->status_label,
+                            ])
+                        </x-table.td>
+
+                        <x-table.td align="right" class="tabular-nums">
+                            {{ number_format($restockOrder->total_quantity, 0, ',', '.') }}
+                        </x-table.td>
+
+                        <x-table.td align="right">
+                            <x-money :value="$restockOrder->total_amount" />
+                        </x-table.td>
+
+                    </x-table.tr>
+                @empty
+                    <x-table.tr>
+                        <x-table.td colspan="6" align="center">
+                            <span class="text-[11px] text-slate-500 py-6 block">
+                                Tidak ada pesanan restok yang ditugaskan kepada Anda.
+                            </span>
+                        </x-table.td>
+                    </x-table.tr>
+                @endforelse
+            </x-table.tbody>
+        </x-table>
+
+        {{-- pagination --}}
+        @if($restockOrders->hasPages() || $restockOrders->total() > 0)
+            <x-advanced-pagination :paginator="$restockOrders" />
+        @endif
     </div>
 @endsection

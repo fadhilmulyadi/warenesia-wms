@@ -14,7 +14,7 @@
     ])>
         {{ $product->current_stock }}
         <span class="text-[10px] font-normal text-slate-500 ml-0.5 uppercase">
-            {{ $product->unit }}
+            {{ $product->unit->name ?? '' }}
         </span>
     </span>
 

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\GeneratorService;
+use App\Services\NumberGeneratorService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,39 +54,26 @@ class RestockOrder extends Model
         'rating_given_at'         => 'datetime',
     ];
 
-    /**
-     * Generate next purchase order number with pattern:
-     * PO-YYYYMMDD-XXXX
-     */
     public static function generateNextPurchaseOrderNumber(): string
     {
-        return GeneratorService::generateDailySequence(
-            static::class,
+        return app(NumberGeneratorService::class)->generateDailySequence(
+            (new static())->getTable(),
             'po_number',
             self::PURCHASE_ORDER_PREFIX,
             self::SEQUENCE_PAD_LENGTH
         );
     }
 
-    /**
-     * Supplier yang menerima restock order ini.
-     */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    /**
-     * User yang membuat restock order.
-     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    /**
-     * User yang mengkonfirmasi restock order (jika ada).
-     */
     public function confirmedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'confirmed_by');
@@ -97,21 +84,11 @@ class RestockOrder extends Model
         return $this->belongsTo(User::class, 'rating_given_by');
     }
 
-    /**
-     * Item produk di dalam restock order.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<RestockOrderItem>
-     */
     public function items(): HasMany
     {
         return $this->hasMany(RestockOrderItem::class);
     }
 
-    /**
-     * Opsi status untuk dropdown/filter/UI.
-     *
-     * @return array<string,string>
-     */
     public static function statusOptions(): array
     {
         return [
@@ -123,9 +100,6 @@ class RestockOrder extends Model
         ];
     }
 
-    /**
-     * Label status yang sudah dirapikan untuk kebutuhan UI.
-     */
     public function getStatusLabelAttribute(): string
     {
         return self::statusOptions()[$this->status]
@@ -157,10 +131,6 @@ class RestockOrder extends Model
         return $this->status === self::STATUS_CANCELLED;
     }
 
-    /**
-     * Dipakai untuk aksi "Confirm" di workflow (Admin/Manager sekarang),
-     * dan bisa juga nanti di-reuse untuk konfirmasi sisi supplier.
-     */
     public function canBeConfirmed(): bool
     {
         return $this->isPending();

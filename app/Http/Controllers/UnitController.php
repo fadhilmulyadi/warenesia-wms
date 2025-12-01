@@ -2,43 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UnitRequest;
+use App\Http\Requests\UnitStoreRequest;
+use App\Http\Requests\UnitUpdateRequest;
 use App\Models\Unit;
+use App\Services\UnitService;
+use DomainException;
 use Illuminate\Http\Request;
 
 class UnitController extends Controller
 {
-    private const PER_PAGE = 15;
+    public function __construct(private readonly UnitService $units)
+    {
+    }
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Unit::class);
+
         $search = (string) $request->query('q', '');
 
-        $units = Unit::query()
-            ->withCount('products')
-            ->when($search, static function ($query) use ($search) {
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('description', 'like', '%' . $search . '%');
-                });
-            })
-            ->orderBy('name')
-            ->paginate(self::PER_PAGE)
-            ->withQueryString();
+        $units = $this->units->index([
+            'search' => $search,
+        ]);
 
         return view('units.index', compact('units', 'search'));
     }
 
     public function create()
     {
+        $this->authorize('create', Unit::class);
+
         return view('units.create');
     }
 
-    public function store(UnitRequest $request)
+    public function store(UnitStoreRequest $request)
     {
-        $data = $request->validated();
+        $this->authorize('create', Unit::class);
 
-        Unit::create($data);
+        $this->units->create($request->validated());
 
         return redirect()
             ->route('units.index')
@@ -47,12 +48,16 @@ class UnitController extends Controller
 
     public function edit(Unit $unit)
     {
+        $this->authorize('update', $unit);
+
         return view('units.edit', compact('unit'));
     }
 
-    public function update(UnitRequest $request, Unit $unit)
+    public function update(UnitUpdateRequest $request, Unit $unit)
     {
-        $unit->update($request->validated());
+        $this->authorize('update', $unit);
+
+        $this->units->update($unit, $request->validated());
 
         return redirect()
             ->route('units.index')
@@ -61,20 +66,24 @@ class UnitController extends Controller
 
     public function destroy(Unit $unit)
     {
-        if ($unit->products()->exists()) {
-            return back()->with('error', 'Satuan tidak dapat dihapus karena digunakan oleh produk.');
-        }
+        $this->authorize('delete', $unit);
 
-        $unit->delete();
+        try {
+            $this->units->delete($unit);
+        } catch (DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
 
         return redirect()
             ->route('units.index')
             ->with('success', 'Satuan berhasil dihapus.');
     }
 
-    public function quickStore(UnitRequest $request)
+    public function quickStore(UnitStoreRequest $request)
     {
-        $unit = Unit::create($request->validated());
+        $this->authorize('create', Unit::class);
+
+        $unit = $this->units->create($request->validated());
 
         if ($request->wantsJson()) {
             return response()->json([

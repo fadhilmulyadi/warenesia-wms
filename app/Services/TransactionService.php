@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Exceptions\InsufficientStockException;
 use App\Models\IncomingTransaction;
 use App\Models\IncomingTransactionItem;
 use App\Models\OutgoingTransaction;
@@ -10,63 +9,65 @@ use App\Models\OutgoingTransactionItem;
 use App\Models\User;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class TransactionService
 {
-    public function __construct(private readonly ActivityLogService $activityLogger)
-    {
+    public function __construct(
+        private readonly ActivityLogService $activityLogger,
+        private readonly StockAdjustmentService $stockAdjustments,
+        private readonly NumberGeneratorService $numberGenerator
+    ) {
     }
 
     public function createIncoming(array $validatedData, User $creator): IncomingTransaction
     {
-        $itemsData = $validatedData['items'] ?? [];
+        $itemsData = $this->extractItems($validatedData);
 
-        if (count($itemsData) === 0) {
-            throw new InvalidArgumentException('At least one product must be added to the transaction.');
-        }
+        return $this->runWithNumberRetry(function () use ($validatedData, $creator, $itemsData): IncomingTransaction {
+            return DB::transaction(function () use ($validatedData, $creator, $itemsData): IncomingTransaction {
+                $transactionNumber = $this->numberGenerator->generateDailySequence(
+                    (new IncomingTransaction())->getTable(),
+                    'transaction_number',
+                    'PO'
+                );
 
-        return DB::transaction(function () use ($validatedData, $creator, $itemsData): IncomingTransaction {
-            $transactionNumber = GeneratorService::generateDailySequence(
-                IncomingTransaction::class,
-                'transaction_number',
-                'PO'
-            );
+                $transaction = IncomingTransaction::create([
+                    'transaction_number' => $transactionNumber,
+                    'transaction_date' => $validatedData['transaction_date'],
+                    'supplier_id' => $validatedData['supplier_id'],
+                    'created_by' => $creator->id,
+                    'verified_by' => null,
+                    'status' => IncomingTransaction::STATUS_PENDING,
+                    'total_items' => 0,
+                    'total_quantity' => 0,
+                    'total_amount' => 0,
+                    'notes' => $validatedData['notes'] ?? null,
+                ]);
 
-            $transaction = IncomingTransaction::create([
-                'transaction_number' => $transactionNumber,
-                'transaction_date' => $validatedData['transaction_date'],
-                'supplier_id' => $validatedData['supplier_id'],
-                'created_by' => $creator->id,
-                'verified_by' => null,
-                'status' => IncomingTransaction::STATUS_PENDING,
-                'total_items' => 0,
-                'total_quantity' => 0,
-                'total_amount' => 0,
-                'notes' => $validatedData['notes'] ?? null,
-            ]);
+                $totals = $this->createIncomingItems($transaction, $itemsData);
 
-            $totals = $this->createIncomingItems($transaction, $itemsData);
+                $transaction->update([
+                    'total_items' => $totals['total_items'],
+                    'total_quantity' => $totals['total_quantity'],
+                    'total_amount' => $totals['total_amount'],
+                ]);
 
-            $transaction->update([
-                'total_items' => $totals['total_items'],
-                'total_quantity' => $totals['total_quantity'],
-                'total_amount' => $totals['total_amount'],
-            ]);
+                $this->logActivity(
+                    $creator,
+                    'CREATE_INCOMING',
+                    $this->formatDescription($creator, 'CREATE', 'IncomingTransaction #' . $transaction->transaction_number),
+                    $transaction
+                );
 
-            $this->activityLogger->log(
-                $creator,
-                'CREATE_INCOMING',
-                $this->formatDescription($creator, 'CREATE', 'IncomingTransaction #' . $transaction->transaction_number),
-                $transaction
-            );
-
-            return $transaction;
+                return $transaction;
+            });
         });
     }
 
-    public function verifyIncoming(IncomingTransaction $transaction, User $verifier): void
+    public function approveIncoming(IncomingTransaction $transaction, User $verifier): void
     {
         if (! $transaction->canBeVerified()) {
             throw new DomainException('Only pending transactions can be verified.');
@@ -79,10 +80,15 @@ class TransactionService
                 $product = $item->product;
 
                 if ($product === null) {
-                    continue;
+                    throw new ModelNotFoundException('One or more products in this transaction no longer exist.');
                 }
 
-                $product->increaseStock((int) $item->quantity);
+                $this->stockAdjustments->increaseStock(
+                    $product,
+                    (int) $item->quantity,
+                    'incoming_transaction',
+                    $transaction
+                );
             }
 
             $transaction->update([
@@ -90,13 +96,18 @@ class TransactionService
                 'verified_by' => $verifier->id,
             ]);
 
-            $this->activityLogger->log(
+            $this->logActivity(
                 $verifier,
                 'VERIFY_INCOMING',
                 $this->formatDescription($verifier, 'VERIFY', 'IncomingTransaction #' . $transaction->transaction_number),
                 $transaction
             );
         });
+    }
+
+    public function verifyIncoming(IncomingTransaction $transaction, User $verifier): void
+    {
+        $this->approveIncoming($transaction, $verifier);
     }
 
     public function rejectIncoming(IncomingTransaction $transaction, User $verifier, ?string $reason): void
@@ -121,7 +132,7 @@ class TransactionService
 
         $transaction->update($updates);
 
-        $this->activityLogger->log(
+        $this->logActivity(
             $verifier,
             'REJECT_INCOMING',
             $this->formatDescription($verifier, 'REJECT', 'IncomingTransaction #' . $transaction->transaction_number),
@@ -139,7 +150,7 @@ class TransactionService
             'status' => IncomingTransaction::STATUS_COMPLETED,
         ]);
 
-        $this->activityLogger->log(
+        $this->logActivity(
             $actor,
             'COMPLETE_INCOMING',
             $this->formatDescription($actor, 'COMPLETE', 'IncomingTransaction #' . $transaction->transaction_number),
@@ -149,48 +160,46 @@ class TransactionService
 
     public function createOutgoing(array $validatedData, User $creator): OutgoingTransaction
     {
-        $itemsData = $validatedData['items'] ?? [];
+        $itemsData = $this->extractItems($validatedData);
 
-        if (count($itemsData) === 0) {
-            throw new InvalidArgumentException('At least one product must be added to the transaction.');
-        }
+        return $this->runWithNumberRetry(function () use ($validatedData, $creator, $itemsData): OutgoingTransaction {
+            return DB::transaction(function () use ($validatedData, $creator, $itemsData): OutgoingTransaction {
+                $transactionNumber = $this->numberGenerator->generateDailySequence(
+                    (new OutgoingTransaction())->getTable(),
+                    'transaction_number',
+                    'SO'
+                );
 
-        return DB::transaction(function () use ($validatedData, $creator, $itemsData): OutgoingTransaction {
-            $transactionNumber = GeneratorService::generateDailySequence(
-                OutgoingTransaction::class,
-                'transaction_number',
-                'SO'
-            );
+                $transaction = OutgoingTransaction::create([
+                    'transaction_number' => $transactionNumber,
+                    'transaction_date' => $validatedData['transaction_date'],
+                    'customer_name' => $validatedData['customer_name'],
+                    'created_by' => $creator->id,
+                    'approved_by' => null,
+                    'status' => OutgoingTransaction::STATUS_PENDING,
+                    'total_items' => 0,
+                    'total_quantity' => 0,
+                    'total_amount' => 0,
+                    'notes' => $validatedData['notes'] ?? null,
+                ]);
 
-            $transaction = OutgoingTransaction::create([
-                'transaction_number' => $transactionNumber,
-                'transaction_date' => $validatedData['transaction_date'],
-                'customer_name' => $validatedData['customer_name'],
-                'created_by' => $creator->id,
-                'approved_by' => null,
-                'status' => OutgoingTransaction::STATUS_PENDING,
-                'total_items' => 0,
-                'total_quantity' => 0,
-                'total_amount' => 0,
-                'notes' => $validatedData['notes'] ?? null,
-            ]);
+                $totals = $this->createOutgoingItems($transaction, $itemsData);
 
-            $totals = $this->createOutgoingItems($transaction, $itemsData);
+                $transaction->update([
+                    'total_items' => $totals['total_items'],
+                    'total_quantity' => $totals['total_quantity'],
+                    'total_amount' => $totals['total_amount'],
+                ]);
 
-            $transaction->update([
-                'total_items' => $totals['total_items'],
-                'total_quantity' => $totals['total_quantity'],
-                'total_amount' => $totals['total_amount'],
-            ]);
+                $this->logActivity(
+                    $creator,
+                    'CREATE_OUTGOING',
+                    $this->formatDescription($creator, 'CREATE', 'OutgoingTransaction #' . $transaction->transaction_number),
+                    $transaction
+                );
 
-            $this->activityLogger->log(
-                $creator,
-                'CREATE_OUTGOING',
-                $this->formatDescription($creator, 'CREATE', 'OutgoingTransaction #' . $transaction->transaction_number),
-                $transaction
-            );
-
-            return $transaction;
+                return $transaction;
+            });
         });
     }
 
@@ -210,19 +219,12 @@ class TransactionService
                     throw new ModelNotFoundException('One or more products in this transaction no longer exist.');
                 }
 
-                if (! $product->hasSufficientStock((int) $item->quantity)) {
-                    throw new InsufficientStockException($product->name);
-                }
-            }
-
-            foreach ($transaction->items as $item) {
-                $product = $item->product;
-
-                if ($product === null) {
-                    continue;
-                }
-
-                $product->decreaseStock((int) $item->quantity);
+                $this->stockAdjustments->decreaseStock(
+                    $product,
+                    (int) $item->quantity,
+                    'outgoing_transaction',
+                    $transaction
+                );
             }
 
             $transaction->update([
@@ -230,7 +232,7 @@ class TransactionService
                 'approved_by' => $approver->id,
             ]);
 
-            $this->activityLogger->log(
+            $this->logActivity(
                 $approver,
                 'APPROVE_OUTGOING',
                 $this->formatDescription($approver, 'APPROVE', 'OutgoingTransaction #' . $transaction->transaction_number),
@@ -249,12 +251,23 @@ class TransactionService
             'status' => OutgoingTransaction::STATUS_SHIPPED,
         ]);
 
-        $this->activityLogger->log(
+        $this->logActivity(
             $actor,
             'SHIP_OUTGOING',
             $this->formatDescription($actor, 'SHIP', 'OutgoingTransaction #' . $transaction->transaction_number),
             $transaction
         );
+    }
+
+    private function extractItems(array $validatedData): array
+    {
+        $items = $validatedData['items'] ?? [];
+
+        if (count($items) === 0) {
+            throw new InvalidArgumentException('At least one product must be added to the transaction.');
+        }
+
+        return $items;
     }
 
     private function createIncomingItems(IncomingTransaction $transaction, array $itemsData): array
@@ -327,5 +340,40 @@ class TransactionService
             strtoupper($action),
             $subjectLabel
         );
+    }
+
+    private function logActivity(?User $user, string $action, string $description, object $subject): void
+    {
+        $this->activityLogger->log(
+            $user,
+            $action,
+            $description,
+            $subject
+        );
+    }
+
+    private function runWithNumberRetry(callable $callback): mixed
+    {
+        $attempts = 0;
+        $maxAttempts = 3;
+
+        do {
+            try {
+                return $callback();
+            } catch (QueryException $exception) {
+                $attempts++;
+
+                if (! $this->isUniqueConstraintViolation($exception) || $attempts >= $maxAttempts) {
+                    throw $exception;
+                }
+            }
+        } while ($attempts < $maxAttempts);
+
+        return $callback();
+    }
+
+    private function isUniqueConstraintViolation(QueryException $exception): bool
+    {
+        return (string) $exception->getCode() === '23000';
     }
 }

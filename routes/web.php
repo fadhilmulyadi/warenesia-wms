@@ -9,31 +9,16 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductScanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestockOrderController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupplierRegistrationController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Public & generic dashboard routes
-|--------------------------------------------------------------------------
-| Halaman publik dan fallback dashboard generik.
-| Dashboard generik tetap disiapkan jika suatu saat
-| ada user yang tidak punya role spesifik.
-*/
-
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
-
-/*
-|--------------------------------------------------------------------------
-| Authenticated user profile
-|--------------------------------------------------------------------------
-| Profile dikelola di luar area admin agar tetap konsisten
-| untuk semua role.
-*/
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -68,25 +53,28 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+
+    Route::middleware('can:manage-users')->group(function () {
+        Route::resource('users', UserController::class);
+
+        Route::patch('users/{user}/approve', [UserController::class, 'approveSupplier'])
+            ->name('users.approve');
+    });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Admin & Manager: master data dan konfigurasi gudang
-|--------------------------------------------------------------------------
-| Hanya Admin dan Warehouse Manager yang boleh mengelola
-| master data inti: produk, kategori, supplier, dan restock orders.
-*/
+Route::middleware('guest')->group(function () {
+    Route::get('supplier/register', [SupplierRegistrationController::class, 'create'])
+        ->name('supplier.register');
+    Route::post('supplier/register', [SupplierRegistrationController::class, 'store']);
+});
 
 Route::middleware(['auth', 'role:admin,manager'])
     ->group(function () {
         Route::get('products/export', [ProductController::class, 'export'])
             ->name('products.export');
 
-        // Product management (inventory master)
         Route::resource('products', ProductController::class);
 
-        // Category management, termasuk quick add dari form produk
         Route::post('categories/quick-store', [CategoryController::class, 'quickStore'])
             ->name('categories.quick-store');
 
@@ -95,7 +83,6 @@ Route::middleware(['auth', 'role:admin,manager'])
         Route::resource('categories', CategoryController::class)
             ->except(['show']);
 
-        // Unit management
         Route::post('units/quick-store', [UnitController::class, 'quickStore'])
             ->name('units.quick-store');
         Route::resource('units', UnitController::class)
@@ -126,14 +113,6 @@ Route::middleware(['auth', 'role:admin,manager'])
             ->name('restocks.cancel');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Admin, Manager, Staff: transaksi harian (purchases & sales)
-|--------------------------------------------------------------------------
-| Ketiga role ini terlibat di transaksi harian. Pembatasan hak akses
-| lebih detail (misalnya siapa boleh approve) diatur di group lain.
-*/
-
 Route::middleware(['auth', 'role:admin,manager,staff'])
     ->group(function () {
         Route::get('products/{product}/barcode', [ProductBarcodeController::class, 'show'])
@@ -162,17 +141,8 @@ Route::middleware(['auth', 'role:admin,manager,staff'])
             ->name('transactions.index');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Admin & Manager: approval dan status perubahan transaksi
-|--------------------------------------------------------------------------
-| Aksi yang mengubah status bisnis penting (approve, verify, ship)
-| dibatasi hanya untuk Admin dan Manager.
-*/
-
 Route::middleware(['auth', 'role:admin,manager'])
     ->group(function () {
-        // Approval flow untuk incoming transactions (purchases)
         Route::patch('purchases/{purchase}/verify', [IncomingTransactionController::class, 'verify'])
             ->name('purchases.verify');
 
@@ -182,7 +152,6 @@ Route::middleware(['auth', 'role:admin,manager'])
         Route::patch('purchases/{purchase}/complete', [IncomingTransactionController::class, 'complete'])
             ->name('purchases.complete');
 
-        // Approval flow untuk outgoing transactions (sales)
         Route::patch('sales/{sale}/approve', [OutgoingTransactionController::class, 'approve'])
             ->name('sales.approve');
 
@@ -190,12 +159,7 @@ Route::middleware(['auth', 'role:admin,manager'])
             ->name('sales.ship');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Supplier portal: restock orders
-|--------------------------------------------------------------------------
-| Supplier dapat melihat dan mengelola restock order mereka sendiri.
-*/
+
 Route::middleware(['auth', 'role:supplier'])
     ->prefix('supplier')
     ->as('supplier.')

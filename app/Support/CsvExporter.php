@@ -6,12 +6,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class CsvExporter
 {
-    /**
-     * Stream CSV file as a download response.
-     *
-     * @param string $fileName
-     * @param callable $writer function(\SplFileObject $output): void
-     */
+
     public static function stream(string $fileName, callable $writer): StreamedResponse
     {
         return response()->streamDownload(

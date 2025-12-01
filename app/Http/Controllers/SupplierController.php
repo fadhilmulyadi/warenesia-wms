@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
-use App\Http\Requests\SupplierRequest;
+use App\Http\Requests\SupplierStoreRequest;
+use App\Http\Requests\SupplierUpdateRequest;
 use App\Models\Supplier;
+use App\Services\SupplierService;
 use App\Support\CsvExporter;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use DomainException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupplierController extends Controller
@@ -20,6 +22,10 @@ class SupplierController extends Controller
     private const DEFAULT_PER_PAGE = Supplier::DEFAULT_PER_PAGE;
     private const MAX_PER_PAGE = 250;
     private const EXPORT_CHUNK_SIZE = 200;
+
+    public function __construct(private readonly SupplierService $suppliers)
+    {
+    }
 
     /**
      * Display a listing of the resource.
@@ -41,11 +47,14 @@ class SupplierController extends Controller
             defaultDirection: 'asc'
         );
 
-        $suppliersQuery = $this->buildSupplierIndexQuery($request, $sort, $direction);
+        $filters = [
+            'search' => (string) $request->query('q', ''),
+            'sort' => $sort,
+            'direction' => $direction,
+            'per_page' => $perPage,
+        ];
 
-        $suppliers = $suppliersQuery
-            ->paginate($perPage)
-            ->withQueryString();
+        $suppliers = $this->suppliers->index($filters);
 
         $search = (string) $request->query('q', '');
 
@@ -65,11 +74,11 @@ class SupplierController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(SupplierRequest $request): RedirectResponse
+    public function store(SupplierStoreRequest $request): RedirectResponse
     {
         $this->authorize('create', Supplier::class);
 
-        Supplier::create($request->validated());
+        $this->suppliers->create($request->validated());
 
         return redirect()
             ->route('suppliers.index')
@@ -97,11 +106,11 @@ class SupplierController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SupplierRequest $request, Supplier $supplier): RedirectResponse
+    public function update(SupplierUpdateRequest $request, Supplier $supplier): RedirectResponse
     {
         $this->authorize('update', $supplier);
 
-        $supplier->update($request->validated());
+        $this->suppliers->update($supplier, $request->validated());
 
         return redirect()
             ->route('suppliers.index')
@@ -115,13 +124,13 @@ class SupplierController extends Controller
     {
         $this->authorize('delete', $supplier);
 
-        if ($supplier->products()->exists()) {
+        try {
+            $this->suppliers->delete($supplier);
+        } catch (DomainException $exception) {
             return redirect()
                 ->route('suppliers.index')
-                ->with('error', 'Supplier cannot be deleted because it is used by one or more products.');
+                ->with('error', $exception->getMessage());
         }
-
-        $supplier->delete();
 
         return redirect()
             ->route('suppliers.index')
@@ -139,7 +148,11 @@ class SupplierController extends Controller
             defaultDirection: 'asc'
         );
 
-        $supplierQuery = $this->buildSupplierIndexQuery($request, $sort, $direction);
+        $supplierQuery = $this->suppliers->query([
+            'search' => (string) $request->query('q', ''),
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
         $fileName = 'suppliers-' . now()->format('Ymd-His') . '.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($supplierQuery): void {
@@ -182,31 +195,5 @@ class SupplierController extends Controller
                     }
                 });
         });
-    }
-
-    private function buildSupplierIndexQuery(
-        Request $request,
-        string $sort,
-        string $direction
-    ): Builder {
-        $search = (string) $request->query('q', '');
-
-        $query = Supplier::query()
-            ->withCount([
-                'restockOrders as rated_restock_count' => function ($query): void {
-                    $query->whereNotNull('rating');
-                },
-            ])
-            ->withAvg(
-                'restockOrders as average_rating',
-                'rating'
-            );
-
-        $this->applySearch($query, $search, ['name', 'contact_person', 'email', 'phone']);
-
-        $query->orderBy($sort, $direction)
-            ->orderBy('id');
-
-        return $query;
     }
 }

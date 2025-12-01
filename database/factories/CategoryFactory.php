@@ -20,6 +20,7 @@ class CategoryFactory extends Factory
             'name' => ucfirst($this->faker->unique()->word()) . ' Category',
             'description' => $this->faker->sentence(),
             'image_path' => null,
+            'sku_prefix' => strtoupper($this->faker->unique()->lexify('???')),
         ];
     }
 }

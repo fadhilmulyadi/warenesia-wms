@@ -8,6 +8,7 @@ use App\Http\Requests\OutgoingTransactionRequest;
 use App\Exceptions\InsufficientStockException;
 use App\Models\OutgoingTransaction;
 use App\Models\Product;
+use App\Models\User;
 use App\Support\CsvExporter;
 use App\Support\TransactionPrefill;
 use App\Services\TransactionService;
@@ -55,6 +56,7 @@ class OutgoingTransactionController extends Controller
         );
 
         $transactionsQuery = $this->buildOutgoingTransactionIndexQuery($request, $sort, $direction);
+        $this->applyStaffScope($transactionsQuery, $request->user());
 
         $transactions = $transactionsQuery
             ->paginate($perPage)
@@ -134,11 +136,7 @@ class OutgoingTransactionController extends Controller
         );
 
         $transactionQuery = $this->buildOutgoingTransactionIndexQuery($request, $sort, $direction);
-        $user = $request->user();
-
-        if ($user !== null && $user->role === self::ROLE_STAFF) {
-            $transactionQuery->where('created_by', $user->id);
-        }
+        $this->applyStaffScope($transactionQuery, $request->user());
 
         $fileName = 'sales-' . now()->format('Ymd-His') . '.csv';
 
@@ -285,6 +283,13 @@ class OutgoingTransactionController extends Controller
             ->orderBy('id');
 
         return $query;
+    }
+
+    private function applyStaffScope(Builder $query, ?User $user): void
+    {
+        if ($user !== null && $user->role === self::ROLE_STAFF) {
+            $query->where('created_by', $user->id);
+        }
     }
 
     private function outgoingStatusOptions(): array

@@ -22,7 +22,9 @@ class RoleAndUserSeeder extends Seeder
                 'name'        => 'System Admin',
                 'password'    => Hash::make('password'),
                 'role'        => 'admin',
+                'status'      => 'active',
                 'is_approved' => true,
+                'approved_at' => now(),
             ]
         );
 
@@ -33,6 +35,7 @@ class RoleAndUserSeeder extends Seeder
                 'name'        => 'Warehouse Manager',
                 'password'    => Hash::make('password'),
                 'role'        => 'manager',
+                'status'      => 'active',
                 'is_approved' => true,
             ]
         );
@@ -44,6 +47,7 @@ class RoleAndUserSeeder extends Seeder
                 'name'        => 'Warehouse Staff',
                 'password'    => Hash::make('password'),
                 'role'        => 'staff',
+                'status'      => 'active',
                 'is_approved' => true,
             ]
         );
@@ -55,7 +59,10 @@ class RoleAndUserSeeder extends Seeder
                 'name'        => 'Default Supplier',
                 'password'    => Hash::make('password'),
                 'role'        => 'supplier',
+                'status'      => 'active',
                 'is_approved' => true,
+                'approved_at' => now(),
+                'approved_by' => 1,
             ]
         );
     

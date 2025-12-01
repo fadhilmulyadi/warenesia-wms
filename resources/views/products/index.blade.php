@@ -12,7 +12,6 @@
 @section('content')
     <div class="space-y-4">
 
-        {{-- TOOLBAR & FILTER --}}
         <x-toolbar>
             @php
                 $filters = [

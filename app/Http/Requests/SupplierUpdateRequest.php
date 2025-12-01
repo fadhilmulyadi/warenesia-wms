@@ -2,35 +2,35 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Supplier;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class SupplierRequest extends FormRequest
+class SupplierUpdateRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true;
+        /** @var \App\Models\Supplier|null $supplier */
+        $supplier = $this->route('supplier');
+
+        return $supplier
+            ? $this->user()?->can('update', $supplier) ?? false
+            : false;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        /** @var \App\Models\Supplier|null $supplier */
-        $supplier = $this->route('supplier');
+        $supplierId = $this->route('supplier')?->id;
 
         return [
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('suppliers', 'name')->ignore(optional($supplier)->id),
+                Rule::unique('suppliers', 'name')->ignore($supplierId),
             ],
             'contact_person' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],

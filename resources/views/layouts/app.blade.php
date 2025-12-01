@@ -64,15 +64,11 @@
             ]">
 
             <div class="h-16 flex items-center px-4 border-b border-slate-800">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="h-9 w-9 rounded-xl bg-teal-400 flex items-center justify-center text-slate-900 font-black text-lg">
-                        W
-                    </div>
-                    <div class="flex flex-col" x-show="sidebarOpen" x-transition>
-                        <span class="font-semibold text-lg tracking-tight">Warenesia</span>
-                        <span class="text-xs text-slate-400">Warehouse Management</span>
-                    </div>
+                <div class="flex flex-col"
+                    x-show="sidebarOpen"
+                    x-transition.opacity
+                >
+                    <span class="font-semibold text-lg tracking-tight">Warenesia</span>
                 </div>
             </div>
 
@@ -96,6 +92,15 @@
                     </span>
                     <span class="font-medium" x-show="sidebarOpen" x-transition>Dashboard</span>
                 </a>
+
+                @can('viewAny', \App\Models\User::class)
+                    <a href="{{ route('users.index') }}" class="{{ sidebar_classes(request()->routeIs('users.*')) }}">
+                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                            <x-lucide-users class="h-4 w-4" />
+                        </span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>User Management</span>
+                    </a>
+                @endcan
 
                 @php
                     $canViewIncoming = auth()->user()?->can('viewAny', \App\Models\IncomingTransaction::class);
@@ -153,12 +158,12 @@
                     </a>
                 @endcan
 
-                @can('viewAny', \App\Models\Supplier::class)
-                    <a href="{{ route('suppliers.index') }}" class="{{ sidebar_classes(request()->routeIs('suppliers.*')) }}">
+                @can('viewAny', \App\Models\Unit::class)
+                    <a href="{{ route('units.index') }}" class="{{ sidebar_classes(request()->routeIs('units.*')) }}">
                         <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-building-2 class="h-4 w-4" />
+                            <x-lucide-ruler class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Suppliers</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Units</span>
                     </a>
                 @endcan
             </nav>

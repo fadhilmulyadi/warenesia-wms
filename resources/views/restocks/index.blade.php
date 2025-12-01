@@ -4,8 +4,8 @@
 
 @section('page-header')
     <x-page-header
-        title="Data Restock"
-        description="Kelola siklus pengadaan barang ke pemasok dan monitor status pengiriman pesanan."
+        title="Data Restok"
+        description="Kelola siklus pengadaan barang ke supplier dan monitor status pengiriman pesanan."
     />
 @endsection
 
@@ -165,7 +165,6 @@
 
                         @can('viewAny', \App\Models\RestockOrder::class)
                             <x-table.td align="right">
-                                {{-- Menggunakan komponen aksi tabel --}}
                                 <x-table.actions>
                                     @can('view', $restockOrder)
                                         <x-table.action-item

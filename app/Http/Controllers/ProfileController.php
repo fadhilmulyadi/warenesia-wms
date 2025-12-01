@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfileDeleteRequest;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -16,6 +18,8 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $this->authorize('updateProfile', $request->user());
+
         return view('profile.edit', [
             'user' => $request->user(),
         ]);
@@ -26,6 +30,8 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        $this->authorize('updateProfile', $request->user());
+
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -40,24 +46,22 @@ class ProfileController extends Controller
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(ProfileDeleteRequest $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
 
-        Auth::logout();
+        $this->authorize('deleteProfile', $user);
 
-        $user->delete();
+        DB::transaction(function () use ($user, $request): void {
+            $user->delete();
+            Auth::logout();
+            $request->session()->invalidate();
+        });
 
-        $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
     }
 }
-
 
 

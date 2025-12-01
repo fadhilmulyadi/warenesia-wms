@@ -74,9 +74,9 @@
     
                             <div class="text-slate-500">Supplier</div>
                             <div class="font-medium text-slate-900">{{ optional($product->supplier)->name ?? '-' }}</div>
-    
+
                             <div class="text-slate-500">Unit</div>
-                            <div class="font-medium text-slate-900 uppercase">{{ $product->unit }}</div>
+                            <div class="font-medium text-slate-900 uppercase">{{ $product->unit->name ?? '-' }}</div>
     
                             <div class="text-slate-500">Lokasi Rak</div>
                             <div class="font-medium text-slate-900">{{ $product->rack_location ?: '-' }}</div>
@@ -137,12 +137,12 @@
                         <div class="text-slate-500">Stok Saat Ini</div>
                         <div class="flex items-center gap-2 font-semibold text-slate-900">
                             <x-lucide-package class="h-4 w-4 text-slate-400" />
-                            <span>{{ number_format($product->current_stock, 0, ',', '.') }} {{ $product->unit }}</span>
+                            <span>{{ number_format($product->current_stock, 0, ',', '.') }} {{ $product->unit->name ?? '-' }}</span>
                         </div>
 
                         <div class="text-slate-500">Minimum Stok</div>
                         <div class="font-medium text-slate-900">
-                            {{ number_format($product->min_stock, 0, ',', '.') }} {{ $product->unit }}
+                            {{ number_format($product->min_stock, 0, ',', '.') }} {{ $product->unit->name ?? '-' }}
                         </div>
                     </div>
 
