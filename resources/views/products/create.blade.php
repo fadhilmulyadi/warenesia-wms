@@ -3,55 +3,59 @@
 @section('title', 'Tambah Produk')
 
 @section('page-header')
-    <x-page-header
-        title="Tambah Produk"
-        description="Masukkan detail produk baru untuk menambahkannya ke inventaris gudang."
-    />
+    <div class="hidden md:block">
+        <x-page-header
+            title="Tambah Produk"
+            description="Tambahkan produk baru ke inventaris gudang."
+        />
+    </div>
+    <div class="md:hidden">
+        <x-mobile-header
+            title="Tambah Produk"
+            back="{{ route('products.index') }}"
+        />
+    </div>
 @endsection
 
 @section('content')
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        
-            <x-breadcrumbs :items="[
-                'Produk' => route('products.index'),
-                'Buat Baru'  => '#'
-            ]" />
+    <x-mobile.form form-id="product-form-mobile" save-label="Simpan Produk" save-icon="save">
+        <x-slot:fields>
+            <form
+                id="product-form-mobile"
+                method="POST"
+                action="{{ route('products.store') }}"
+                enctype="multipart/form-data"
+            >
+                @csrf
+                @include('products.form.form', [
+                    'product' => null,
+                    'categories' => $categories,
+                    'suppliers' => $suppliers,
+                    'units' => $units,
+                    'readonly' => false
+                ])
+            </form>
+        </x-slot:fields>
+    </x-mobile.form>
 
-            <div class="flex flex-wrap items-center gap-2 justify-end">
-                <x-action-button href="{{ route('products.index') }}" variant="secondary">
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <x-breadcrumbs :items="['Produk' => route('products.index'), 'Tambah' => '#']" />
+            <div class="flex flex-wrap gap-2 justify-end">
+                <x-action-button href="{{ route('products.index') }}" variant="secondary" icon="arrow-left">
                     Batal
-            </x-action-button>
-
-            <x-action-button type="button" onclick="document.getElementById('product-form').submit()" variant="primary" icon="save">
-                Simpan Produk
-            </x-action-button>
+                </x-action-button>
+                <x-action-button type="submit" form="product-form" variant="primary" icon="save">
+                    Simpan Produk
+                </x-action-button>
+            </div>
         </div>
-    </div>
-
-    {{-- Form --}}
-    <div class="max-w-7xl mx-auto">
-        @php
-            $categoryOptions = $categories->mapWithKeys(function ($cat) {
-                return [$cat->id => [
-                    'label' => $cat->name, 
-                    'prefix' => $cat->sku_prefix,
-                ]];
-            })->toArray();
-            $supplierOptions = $suppliers->mapWithKeys(function ($item) {
-                return [$item->id => $item->name . ($item->contact_person ? ' (' . $item->contact_person . ')' : '')];
-            })->toArray();
-            $unitOptions = $units->mapWithKeys(fn ($unit) => [$unit->id => ['label' => $unit->name]])->toArray();
-        @endphp
-        <form id="product-form" action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
             @include('products.form.form', [
                 'product' => null,
                 'categories' => $categories,
                 'suppliers' => $suppliers,
                 'units' => $units,
-                'categoryOptions' => $categoryOptions,
-                'supplierOptions' => $supplierOptions,
-                'unitOptions' => $unitOptions,
             ])
         </form>
     </div>

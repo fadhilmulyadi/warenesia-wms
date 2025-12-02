@@ -88,19 +88,11 @@
                 {{-- Aksi --}}
                 @can('viewAny', $modelClass)
                     <x-table.td align="right">
-                        <x-table.actions>
 
-                            @can('view', $transaction)
-                                <x-table.action-item
-                                    icon="eye"
-                                    :href="route($routePrefix . '.show', $transaction)"
-                                >
-                                    Lihat Detail
-                                </x-table.action-item>
-                            @endcan
-
-                            @if($transaction->isPending())
-
+                        @if($transaction->isPending())
+                            
+                            <x-table.actions>
+                                
                                 @can('update', $transaction)
                                     <x-table.action-item
                                         icon="pencil"
@@ -111,23 +103,30 @@
                                 @endcan
 
                                 @can('delete', $transaction)
-                                    <x-table.action-item
-                                        icon="trash-2"
-                                        danger="true"
-                                        on-click="if(confirm('Yakin ingin menghapus transaksi ini?')) { document.getElementById('delete-{{ $transaction->id }}').submit(); }"
+                                    <button
+                                        type="button"
+                                        class="group flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                        x-data
+                                        x-on:click="$dispatch('open-delete-modal', {
+                                            action: '{{ route($routePrefix . '.destroy', $transaction) }}',
+                                            title: '{{ $isIncoming ? 'Hapus Barang Masuk?' : 'Hapus Barang Keluar?' }}',
+                                            itemName: '#{{ $transaction->transaction_number }}',
+                                            message: 'Apakah Anda yakin ingin menghapus transaksi <b>#{{ $transaction->transaction_number }}</b>?<br>Stok produk akan dikembalikan ke posisi sebelumnya.'
+                                        })"
                                     >
+                                        <x-lucide-trash-2 class="mr-3 h-4 w-4" />
                                         Hapus
-                                    </x-table.action-item>
-
-                                    <form id="delete-{{ $transaction->id }}" action="{{ route($routePrefix . '.destroy', $transaction) }}" method="POST" class="hidden">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
+                                    </button>
                                 @endcan
 
-                            @endif
+                            </x-table.actions>
 
-                        </x-table.actions>
+                        @else
+                            <div class="flex items-center justify-end pr-3 text-slate-400 cursor-help" title="Transaksi Terkunci (Final)">
+                                <x-lucide-lock class="h-4 w-4" />
+                            </div>
+                        @endif
+
                     </x-table.td>
                 @endcan
 

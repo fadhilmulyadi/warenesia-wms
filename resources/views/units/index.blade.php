@@ -66,11 +66,11 @@
 
                                 @if(!$unit->products_count)
                                     <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                        action: '{{ route('units.destroy', $unit) }}',
-                                                        title: 'Hapus Satuan',
-                                                        message: 'Yakin ingin menghapus satuan ini?',
-                                                        itemName: '{{ $unit->name }}'
-                                                    })">
+                                                                    action: '{{ route('units.destroy', $unit) }}',
+                                                                    title: 'Hapus Satuan',
+                                                                    message: 'Yakin ingin menghapus satuan ini?',
+                                                                    itemName: '{{ $unit->name }}'
+                                                                })">
                                         Hapus
                                     </x-table.action-item>
                                 @else

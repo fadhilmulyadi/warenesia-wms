@@ -38,35 +38,9 @@ class OutgoingTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request): RedirectResponse
     {
-        $this->authorize('viewAny', OutgoingTransaction::class);
-
-        $perPage = $this->resolvePerPage(
-            $request,
-            self::DEFAULT_PER_PAGE,
-            self::MAX_PER_PAGE
-        );
-
-        [$sort, $direction] = $this->resolveSortAndDirection(
-            $request,
-            allowedSorts: ['transaction_date', 'transaction_number', 'customer_name', 'status', 'total_items', 'total_quantity', 'total_amount', 'created_at'],
-            defaultSort: 'transaction_date',
-            defaultDirection: 'desc'
-        );
-
-        $transactionsQuery = $this->buildOutgoingTransactionIndexQuery($request, $sort, $direction);
-        $this->applyStaffScope($transactionsQuery, $request->user());
-
-        $transactions = $transactionsQuery
-            ->paginate($perPage)
-            ->withQueryString();
-
-        $search = (string) $request->query('q', '');
-        $statusFilter = (string) $request->query('status', '');
-        $statusOptions = $this->outgoingStatusOptions();
-
-        return view('sales.index', compact('transactions', 'search', 'statusFilter', 'statusOptions', 'sort', 'direction', 'perPage'));
+        return redirect()->route('transactions.index', ['tab' => 'outgoing']);
     }
 
     /**
@@ -210,17 +184,50 @@ class OutgoingTransactionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(OutgoingTransactionRequest $request, OutgoingTransaction $sale): RedirectResponse
     {
-        //
+        $this->authorize('update', $sale);
+
+        if (! $sale->isPending()) {
+            return back()->withErrors(['general' => 'Hanya transaksi status Pending yang dapat diedit.']);
+        }
+
+        $validated = $request->validated();
+
+        try {
+            $this->transactionService->updateOutgoing($sale, $validated, $request->user());
+
+            return redirect()
+                ->route('sales.show', $sale)
+                ->with('success', 'Transaksi barang keluar berhasil diperbarui.');
+
+        } catch (InvalidArgumentException $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['items' => $exception->getMessage()]);
+        } catch (\Throwable $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['general' => 'Gagal memperbarui transaksi: ' . $exception->getMessage()]);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(OutgoingTransaction $sale)
     {
-        //
+        $this->authorize('delete', $sale);
+
+        if (! $sale->isPending()) {
+            return back()->withErrors(['general' => 'Hanya transaksi status Pending yang dapat dihapus.']);
+        }
+
+        $sale->delete();
+
+        return redirect()
+            ->route('transactions.index', ['tab' => 'outgoing'])
+            ->with('success', 'Transaksi barang keluar berhasil dihapus.');
     }
 
     public function approve(Request $request, OutgoingTransaction $sale): RedirectResponse

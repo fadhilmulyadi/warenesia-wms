@@ -33,12 +33,10 @@ trait HasIndexQueryHelpers
         $sort = $request->query('sort', $defaultSort);
         $direction = strtolower($request->query('direction', $defaultDirection));
 
-        // Sort yang tidak valid → fallback
         if (!in_array($sort, $allowedSorts, true)) {
             $sort = $defaultSort;
         }
 
-        // Direction aman (asc/desc)
         if (!in_array($direction, ['asc', 'desc'], true)) {
             $direction = $defaultDirection;
         }
@@ -108,6 +106,10 @@ trait HasIndexQueryHelpers
         Request $request,
         string $column = 'created_at'
     ): void {
+        if (! $request->filled('date_range')) {
+            return;
+        }
+        
         $from = $request->query('date_from');
         $to   = $request->query('date_to');
 

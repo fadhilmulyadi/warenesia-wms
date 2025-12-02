@@ -26,6 +26,7 @@
 
     $activeFilterCount = $activeStates->filter()->count();
     $hasActiveFilter = $activeFilterCount > 0;
+    $shouldShowFilters = $hasActiveFilter || request('filters_visible') === 'true';
 @endphp
 
 <form 
@@ -33,7 +34,7 @@
     action="{{ $action }}"
     class="w-full space-y-3"
     x-data="{
-        filtersVisible: {{ $hasActiveFilter ? 'true' : 'false' }},
+        filtersVisible: {{ $shouldShowFilters ? 'true' : 'false' }},
         activeMap: @js($activeStates),
         activeCount: {{ $activeFilterCount }},
 
@@ -77,7 +78,13 @@
 
             // Redirect without filter params; keep hidden inputs (e.g., sort/direction) intact
             const params = new URLSearchParams();
+            
+            // Always keep filters visible after clear all
+            params.append('filters_visible', 'true');
+
             this.$el.querySelectorAll('input[type=hidden]').forEach(input => {
+                if (container.contains(input)) return;
+                
                 if (input.name && input.value) {
                     params.append(input.name, input.value);
                 }
@@ -133,6 +140,9 @@
         {{-- Hidden Sort Preservation --}}
         @if($sort) <input type="hidden" name="sort" value="{{ $sort }}"> @endif
         @if($direction) <input type="hidden" name="direction" value="{{ $direction }}"> @endif
+        
+        {{-- Persist Filter Visibility --}}
+        <input type="hidden" name="filters_visible" :value="filtersVisible ? 'true' : 'false'">
     </div>
 
     {{-- BARIS 2: Filter Buttons (Hanya muncul jika ada definisi filters) --}}

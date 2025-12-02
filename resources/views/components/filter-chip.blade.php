@@ -24,8 +24,15 @@
         },
 
         resetInputs() {
-            $el.querySelectorAll('input[type=checkbox]').forEach(el => el.checked = false);
+            $el.querySelectorAll('input').forEach(el => {
+                if (['checkbox', 'radio'].includes(el.type)) {
+                    el.checked = false;
+                } else if (!['submit', 'button'].includes(el.type)) {
+                    el.value = '';
+                }
+            });
             $el.querySelectorAll('select').forEach(el => el.selectedIndex = -1);
+            $el.querySelectorAll('textarea').forEach(el => el.value = '');
         },
 
         updateLabel() {

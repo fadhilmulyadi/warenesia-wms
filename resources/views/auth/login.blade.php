@@ -30,7 +30,18 @@
                 <p class="text-teal-50 text-lg leading-relaxed font-light">
                     Sistem manajemen gudang terintegrasi untuk tracking stok, pemenuhan pesanan, dan laporan real-time yang akurat.
                 </p>
-
+                
+                {{-- Footer Kecil (Fitur Utama) --}}
+                <div class="mt-10 pt-8 border-t border-white/10 flex gap-6 text-sm font-medium text-teal-200">
+                    <div class="flex items-center gap-2">
+                        <x-lucide-bar-chart-3 class="w-5 h-5" />
+                        <span>Real-time Data</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <x-lucide-shield-check class="w-5 h-5" />
+                        <span>Aman & Terpercaya</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -53,6 +64,7 @@
 
                 <x-auth-session-status class="mb-4" :status="session('status')" />
 
+                {{-- PERUBAHAN: space-y-5 -> space-y-4 (Menghemat ruang vertikal) --}}
                 <form method="POST" action="{{ route('login') }}" class="space-y-4">
                     @csrf
 

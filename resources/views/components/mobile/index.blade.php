@@ -12,7 +12,6 @@
     $fabEnabled = $config['fab']['enabled'] ?? false;
     $emptyState = $config['empty_state'] ?? [];
     
-    // Check if any filter is active
     $activeFilterCount = 0;
     if ($filtersEnabled) {
         foreach ($config['filters'] as $key => $filter) {
@@ -34,7 +33,6 @@
 @endphp
 
 <div class="pb-24 space-y-4">
-    {{-- Search Bar --}}
     @if($searchEnabled)
         <form action="{{ $emptyState['reset_route'] ?? url()->current() }}" method="GET">
             @foreach($config['hidden_query'] ?? [] as $key => $value)
@@ -56,7 +54,6 @@
         </form>
     @endif
 
-    {{-- Filter & Sort Buttons --}}
     @if($filtersEnabled || $sortEnabled)
         <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
             @if($filtersEnabled)
@@ -86,7 +83,6 @@
         </div>
     @endif
 
-    {{-- List Items --}}
     @if($items->isEmpty())
         <div class="flex flex-col items-center justify-center py-12 text-center">
             <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
@@ -114,7 +110,6 @@
             @endforeach
         </div>
 
-        {{-- Pagination --}}
         @if($items instanceof \Illuminate\Pagination\AbstractPaginator && $items->hasPages())
             <div class="mt-4">
                 {{ $items->links() }}
@@ -122,7 +117,6 @@
         @endif
     @endif
 
-    {{-- FAB --}}
     @if($fabEnabled)
         <a
             href="{{ $config['fab']['route'] }}"
@@ -135,16 +129,13 @@
         </a>
     @endif
 
-    {{-- Filter Bottom Sheet --}}
     @if($filtersEnabled)
         <x-mobile.bottom-sheet name="filter-sheet" title="Filter Data">
             <form action="{{ $emptyState['reset_route'] ?? url()->current() }}" method="GET" class="space-y-6">
-                {{-- Preserve Search --}}
                 @if($searchEnabled && request()->filled($config['search']['param']))
                     <input type="hidden" name="{{ $config['search']['param'] }}" value="{{ request($config['search']['param']) }}">
                 @endif
 
-                {{-- Preserve Hidden Query --}}
                 @foreach($config['hidden_query'] ?? [] as $key => $value)
                     <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                 @endforeach
@@ -186,6 +177,7 @@
                                 @endforeach
                             </select>
                         @elseif($filter['type'] === 'date-range')
+                            <input type="hidden" name="date_range" value="1">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <input
@@ -228,7 +220,6 @@
         </x-mobile.bottom-sheet>
     @endif
 
-    {{-- Sort Bottom Sheet --}}
     @if($sortEnabled)
         <x-mobile.bottom-sheet name="sort-sheet" title="Urutkan Data">
             <form action="{{ $emptyState['reset_route'] ?? url()->current() }}" method="GET">
@@ -237,7 +228,6 @@
                     <input type="hidden" name="{{ $config['search']['param'] }}" value="{{ request($config['search']['param']) }}">
                 @endif
 
-                {{-- Preserve Filters --}}
                 @if($filtersEnabled)
                     @foreach($config['filters'] as $key => $filter)
                         @if(!$filter['enabled']) @continue @endif
@@ -246,14 +236,30 @@
                             @foreach((array) request($filter['param'], []) as $val)
                                 <input type="hidden" name="{{ $filter['param'] }}[]" value="{{ $val }}">
                             @endforeach
+
                         @elseif($filter['type'] === 'select')
                             @if(request()->filled($filter['param']))
-                                <input type="hidden" name="{{ $filter['param'] }}" value="{{ request($filter['param']) }}">
+                                @php
+                                    $selectedValue = request($filter['param']);
+                                @endphp
+                                @if(is_array($selectedValue))
+                                    @foreach($selectedValue as $val)
+                                        <input type="hidden" name="{{ $filter['param'] }}[]" value="{{ $val }}">
+                                    @endforeach
+                                @else
+                                    <input type="hidden" name="{{ $filter['param'] }}" value="{{ $selectedValue }}">
+                                @endif
                             @endif
+
                         @elseif($filter['type'] === 'date-range')
+                            @if(request()->filled($filter['param'][0]) || request()->filled($filter['param'][1]))
+                                <input type="hidden" name="date_range" value="1">
+                            @endif
+
                             @if(request()->filled($filter['param'][0]))
                                 <input type="hidden" name="{{ $filter['param'][0] }}" value="{{ request($filter['param'][0]) }}">
                             @endif
+
                             @if(request()->filled($filter['param'][1]))
                                 <input type="hidden" name="{{ $filter['param'][1] }}" value="{{ request($filter['param'][1]) }}">
                             @endif
@@ -261,7 +267,6 @@
                     @endforeach
                 @endif
                 
-                {{-- Preserve Hidden Query --}}
                 @foreach($config['hidden_query'] ?? [] as $key => $value)
                     <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                 @endforeach
@@ -288,7 +293,6 @@
                         </button>
                     @endforeach
                     
-                    {{-- Hidden inputs for sort and direction --}}
                     <input type="hidden" name="{{ $config['sort']['param'] }}" value="{{ $currentSort }}">
                     <input type="hidden" name="{{ $config['sort']['direction_param'] }}" value="{{ $currentDirection }}">
                 </div>

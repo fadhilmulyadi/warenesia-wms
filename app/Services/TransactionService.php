@@ -276,9 +276,21 @@ class TransactionService
         $totalQuantity = 0;
         $totalAmount = 0.0;
 
+        $productIds = array_column($itemsData, 'product_id');
+        $products = \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id');
+
         foreach ($itemsData as $itemData) {
             $quantity = (int) $itemData['quantity'];
             $unitCost = isset($itemData['unit_cost']) ? (float) $itemData['unit_cost'] : 0.0;
+
+            if ($unitCost <= 0) {
+                $product = $products[$itemData['product_id']] ?? null;
+                
+                if ($product) {
+                    $unitCost = (float) $product->purchase_price;
+                }
+            }
+            
             $lineTotal = $quantity * $unitCost;
 
             $totalQuantity += $quantity;
@@ -328,6 +340,81 @@ class TransactionService
             'total_quantity' => $totalQuantity,
             'total_amount' => $totalAmount,
         ];
+    }
+
+    public function updateIncoming(IncomingTransaction $transaction, array $validatedData, User $updater): IncomingTransaction
+    {
+        if (! $transaction->isPending()) {
+            throw new DomainException('Only pending transactions can be updated.');
+        }
+
+        $itemsData = $this->extractItems($validatedData);
+
+        return DB::transaction(function () use ($transaction, $validatedData, $itemsData, $updater) {
+            $transaction->update([
+                'transaction_date' => $validatedData['transaction_date'],
+                'supplier_id'      => $validatedData['supplier_id'],
+                'notes'            => $validatedData['notes'] ?? null,
+            ]);
+
+            $transaction->items()->delete();
+
+            $totals = $this->createIncomingItems($transaction, $itemsData);
+
+            $transaction->update([
+                'total_items'    => $totals['total_items'],
+                'total_quantity' => $totals['total_quantity'],
+                'total_amount'   => $totals['total_amount'],
+            ]);
+
+            $this->logActivity(
+                $updater,
+                'UPDATE_INCOMING',
+                $this->formatDescription($updater, 'UPDATE', 'IncomingTransaction #' . $transaction->transaction_number),
+                $transaction
+            );
+
+            return $transaction;
+        });
+    }
+
+    /**
+     * Memperbarui transaksi barang keluar (Sales).
+     */
+    public function updateOutgoing(OutgoingTransaction $transaction, array $validatedData, User $updater): OutgoingTransaction
+    {
+        if (! $transaction->isPending()) {
+            throw new DomainException('Only pending transactions can be updated.');
+        }
+
+        $itemsData = $this->extractItems($validatedData);
+
+        return DB::transaction(function () use ($transaction, $validatedData, $itemsData, $updater) {
+            $transaction->update([
+                'transaction_date' => $validatedData['transaction_date'],
+                'customer_name'    => $validatedData['customer_name'], // Sales pakai customer_name
+                'notes'            => $validatedData['notes'] ?? null,
+            ]);
+
+            $transaction->items()->delete();
+
+            $totals = $this->createOutgoingItems($transaction, $itemsData);
+
+            $transaction->update([
+                'total_items'    => $totals['total_items'],
+                'total_quantity' => $totals['total_quantity'],
+                'total_amount'   => $totals['total_amount'],
+            ]);
+
+            $this->logActivity(
+                $updater,
+                'UPDATE_OUTGOING',
+                $this->formatDescription($updater, 'UPDATE', 'OutgoingTransaction #' . $transaction->transaction_number),
+                $transaction
+            );
+
+            return $transaction;
+        });
     }
 
     private function formatDescription(User $user, string $action, string $subjectLabel): string

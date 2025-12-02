@@ -70,8 +70,6 @@ class ProductController extends Controller
             'direction',
             'perPage'
         ));
-
-
     }
 
     /**

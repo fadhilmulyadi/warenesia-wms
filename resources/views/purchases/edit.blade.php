@@ -1,60 +1,174 @@
+
+
 @extends('layouts.app')
 
-@section('title', 'Edit Transaki Masuk')
+@section('title', 'Edit Pembelian')
 
 @section('page-header')
-    <x-page-header
-        title="Edit Transaksi Masuk"
-        :description="'Edit detail transaksi: ' . $purchase->transaction_number"
-    />
+    <div class="hidden md:block">
+        <x-page-header
+            title="Edit Pembelian"
+            :description="'Perbarui informasi pembelian #' . $purchase->id"
+        />
+    </div>
+    <div class="md:hidden">
+        <x-mobile-header
+            title="Edit Pembelian"
+            back="{{ route('transactions.index', ['tab' => 'purchases']) }}"
+        />
+    </div>
 @endsection
 
 @section('content')
-    @php
-        $currentItems = $purchase->items->map(function($item) {
-            return [
-                'product_id' => $item->product_id,
-                'quantity' => (int) $item->quantity,
-                'unit_cost' => (float) $item->unit_cost,
-            ];
-        })->values()->toArray();
+    {{-- MOBILE VERSION --}}
+    <x-mobile.form
+        form-id="edit-form-mobile"
+        save-label="Simpan Perubahan"
+        save-icon="save"
+        :show-delete="true"
+        delete-action="{{ route('purchases.destroy', $purchase) }}"
+        delete-label="Hapus Pembelian"
+        delete-confirm="Hapus pembelian ini?"
+    >
+        <x-slot:fields>
+            @if($errors->any())
+                <div class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 mb-4">
+                    Terdapat kesalahan input. Periksa kembali formulir di bawah.
+                </div>
+            @endif
 
-        $initialItems = old('items', $currentItems);
-      
-    @endphp
-    
-    <div class="max-w-5xl mx-auto">
-        <div class="flex flex-wrap items-center justify-end gap-2 mb-4">
-            <x-action-button href="{{ route('transactions.index') }}" variant="secondary">
-                Batal
-            </x-action-button>
-            <x-action-button type="button" onclick="document.getElementById('edit-form').submit()" variant="primary" icon="save">
-                Simpan Perubahan
-            </x-action-button>
-        </div>
-
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-4 shadow-sm">
-            <form id="edit-form" method="POST" action="{{ route('purchases.update', $purchase) }}">
+            <form
+                id="edit-form-mobile"
+                method="POST"
+                action="{{ route('purchases.update', $purchase) }}"
+                class="space-y-6"
+            >
                 @csrf
                 @method('PUT')
+                
+                {{-- Informasi Transaksi --}}
+                <x-card class="p-4 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                        Informasi Transaksi
+                    </h3>
 
-                <x-transactions.form-header :value="['date' => $purchase->transaction_date->format('Y-m-d'), 'notes' => $purchase->notes]">
-                    <x-input-label value="Pilih Supplier" class="mb-1" />
-                    <x-custom-select 
-                        name="supplier_id" 
-                        :options="$suppliers->pluck('name', 'id')->toArray()" 
-                        placeholder="Cari Supplier..." 
+                    <div class="space-y-4">
+                        {{-- Tanggal --}}
+                        <div>
+                            <x-input-label for="transaction_date_mobile" value="Tanggal Transaksi" />
+                            <input
+                                type="date"
+                                id="transaction_date_mobile"
+                                name="transaction_date"
+                                value="{{ old('transaction_date', $purchase->transaction_date->format('Y-m-d')) }}"
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                required
+                            >
+                            <x-input-error :messages="$errors->get('transaction_date')" class="mt-2" />
+                        </div>
+
+                        {{-- Supplier --}}
+                        <div>
+                            <x-input-label for="supplier_id_mobile" value="Supplier" />
+                            <x-custom-select
+                                id="supplier_id_mobile"
+                                name="supplier_id"
+                                :options="$suppliers->pluck('name', 'id')->toArray()"
+                                :value="old('supplier_id', $purchase->supplier_id)"
+                                placeholder="Pilih Supplier"
+                                class="mt-1 block w-full"
+                                required
+                            />
+                            <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
+                        </div>
+
+                        {{-- Catatan --}}
+                        <div>
+                            <x-input-label for="notes_mobile" value="Catatan / Referensi" />
+                            <textarea
+                                id="notes_mobile"
+                                name="notes"
+                                rows="2"
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                            >{{ old('notes', $purchase->notes) }}</textarea>
+                            <x-input-error :messages="$errors->get('notes')" class="mt-2" />
+                        </div>
+                    </div>
+                </x-card>
+
+                {{-- Daftar Item --}}
+                <x-card class="p-4 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                        Daftar Item
+                    </h3>
+                    
+                    <div class="overflow-x-auto -mx-4 px-4">
+                        <x-transactions.items-table
+                            :products="$products"
+                            :initial-items="$purchase->items->map(fn($item) => [
+                                'product_id' => $item->product_id,
+                                'quantity' => $item->quantity,
+                                'unit_cost' => $item->unit_cost,
+                            ])->toArray()"
+                        />
+                    </div>
+                </x-card>
+            </form>
+        </x-slot:fields>
+    </x-mobile.form>
+
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <x-breadcrumbs :items="[
+                'Pembelian' => route('transaction.index', ['tab' => 'incoming']),
+                'Edit #' . $purchase->id => '#',
+            ]" />
+            <div class="flex flex-wrap gap-2 justify-end">
+                <x-action-button href="{{ route('transaction.index', ['tab' => 'incoming']) }}" variant="secondary" icon="arrow-left">
+                    Batal
+                </x-action-button>
+                <x-action-button type="submit" form="edit-form" variant="primary" icon="save">
+                    Simpan Perubahan
+                </x-action-button>
+            </div>
+        </div>
+
+        <form
+            id="edit-form"
+            method="POST"
+            action="{{ route('purchases.update', $purchase) }}"
+            class="space-y-6"
+        >
+            @csrf
+            @method('PUT')
+            
+            <x-card class="p-6">
+                <x-transactions.form-header
+                    :value="['date' => $purchase->transaction_date->format('Y-m-d'), 'notes' => $purchase->notes]"
+                >
+                    <x-input-label value="Supplier" class="mb-1" />
+                    <x-custom-select
+                        name="supplier_id"
+                        :options="$suppliers->pluck('name', 'id')->toArray()"
                         :value="old('supplier_id', $purchase->supplier_id)"
+                        placeholder="Pilih Supplier"
+                        required
                     />
                 </x-transactions.form-header>
 
-                <x-transactions.items-table 
-                    :products="$products" 
-                    price-label="Harga Beli (HPP)" 
-                    price-field="unit_cost" 
-                    :initial-items="$initialItems"
-                />
-            </form>
-        </div>
+                <div class="mt-8">
+                    <h3 class="text-base font-semibold text-slate-900 mb-4">Daftar Item</h3>
+                    <x-transactions.items-table
+                        :products="$products"
+                        :initial-items="$purchase->items->map(fn($item) => [
+                            'product_id' => $item->product_id,
+                            'quantity' => $item->quantity,
+                            'unit_cost' => $item->unit_cost,
+                        ])->toArray()"
+                    />
+                </div>
+            </x-card>
+        </form>
     </div>
 @endsection

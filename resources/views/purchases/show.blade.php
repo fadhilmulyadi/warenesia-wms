@@ -10,6 +10,35 @@
 @endsection
 
 @section('content')
+{{-- AREA DEBUGGING USER --}}
+    <x-card class="p-4 bg-blue-100 border-blue-400 text-blue-900 mb-6">
+        <h3 class="font-bold text-lg border-b border-blue-400 pb-2 mb-2">👤 Debug Informasi Login</h3>
+        <div class="font-mono text-sm">
+            <p><strong>Nama Akun:</strong> {{ auth()->user()->name }}</p>
+            <p><strong>Email:</strong> {{ auth()->user()->email }}</p>
+            <p><strong>Role (Jabatan):</strong> <span class="bg-white px-1 rounded font-bold">{{ auth()->user()->role }}</span></p>
+            <p><strong>User ID:</strong> {{ auth()->user()->id }}</p>
+            
+            <div class="mt-2 pt-2 border-t border-blue-300">
+                <strong>Cek Izin (Policy) untuk Transaksi Ini:</strong>
+                <ul class="list-disc pl-5 mt-1">
+                    <li>
+                        Boleh Verifikasi (verify)? 
+                        @can('verify', $purchase) <span class="text-green-600 font-bold">YA</span> @else <span class="text-red-600 font-bold">TIDAK</span> @endcan
+                    </li>
+                    <li>
+                        Boleh Menolak (reject)? 
+                        @can('reject', $purchase) <span class="text-green-600 font-bold">YA</span> @else <span class="text-red-600 font-bold">TIDAK</span> @endcan
+                    </li>
+                    <li>
+                        Boleh Selesai (complete)? 
+                        @can('complete', $purchase) <span class="text-green-600 font-bold">YA</span> @else <span class="text-red-600 font-bold">TIDAK</span> @endcan
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </x-card>
+    {{-- END DEBUGGING --}}
     <div class="max-w-6xl mx-auto space-y-6 text-sm text-slate-700">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <x-breadcrumbs :items="[
@@ -47,12 +76,12 @@
                                 @csrf
                                 @method('PATCH')
                                 <x-action-button
-                                    type="button"
+                                    type="submit"
                                     variant="primary"
                                     icon="check"
-                                    onclick="return confirm('Verify this transaction and update stock?')"
+                                    onclick="return confirm('Verifikasi transaksi ini dan perbarui stok?')"
                                 >
-                                    Verifikasi & tambah stok
+                                    Verifikasi
                                 </x-action-button>
                             </form>
                         @endcan
@@ -62,7 +91,7 @@
                                 @csrf
                                 @method('PATCH')
                                 <x-action-button
-                                    type="button"
+                                    type="submit"
                                     variant="secondary"
                                     icon="check-circle"
                                     onclick="return confirm('Mark this transaction as completed?')"
@@ -87,7 +116,7 @@
                                     placeholder="Alasan (opsional)"
                                 >
                                 <x-action-button
-                                    type="button"
+                                    type="submit"
                                     variant="outline-danger"
                                     icon="x"
                                     onclick="return confirm('Reject this transaction?')"

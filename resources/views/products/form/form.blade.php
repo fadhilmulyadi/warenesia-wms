@@ -56,10 +56,10 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+    <div class="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
         
         {{-- KOLOM KIRI --}}
-        <div class="lg:col-span-2 flex flex-col gap-6">
+        <div class="order-1 lg:col-span-2 flex flex-col gap-6">
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm divide-y divide-slate-100 overflow-hidden h-full">
                 
                 @include('products.form.general', ['product' => $target, 'readonly' => $readonly])
@@ -70,12 +70,12 @@
         </div>
 
         {{-- KOLOM KANAN --}}
-        <div class="flex flex-col gap-6 h-full">
-            <div class="shrink-0">
+        <div class="order-2 flex flex-col gap-6 h-full">
+            <div class="shrink-0 order-2 md:order-1">
                 @include('products.form.media', ['product' => $target, 'readonly' => $readonly])
             </div>
             
-            <div class="flex-1 min-h-0">
+            <div class="flex-1 min-h-0 order-1 md:order-2">
                 @include('products.form.sidebar', [
                     'product' => $target,
                     'readonly' => $readonly,

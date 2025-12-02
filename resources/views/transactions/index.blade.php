@@ -122,14 +122,14 @@
                             <x-form.date
                                 name="date_from"
                                 x-ref="from"
-                                :value="request('date_from')"
+                                :value="request('date_range') ? request('date_from') : ''"
                                 placeholder="Dari tanggal"
                                 x-on:change="updateMeta()"
                             />
                             <x-form.date
                                 name="date_to"
                                 x-ref="to"
-                                :value="request('date_to')"
+                                :value="request('date_range') ? request('date_to') : ''"
                                 placeholder="Sampai tanggal"
                                 x-on:change="updateMeta()"
                             />
@@ -188,6 +188,8 @@
             </div>
         @endif
     </div>
+
+    <x-confirm-delete-modal />
 
 </div>
 @endsection

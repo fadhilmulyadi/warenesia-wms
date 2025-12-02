@@ -408,10 +408,10 @@ class MobileIndexConfig
                 'icon' => 'shopping-cart',
                 'title' => 'Tidak ada transaksi pembelian.',
                 'description' => 'Coba ubah filter atau catat transaksi baru.',
-                'reset_route' => route('purchases.index'),
+                'reset_route' => route('transactions.index', ['tab' => 'incoming']),
             ],
 
-            'hidden_query' => [],
+            'hidden_query' => ['tab' => 'incoming'],
         ];
     }
 
@@ -488,10 +488,10 @@ class MobileIndexConfig
                 'icon' => 'trending-up',
                 'title' => 'Tidak ada transaksi penjualan.',
                 'description' => 'Coba ubah filter atau catat transaksi baru.',
-                'reset_route' => route('sales.index'),
+                'reset_route' => route('transactions.index', ['tab' => 'outgoing']),
             ],
 
-            'hidden_query' => [],
+            'hidden_query' => ['tab' => 'outgoing'],
         ];
     }
 

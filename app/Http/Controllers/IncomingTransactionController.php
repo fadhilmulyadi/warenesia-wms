@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Redirect;
 use InvalidArgumentException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -37,36 +38,9 @@ class IncomingTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request): RedirectResponse
     {
-        $this->authorize('viewAny', IncomingTransaction::class);
-
-        $perPage = $this->resolvePerPage(
-            $request,
-            self::DEFAULT_PER_PAGE,
-            self::MAX_PER_PAGE
-        );
-
-        [$sort, $direction] = $this->resolveSortAndDirection(
-            $request,
-            allowedSorts: ['transaction_date', 'transaction_number', 'status', 'total_items', 'total_quantity', 'total_amount', 'created_at'],
-            defaultSort: 'transaction_date',
-            defaultDirection: 'desc'
-        );
-
-        $transactionsQuery = $this->buildIncomingTransactionIndexQuery($request, $sort, $direction);
-
-        $this->applyStaffScope($transactionsQuery, $request->user());
-
-        $transactions = $transactionsQuery
-            ->paginate($perPage)
-            ->withQueryString();
-
-        $search = (string) $request->query('q', '');
-        $statusFilter = (string) $request->query('status', '');
-        $statusOptions = $this->incomingStatusOptions();
-
-        return view('purchases.index', compact('transactions', 'search', 'statusFilter', 'statusOptions', 'sort', 'direction', 'perPage'));
+        return redirect()->route('transactions.index', ['tab' => 'incoming']);
     }
 
     /**
@@ -212,17 +186,46 @@ class IncomingTransactionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(IncomingTransactionRequest $request, IncomingTransaction $purchase): RedirectResponse
     {
-        //
+        $this->authorize('update', $purchase);
+
+        if (! $purchase->isPending()) {
+            return back()->withErrors(['general' => 'Only pending transactions can be edited.']);
+        }
+
+        $validated = $request->validated();
+
+        try {
+            $this->transactionService->updateIncoming($purchase, $validated, $request->user());
+
+            return redirect()
+                ->route('purchases.show', $purchase)
+                ->with('success', 'Transaksi berhasil diperbarui.');
+
+        } catch (InvalidArgumentException $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['items' => $exception->getMessage()]);
+        } catch (\Throwable $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['general' => 'Gagal memperbarui transaksi: ' . $exception->getMessage()]);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(IncomingTransaction $purchase)
     {
-        //
+        $this->authorize('delete', $purchase);
+
+        $purchase->delete();
+
+        return redirect()
+            ->route('transactions.index', ['tab' => 'incoming'])
+            ->with('success', 'Transaksi berhasil dihapus.');
     }
 
     public function verify(Request $request, IncomingTransaction $purchase): RedirectResponse
@@ -263,22 +266,22 @@ class IncomingTransactionController extends Controller
         }
     }
 
-    // public function reject(Request $request, IncomingTransaction $purchase): RedirectResponse
-    // {
-    //     $this->authorize('reject', $purchase);
+    public function reject(Request $request, IncomingTransaction $purchase): RedirectResponse
+    {
+        $this->authorize('reject', $purchase);
 
-    //     try {
-    //         $this->transactionService->rejectIncoming($purchase, $request->user(), $request->input('reason'));
+        try {
+            $this->transactionService->rejectIncoming($purchase, $request->user(), $request->input('reason'));
 
-    //         return redirect()
-    //             ->route('purchases.show', $purchase)
-    //             ->with('success', 'Transaction rejected.');
-    //     } catch (DomainException $exception) {
-    //         return redirect()
-    //             ->route('purchases.show', $purchase)
-    //             ->withErrors(['general' => $exception->getMessage()]);
-    //     }
-    // }
+            return redirect()
+                ->route('purchases.show', $purchase)
+                ->with('success', 'Transaction rejected.');
+        } catch (DomainException $exception) {
+            return redirect()
+                ->route('purchases.show', $purchase)
+                ->withErrors(['general' => $exception->getMessage()]);
+        }
+    }
 
     private function buildIncomingTransactionIndexQuery(
         Request $request,

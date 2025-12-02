@@ -3,69 +3,101 @@
 @section('title', 'Catat Barang Keluar')
 
 @section('page-header')
-    <x-page-header
-        title="Barang Keluar Baru"
-        description="Buat transaksi penjualan ke customer."
-    />
+    <x-page-header title="Barang Keluar Baru" description="Buat transaksi penjualan ke customer." />
 @endsection
 
 @section('content')
-    @php
-        $initialItems = old('items', [
-            [
-                'product_id' => $prefilledProductId ?? null,
-                'quantity' => $prefilledQuantity ?? 1,
-                'unit_price' => $prefilledUnitPrice ?? null,
-            ],
-        ]);
+    {{-- MOBILE VERSION --}}
+    <x-mobile.form form-id="transaction-form-mobile" save-label="Simpan Penjualan" save-icon="save">
+        <x-slot:fields>
+            @if($errors->any())
+                <div class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 mb-4">
+                    Terdapat kesalahan input. Periksa kembali formulir di bawah.
+                </div>
+            @endif
 
-        $transactionDate = old('transaction_date', $today);
-        $notes = old('notes');
-        $customerName = old('customer_name', $prefilledCustomerName);
-    @endphp
+            <form id="transaction-form-mobile" method="POST" action="{{ route('sales.store') }}" class="space-y-6">
+                @csrf
 
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                {{-- Informasi Transaksi --}}
+                <x-card class="p-4 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                        Informasi Transaksi
+                    </h3>
 
-        {{-- Breadcrumb --}}
-        <x-breadcrumbs :items="[
-            'Transaksi' => route('transactions.index', ['tab' => 'outgoing']),
-            'Buat Baru' => '#',
-        ]" />
+                    <div class="space-y-4">
+                        {{-- Tanggal --}}
+                        <div>
+                            <x-input-label for="transaction_date_mobile" value="Tanggal Transaksi" />
+                            <input type="date" id="transaction_date_mobile" name="transaction_date"
+                                value="{{ date('Y-m-d') }}"
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                required>
+                            <x-input-error :messages="$errors->get('transaction_date')" class="mt-2" />
+                        </div>
 
-        <div class="flex flex-wrap items-center gap-2 justify-end">
-            <x-action-button href="{{ route('transactions.index') }}" variant="secondary" icon="arrow-left">
-                Kembali
-            </x-action-button>
+                        {{-- Customer --}}
+                        <div>
+                            <x-input-label for="customer_name_mobile" value="Nama Customer" />
+                            <input type="text" id="customer_name_mobile" name="customer_name"
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                placeholder="Nama Customer (Opsional)">
+                            <x-input-error :messages="$errors->get('customer_name')" class="mt-2" />
+                        </div>
 
-            <x-action-button type="button" onclick="submitFormWithValidation('transaction-form')" variant="primary" icon="save">
-                Simpan Data
-            </x-action-button>
+                        {{-- Catatan --}}
+                        <div>
+                            <x-input-label for="notes_mobile" value="Catatan / Referensi" />
+                            <textarea id="notes_mobile" name="notes" rows="2"
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                placeholder="Contoh: No. Resi, Keterangan..."></textarea>
+                            <x-input-error :messages="$errors->get('notes')" class="mt-2" />
+                        </div>
+                    </div>
+                </x-card>
+
+                {{-- Daftar Item --}}
+                <x-card class="p-4 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                        Daftar Item
+                    </h3>
+
+                    <div class="overflow-x-auto -mx-4 px-4">
+                        <x-transactions.items-table :products="$products" />
+                    </div>
+                </x-card>
+            </form>
+        </x-slot:fields>
+    </x-mobile.form>
+
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <x-breadcrumbs :items="['Penjualan' => route('sales.index'), 'Buat Baru' => '#']" />
+            <div class="flex flex-wrap gap-2 justify-end">
+                <x-action-button href="{{ route('sales.index') }}" variant="secondary" icon="arrow-left">
+                    Kembali
+                </x-action-button>
+                <x-action-button type="submit" form="transaction-form" variant="primary" icon="save">
+                    Simpan Data
+                </x-action-button>
+            </div>
         </div>
-    </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 max-w-5xl mx-auto">
-
-        <form id="transaction-form" action="{{ route('sales.store') }}" method="POST" >
+        <form id="transaction-form" method="POST" action="{{ route('sales.store') }}" class="space-y-6">
             @csrf
 
-            <x-transactions.form-header :value="['date' => $transactionDate, 'notes' => $notes]">
-                <x-input-label value="Customer" class="mb-1" />
-                <x-text-input
-                    name="customer_name"
-                    type="text"
-                    class="w-full"
-                    :value="$customerName"
-                    placeholder="Nama Customer"
-                />
-            </x-transactions.form-header>
+            <x-card class="p-6">
+                <x-transactions.form-header>
+                    <x-input-label value="Nama Customer" class="mb-1" />
+                    <x-text-input name="customer_name" placeholder="Nama Customer (Opsional)" class="w-full" />
+                </x-transactions.form-header>
 
-            <x-transactions.items-table 
-                :products="$products" 
-                price-label="Harga Jual" 
-                price-field="unit_price" 
-                :initial-items="$initialItems"
-            />
-            
+                <div class="mt-8">
+                    <h3 class="text-base font-semibold text-slate-900 mb-4">Daftar Item</h3>
+                    <x-transactions.items-table :products="$products" />
+                </div>
+            </x-card>
         </form>
     </div>
 @endsection
