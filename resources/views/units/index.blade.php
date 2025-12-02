@@ -3,33 +3,31 @@
 @section('title', 'Satuan Produk')
 
 @section('page-header')
-    <x-page-header
-        title="Satuan Produk"
-        description="Kelola daftar satuan yang digunakan pada master produk."
-    />
+    <x-page-header title="Satuan Produk" description="Kelola daftar satuan yang digunakan pada master produk." />
 @endsection
 
 @section('content')
-    <div class="space-y-4 text-xs max-w-6xl mx-auto">
+    @php
+        $mobileIndexConfig = \App\Support\MobileIndexConfig::units();
+    @endphp
+
+    {{-- MOBILE VERSION --}}
+    <div class="md:hidden">
+        <x-mobile.index :items="$units" :config="$mobileIndexConfig" card-view="mobile.units.card" />
+    </div>
+
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-4 text-xs max-w-6xl mx-auto">
 
         {{-- Toolbar: search + tombol tambah (mirip restock index) --}}
         <x-toolbar>
             <div class="flex flex-wrap items-center justify-between gap-3 w-full">
                 <form method="GET" action="{{ route('units.index') }}" class="w-full sm:w-auto">
-                    <x-search-bar
-                        name="q"
-                        :value="$search"
-                        placeholder="Cari satuan..."
-                        class="w-full sm:w-72"
-                    />
+                    <x-search-bar name="q" :value="$search" placeholder="Cari satuan..." class="w-full sm:w-72" />
                 </form>
 
                 <div class="flex flex-wrap gap-2 justify-end">
-                    <x-action-button
-                        href="{{ route('units.create') }}"
-                        variant="primary"
-                        icon="plus"
-                    >
+                    <x-action-button href="{{ route('units.create') }}" variant="primary" icon="plus">
                         Tambah Satuan
                     </x-action-button>
                 </div>
@@ -62,24 +60,17 @@
 
                         <x-table.td align="right">
                             <x-table.actions>
-                                <x-table.action-item
-                                    icon="pencil"
-                                    href="{{ route('units.edit', $unit) }}"
-                                >
+                                <x-table.action-item icon="pencil" href="{{ route('units.edit', $unit) }}">
                                     Edit
                                 </x-table.action-item>
 
                                 @if(!$unit->products_count)
-                                    <x-table.action-item
-                                        icon="trash-2"
-                                        danger="true"
-                                        x-on:click="$dispatch('open-delete-modal', { 
-                                            action: '{{ route('units.destroy', $unit) }}',
-                                            title: 'Hapus Satuan',
-                                            message: 'Yakin ingin menghapus satuan ini?',
-                                            itemName: '{{ $unit->name }}'
-                                        })"
-                                    >
+                                    <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
+                                                        action: '{{ route('units.destroy', $unit) }}',
+                                                        title: 'Hapus Satuan',
+                                                        message: 'Yakin ingin menghapus satuan ini?',
+                                                        itemName: '{{ $unit->name }}'
+                                                    })">
                                         Hapus
                                     </x-table.action-item>
                                 @else

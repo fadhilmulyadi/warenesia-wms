@@ -10,7 +10,21 @@
 @endsection
     
 @section('content')
-    <div class="space-y-4">
+    @php
+        $mobileIndexConfig = \App\Support\MobileIndexConfig::suppliers();
+    @endphp
+
+    {{-- MOBILE VERSION --}}
+    <div class="md:hidden">
+        <x-mobile.index
+            :items="$suppliers"
+            :config="$mobileIndexConfig"
+            card-view="mobile.suppliers.card"
+        />
+    </div>
+
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-4">
 
         <x-toolbar>
             <form method="GET" action="{{ route('supplier.index') }}" class="flex-1 max-w-sm">
@@ -40,7 +54,7 @@
             @endcan
         </div>
     </div>
-    <div class="max-w-6xl mx-auto space-y-4 text-xs">
+    <div class="hidden md:block max-w-6xl mx-auto space-y-4 text-xs">
         {{-- @if(session('success'))
             <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-800">
                 {{ session('success') }}

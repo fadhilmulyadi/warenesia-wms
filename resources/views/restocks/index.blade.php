@@ -10,7 +10,21 @@
 @endsection
 
 @section('content')
-    <div class="space-y-4 text-xs max-w-6xl mx-auto">
+    @php
+        $mobileIndexConfig = \App\Support\MobileIndexConfig::restocks($statusOptions);
+    @endphp
+
+    {{-- MOBILE VERSION --}}
+    <div class="md:hidden">
+        <x-mobile.index
+            :items="$restockOrders"
+            :config="$mobileIndexConfig"
+            card-view="mobile.restocks.card"
+        />
+    </div>
+
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-4 text-xs max-w-6xl mx-auto">
         
         <x-toolbar>
             @php

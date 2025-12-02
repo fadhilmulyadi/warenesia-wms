@@ -3,14 +3,21 @@
 @section('title', 'Produk')
 
 @section('page-header')
-    <x-page-header
-        title="Data Produk"
-        description="Kelola informasi barang, harga, dan ketersediaan stok gudang."
-    />
+    <x-page-header title="Data Produk" description="Kelola informasi barang, harga, dan ketersediaan stok gudang." />
 @endsection
 
 @section('content')
-    <div class="space-y-4">
+    @php
+        $mobileIndexConfig = \App\Support\MobileIndexConfig::products($categories);
+    @endphp
+
+    {{-- MOBILE VERSION --}}
+    <div class="md:hidden">
+        <x-mobile.index :items="$products" :config="$mobileIndexConfig" card-view="mobile.products.card" />
+    </div>
+
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-4">
 
         <x-toolbar>
             @php
@@ -21,53 +28,32 @@
                 $resetKeys = ['category_id', 'stock_status'];
             @endphp
 
-            <x-filter-bar
-                :action="route('products.index', ['per_page' => $perPage])"
-                :search="$search"
-                :sort="$sort"
-                :direction="$direction"
-                :filters="$filters"
-                :resetKeys="$resetKeys"
-                placeholder="Cari produk atau SKU..."
-            >
+            <x-filter-bar :action="route('products.index', ['per_page' => $perPage])" :search="$search" :sort="$sort"
+                :direction="$direction" :filters="$filters" :resetKeys="$resetKeys" placeholder="Cari produk atau SKU...">
                 <x-slot:filter_category_id>
-                    <x-filter.checkbox-list
-                        name="category_id"
-                        :options="$categories->map(fn ($cat) => ['value' => $cat->id, 'label' => $cat->name])"
-                        :selected="request()->query('category_id', [])"
-                    />
+                    <x-filter.checkbox-list name="category_id" :options="$categories->map(fn($cat) => ['value' => $cat->id, 'label' => $cat->name])" :selected="request()->query('category_id', [])" />
                 </x-slot:filter_category_id>
 
                 <x-slot:filter_stock_status>
-                    <x-filter.checkbox-list
-                        name="stock_status"
-                        :options="[
-                            ['value' => 'available', 'label' => 'Tersedia'],
-                            ['value' => 'low', 'label' => 'Low Stock'],
-                            ['value' => 'out', 'label' => 'Habis'],
-                        ]"
-                        :selected="request()->query('stock_status', [])"
-                    />
+                    <x-filter.checkbox-list name="stock_status" :options="[
+            ['value' => 'available', 'label' => 'Tersedia'],
+            ['value' => 'low', 'label' => 'Low Stock'],
+            ['value' => 'out', 'label' => 'Habis'],
+        ]"
+                        :selected="request()->query('stock_status', [])" />
                 </x-slot:filter_stock_status>
             </x-filter-bar>
 
             <div class="flex flex-wrap flex-none gap-2 justify-end">
                 @can('export', \App\Models\Product::class)
-                    <x-action-button 
-                        href="{{ route('products.export', request()->query()) }}"
-                        variant="secondary"
-                        icon="download"
-                    >
+                    <x-action-button href="{{ route('products.export', request()->query()) }}" variant="secondary"
+                        icon="download">
                         Ekspor CSV
                     </x-action-button>
                 @endcan
-                
+
                 @can('create', \App\Models\Product::class)
-                    <x-action-button 
-                        href="{{ route('products.create') }}"
-                        variant="primary"
-                        icon="plus"
-                    >
+                    <x-action-button href="{{ route('products.create') }}" variant="primary" icon="plus">
                         Tambah Produk
                     </x-action-button>
                 @endcan

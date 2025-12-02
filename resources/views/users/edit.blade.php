@@ -3,15 +3,29 @@
 @section('title', 'Edit User')
 
 @section('page-header')
-    <x-page-header
+
+    {{-- DESKTOP HEADER (TETAP) --}}
+    <div class="hidden md:block">
+        <x-page-header
+            title="Edit User"
+            description="Perbarui profil dan status akun pengguna."
+        />
+    </div>
+
+    {{-- MOBILE HEADER --}}
+    <x-mobile-header
+        class="md:hidden"
         title="Edit User"
-        description="Perbarui profil dan status akun pengguna."
+        back="{{ route('users.index') }}"
     />
 @endsection
 
+
 @section('content')
-    <div class="space-y-4 max-w-6xl">
-        <div class="flex items-center justify-between flex-wrap gap-3">
+    <div class="space-y-4 max-w-6xl mx-auto pb-24">
+
+        {{-- DESKTOP TOP BAR (TIDAK DIUBAH SAMA SEKALI) --}}
+        <div class="hidden md:flex items-center justify-between flex-wrap gap-3">
             <x-breadcrumbs :items="['Users' => route('users.index'), $user->name => '#']" />
 
             <div class="flex flex-wrap gap-2">
@@ -73,6 +87,7 @@
             </div>
         </div>
 
+        {{-- ALERTS --}}
         @if(session('success'))
             <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
                 {{ session('success') }}
@@ -85,6 +100,7 @@
             </div>
         @endif
 
+        {{-- FORM --}}
         <form id="user-form" method="POST" action="{{ route('users.update', $user) }}" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             @csrf
             @method('PUT')
@@ -93,8 +109,8 @@
             <x-card class="lg:col-span-2">
                 <div class="p-4 sm:p-6 space-y-4">
                     <div class="flex flex-col gap-1">
-                        <h2 class="text-base font-semibold text-slate-900">Informasi Pengguna</h2>
-                        <p class="text-xs text-slate-500">Nama, email, departemen, dan role.</p>
+                        <h2 class="text-base font-semibold text-slate-900">INFORMASI PENGGUNA</h2>
+                        <p class="text-xs text-slate-500">Nama, email, dan role.</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -125,18 +141,6 @@
                         </div>
 
                         <div class="space-y-2">
-                            <x-input-label for="department" value="Departemen (Opsional)" />
-                            <x-text-input
-                                id="department"
-                                name="department"
-                                type="text"
-                                value="{{ old('department', $user->department) }}"
-                                class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                            />
-                            <x-input-error :messages="$errors->get('department')" />
-                        </div>
-
-                        <div class="space-y-2">
                             <x-input-label for="role" value="Role" />
                             <x-custom-select
                                 name="role"
@@ -145,6 +149,7 @@
                                 :value="old('role', $user->role)"
                                 placeholder="Pilih role"
                                 width="w-full"
+                                :searchable="false"
                             />
                             <x-input-error :messages="$errors->get('role')" />
                         </div>
@@ -156,7 +161,7 @@
             <x-card class="lg:col-span-1">
                 <div class="p-4 sm:p-6 space-y-4">
                     <div class="flex flex-col gap-1">
-                        <h2 class="text-base font-semibold text-slate-900">Status & Keamanan</h2>
+                        <h2 class="text-base font-semibold text-slate-900">STATUS DAN KEAMANAN</h2>
                         <p class="text-xs text-slate-500">Kelola status akun dan reset password.</p>
                     </div>
 
@@ -169,6 +174,7 @@
                             :value="old('status', $user->status)"
                             placeholder="Pilih status"
                             width="w-full"
+                            :searchable="false"
                         />
                         <x-input-error :messages="$errors->get('status')" />
                     </div>
@@ -233,5 +239,24 @@
                 </div>
             </x-card>
         </form>
+
+
+        {{-- MOBILE DELETE --}}
+        @if(!$deletionReason && auth()->user()->can('delete', $user))
+            <form id="delete-user-mobile" method="POST" action="{{ route('users.destroy', $user) }}">
+                @csrf
+                @method('DELETE')
+            </form>
+
+            <x-mobile-danger-button form="delete-user-mobile">
+                Hapus User
+            </x-mobile-danger-button>
+        @endif
+
+        {{-- MOBILE STICKY SAVE --}}
+        <x-mobile-sticky-button form="user-form" icon="save">
+            Simpan Perubahan
+        </x-mobile-sticky-button>
+
     </div>
 @endsection
