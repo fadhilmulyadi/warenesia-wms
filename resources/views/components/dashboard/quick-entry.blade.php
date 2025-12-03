@@ -61,10 +61,24 @@
                     event.preventDefault();
                 }
             },
+            applyBarcodePrefill(detail) {
+                if (detail.mode === 'incoming') {
+                    this.type = 'purchases';
+                } else if (detail.mode === 'outgoing') {
+                    this.type = 'sales';
+                }
+
+                this.productId = detail.product_id;
+                this.quantity = 1;
+                this.refreshStockMessage();
+            },
         }"
         x-bind:action="action()"
         x-effect="refreshStockMessage()"
+        x-bind:action="action()"
+        x-effect="refreshStockMessage()"
         x-on:submit="handleSubmit($event)"
+        @barcode-prefill.window="applyBarcodePrefill($event.detail)"
         
         class="space-y-4"
     >

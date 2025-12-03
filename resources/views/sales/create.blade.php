@@ -41,7 +41,8 @@
                             <x-input-label for="customer_name_mobile" value="Nama Customer" />
                             <input type="text" id="customer_name_mobile" name="customer_name"
                                 class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                placeholder="Nama Customer (Opsional)">
+                                placeholder="Nama Customer (Opsional)"
+                                value="{{ old('customer_name', $prefilledCustomerName) }}">
                             <x-input-error :messages="$errors->get('customer_name')" class="mt-2" />
                         </div>
 
@@ -63,7 +64,7 @@
                     </h3>
 
                     <div class="overflow-x-auto -mx-4 px-4">
-                        <x-transactions.items-table :products="$products" />
+                        <x-transactions.items-table :products="$products" :initial-items="$initialItems ?? []" />
                     </div>
                 </x-card>
             </form>
@@ -90,12 +91,13 @@
             <x-card class="p-6">
                 <x-transactions.form-header>
                     <x-input-label value="Nama Customer" class="mb-1" />
-                    <x-text-input name="customer_name" placeholder="Nama Customer (Opsional)" class="w-full" />
+                    <x-text-input name="customer_name" placeholder="Nama Customer (Opsional)" class="w-full"
+                        :value="$prefilledCustomerName" />
                 </x-transactions.form-header>
 
                 <div class="mt-8">
                     <h3 class="text-base font-semibold text-slate-900 mb-4">Daftar Item</h3>
-                    <x-transactions.items-table :products="$products" />
+                    <x-transactions.items-table :products="$products" :initial-items="$initialItems ?? []" />
                 </div>
             </x-card>
         </form>

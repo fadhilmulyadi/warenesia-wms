@@ -10,113 +10,100 @@
     $city = old('city', optional($supplier)->city);
     $country = old('country', optional($supplier)->country ?? 'Indonesia');
     $notes = old('notes', optional($supplier)->notes);
-    $isActive = old('is_active', optional($supplier)->is_active ?? true);
+    $isActive = old('is_active', optional($supplier)->is_active ?? false);
 @endphp
 
-<div class="space-y-4 text-xs">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-            <label class="block text-[11px] text-slate-600 mb-1">Supplier name *</label>
-            <input
-                type="text"
-                name="name"
-                value="{{ $supplierName }}"
-                required
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            >
-        </div>
+<div class="space-y-6 text-xs">
+    {{-- Registration Information --}}
+    <div>
+        <h3 class="text-sm font-semibold text-slate-900 mb-3">Registration Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <x-input-label for="name" :value="__('Supplier Name')" required />
+                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="$supplierName"
+                    required autofocus />
+                <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            </div>
 
-        <div>
-            <label class="block text-[11px] text-slate-600 mb-1">Contact person</label>
-            <input
-                type="text"
-                name="contact_person"
-                value="{{ $contactPerson }}"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            >
-        </div>
+            <div>
+                <x-input-label for="contact_person" :value="__('Contact Person')" />
+                <x-text-input id="contact_person" name="contact_person" type="text" class="mt-1 block w-full"
+                    :value="$contactPerson" />
+                <x-input-error class="mt-2" :messages="$errors->get('contact_person')" />
+            </div>
 
-        <div>
-            <label class="block text-[11px] text-slate-600 mb-1">Email</label>
-            <input
-                type="email"
-                name="email"
-                value="{{ $email }}"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            >
-        </div>
+            <div>
+                <x-input-label for="email" :value="__('Email')" required />
+                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="$email" required />
+                <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            </div>
 
-        <div>
-            <label class="block text-[11px] text-slate-600 mb-1">Phone</label>
-            <input
-                type="text"
-                name="phone"
-                value="{{ $phone }}"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            >
-        </div>
-
-        <div>
-            <label class="block text-[11px] text-slate-600 mb-1">Tax number</label>
-            <input
-                type="text"
-                name="tax_number"
-                value="{{ $taxNumber }}"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            >
-        </div>
-
-        <div>
-            <label class="block text-[11px] text-slate-600 mb-1">City</label>
-            <input
-                type="text"
-                name="city"
-                value="{{ $city }}"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            >
-        </div>
-
-        <div>
-            <label class="block text-[11px] text-slate-600 mb-1">Country</label>
-            <input
-                type="text"
-                name="country"
-                value="{{ $country }}"
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            >
-        </div>
-
-        <div class="flex items-center gap-2 mt-5">
-            <input
-                id="is_active"
-                type="checkbox"
-                name="is_active"
-                value="1"
-                @checked($isActive)
-                class="h-3 w-3 rounded border-slate-300 text-teal-600"
-            >
-            <label for="is_active" class="text-[11px] text-slate-600">
-                Active supplier
-            </label>
+            <div>
+                <x-input-label for="phone" :value="__('Phone')" />
+                <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="$phone" />
+                <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+            </div>
         </div>
     </div>
 
+    <hr class="border-slate-100">
+
+    {{-- Company Details --}}
     <div>
-        <label class="block text-[11px] text-slate-600 mb-1">Address</label>
-        <textarea
-            name="address"
-            rows="2"
-            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-        >{{ $address }}</textarea>
+        <h3 class="text-sm font-semibold text-slate-900 mb-3">Company Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <x-input-label for="tax_number" :value="__('Tax Number (NPWP)')" />
+                <x-text-input id="tax_number" name="tax_number" type="text" class="mt-1 block w-full"
+                    :value="$taxNumber" />
+                <x-input-error class="mt-2" :messages="$errors->get('tax_number')" />
+            </div>
+
+            <div>
+                <x-input-label for="city" :value="__('City')" />
+                <x-text-input id="city" name="city" type="text" class="mt-1 block w-full" :value="$city" />
+                <x-input-error class="mt-2" :messages="$errors->get('city')" />
+            </div>
+
+            <div>
+                <x-input-label for="country" :value="__('Country')" />
+                <x-text-input id="country" name="country" type="text" class="mt-1 block w-full" :value="$country" />
+                <x-input-error class="mt-2" :messages="$errors->get('country')" />
+            </div>
+
+            <div class="md:col-span-2">
+                <x-input-label for="address" :value="__('Address')" />
+                <textarea id="address" name="address" rows="2"
+                    class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 text-xs">{{ $address }}</textarea>
+                <x-input-error class="mt-2" :messages="$errors->get('address')" />
+            </div>
+        </div>
     </div>
 
+    <hr class="border-slate-100">
+
+    {{-- Administrative --}}
     <div>
-        <label class="block text-[11px] text-slate-600 mb-1">Internal notes</label>
-        <textarea
-            name="notes"
-            rows="2"
-            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            placeholder="Optional notes visible only to internal users."
-        >{{ $notes }}</textarea>
+        <h3 class="text-sm font-semibold text-slate-900 mb-3">Administrative</h3>
+        <div class="space-y-4">
+            <div>
+                <label for="is_active" class="inline-flex items-center">
+                    <input id="is_active" type="checkbox" name="is_active" value="1" @checked($isActive)
+                        class="rounded border-slate-300 text-teal-600 shadow-sm focus:ring-teal-500">
+                    <span class="ml-2 text-xs text-slate-600">{{ __('Active Supplier') }}</span>
+                </label>
+                <p class="text-[10px] text-slate-500 mt-1 ml-6">
+                    Inactive suppliers cannot be selected for new restock orders.
+                </p>
+            </div>
+
+            <div>
+                <x-input-label for="notes" :value="__('Internal Notes')" />
+                <textarea id="notes" name="notes" rows="3"
+                    class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 text-xs"
+                    placeholder="Optional notes visible only to internal users.">{{ $notes }}</textarea>
+                <x-input-error class="mt-2" :messages="$errors->get('notes')" />
+            </div>
+        </div>
     </div>
 </div>

@@ -55,6 +55,7 @@
                                 id="supplier_id_mobile"
                                 name="supplier_id"
                                 :options="$suppliers->pluck('name', 'id')->toArray()"
+                                :value="$prefilledSupplierId"
                                 placeholder="Pilih Supplier"
                                 class="mt-1 block w-full"
                                 required
@@ -84,7 +85,7 @@
                     </h3>
                     
                     <div class="overflow-x-auto -mx-4 px-4">
-                        <x-transactions.items-table :products="$products" />
+                        <x-transactions.items-table :products="$products" :initial-items="$initialItems ?? []" />
                     </div>
                 </x-card>
             </form>
@@ -119,6 +120,7 @@
                     <x-custom-select
                         name="supplier_id"
                         :options="$suppliers->pluck('name', 'id')->toArray()"
+                        :value="$prefilledSupplierId"
                         placeholder="Pilih Supplier"
                         required
                     />
@@ -126,7 +128,7 @@
 
                 <div class="mt-8">
                     <h3 class="text-base font-semibold text-slate-900 mb-4">Daftar Item</h3>
-                    <x-transactions.items-table :products="$products" />
+                    <x-transactions.items-table :products="$products" :initial-items="$initialItems ?? []" />
                 </div>
             </x-card>
         </form>

@@ -59,15 +59,25 @@ class OutgoingTransactionController extends Controller
         $prefilledQuantity = $prefill['quantity'];
         $prefilledUnitPrice = $prefill['unit_price'];
 
+        $initialItems = [];
+        if ($prefilledProductId) {
+            $initialItems[] = [
+                'product_id' => (int) $prefilledProductId,
+                'quantity' => (int) $prefilledQuantity,
+                'unit_price' => (float) ($prefilledUnitPrice ?? 0),
+            ];
+        }
+
         return view(
             'sales.create',
             compact(
-                'products', 
-                'today', 
+                'products',
+                'today',
                 'prefilledProductId',
                 'prefilledCustomerName',
                 'prefilledQuantity',
-                'prefilledUnitPrice'
+                'prefilledUnitPrice',
+                'initialItems'
             )
         );
     }
@@ -168,14 +178,14 @@ class OutgoingTransactionController extends Controller
         $this->authorize('update', $sale);
 
         // Hanya transaksi berstatus 'pending' yang boleh diedit
-        if (! $sale->isPending()) {
+        if (!$sale->isPending()) {
             return redirect()
                 ->route('sales.show', $sale)
                 ->withErrors(['general' => 'Only pending transactions can be edited.']);
         }
 
         // Eager load items untuk memastikan data produk tersedia di view
-        $sale->load(['items']); 
+        $sale->load(['items']);
         $products = Product::orderBy('name')->get();
 
         return view('sales.edit', compact('sale', 'products'));
@@ -188,7 +198,7 @@ class OutgoingTransactionController extends Controller
     {
         $this->authorize('update', $sale);
 
-        if (! $sale->isPending()) {
+        if (!$sale->isPending()) {
             return back()->withErrors(['general' => 'Hanya transaksi status Pending yang dapat diedit.']);
         }
 
@@ -219,7 +229,7 @@ class OutgoingTransactionController extends Controller
     {
         $this->authorize('delete', $sale);
 
-        if (! $sale->isPending()) {
+        if (!$sale->isPending()) {
             return back()->withErrors(['general' => 'Hanya transaksi status Pending yang dapat dihapus.']);
         }
 
@@ -240,7 +250,7 @@ class OutgoingTransactionController extends Controller
             return redirect()
                 ->route('sales.show', $sale)
                 ->with('success', 'Transaction approved and stock updated.');
-        } catch (InsufficientStockException|DomainException|ModelNotFoundException $exception) {
+        } catch (InsufficientStockException | DomainException | ModelNotFoundException $exception) {
             return redirect()
                 ->route('sales.show', $sale)
                 ->withErrors(['general' => $exception->getMessage()]);

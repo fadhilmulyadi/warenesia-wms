@@ -30,7 +30,6 @@
 @section('content')
     <div class="max-w-4xl mx-auto text-xs">
         {{-- MOBILE VERSION --}}
-        {{-- MOBILE VERSION --}}
         <x-mobile.form form-id="supplier-form-mobile" save-label="Save Supplier" save-icon="save">
             <x-slot:fields>
                 @if($errors->any())
@@ -66,12 +65,12 @@
                 </div>
             @endif
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+            <x-card>
                 <form id="supplier-form" method="POST" action="{{ route('suppliers.store') }}">
                     @csrf
                     @include('suppliers._form', ['supplier' => null])
                 </form>
-            </div>
+            </x-card>
         </div>
     </div>
 @endsection

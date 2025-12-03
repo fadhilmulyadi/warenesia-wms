@@ -20,6 +20,10 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/test-flowbite', function () {
+    return view('test');
+})->name('test-flowbite');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');

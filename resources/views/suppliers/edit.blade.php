@@ -30,7 +30,6 @@
 @section('content')
     <div class="max-w-4xl mx-auto text-xs">
         {{-- MOBILE VERSION --}}
-        {{-- MOBILE VERSION --}}
         <x-mobile.form form-id="supplier-form-mobile" save-label="Save Changes" save-icon="save" :show-delete="true"
             delete-action="{{ route('suppliers.destroy', $supplier) }}" delete-label="Delete Supplier"
             delete-confirm="Are you sure you want to delete this supplier?">
@@ -69,13 +68,13 @@
                 </div>
             @endif
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+            <x-card>
                 <form id="supplier-form" method="POST" action="{{ route('suppliers.update', $supplier) }}">
                     @csrf
                     @method('PUT')
                     @include('suppliers._form', compact('supplier'))
                 </form>
-            </div>
+            </x-card>
         </div>
     </div>
 @endsection

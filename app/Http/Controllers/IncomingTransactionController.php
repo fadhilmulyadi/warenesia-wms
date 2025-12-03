@@ -61,16 +61,26 @@ class IncomingTransactionController extends Controller
         $prefilledQuantity = $prefill['quantity'];
         $prefilledUnitCost = $prefill['unit_cost'];
 
+        $initialItems = [];
+        if ($prefilledProductId) {
+            $initialItems[] = [
+                'product_id' => (int) $prefilledProductId,
+                'quantity' => (int) $prefilledQuantity,
+                'unit_cost' => (float) ($prefilledUnitCost ?? 0),
+            ];
+        }
+
         return view(
             'purchases.create',
             compact(
-                'suppliers', 
-                'products', 
-                'today', 
+                'suppliers',
+                'products',
+                'today',
                 'prefilledProductId',
                 'prefilledSupplierId',
                 'prefilledQuantity',
-                'prefilledUnitCost'
+                'prefilledUnitCost',
+                'initialItems'
             )
         );
     }
@@ -170,7 +180,7 @@ class IncomingTransactionController extends Controller
     {
         $this->authorize('update', $purchase);
 
-        if (! $purchase->isPending()) {
+        if (!$purchase->isPending()) {
             return redirect()
                 ->route('purchases.show', $purchase)
                 ->withErrors(['general' => 'Only pending transactions can be edited.']);
@@ -190,7 +200,7 @@ class IncomingTransactionController extends Controller
     {
         $this->authorize('update', $purchase);
 
-        if (! $purchase->isPending()) {
+        if (!$purchase->isPending()) {
             return back()->withErrors(['general' => 'Only pending transactions can be edited.']);
         }
 

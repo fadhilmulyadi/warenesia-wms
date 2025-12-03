@@ -16,9 +16,11 @@ class StaffDashboardService
     public function getData(User $user, Request $request): array
     {
         $prefill = TransactionPrefill::forDashboard($request);
+        $products = $this->formProducts();
 
         return [
-            'products' => $this->formProducts(),
+            'products' => $products,
+            'productSkuMap' => $products->mapWithKeys(fn($p) => [$p->sku => $p->id]),
             'suppliers' => $this->suppliers(),
             'todayTransactions' => $this->todayTransactions($user),
             'prefilledType' => $prefill['type'],
@@ -58,13 +60,13 @@ class StaffDashboardService
             ->where('created_by', $user->id)
             ->whereDate('transaction_date', $today)
             ->get()
-            ->map(fn ($trx) => $this->mapTxn($trx, 'download'));
+            ->map(fn($trx) => $this->mapTxn($trx, 'download'));
 
         $outgoing = OutgoingTransaction::query()
             ->where('created_by', $user->id)
             ->whereDate('transaction_date', $today)
             ->get()
-            ->map(fn ($trx) => $this->mapTxn($trx, 'upload'));
+            ->map(fn($trx) => $this->mapTxn($trx, 'upload'));
 
         return $incoming->concat($outgoing)
             ->sortByDesc('created_at')
@@ -73,7 +75,7 @@ class StaffDashboardService
     }
 
     private function mapTxn($trx, $icon): array
-    {   
+    {
         $type = $trx instanceof \App\Models\IncomingTransaction
             ? 'purchases'
             : 'sales';

@@ -74,7 +74,7 @@
                     </h3>
 
                     <div class="overflow-x-auto -mx-4 px-4">
-                        <x-transactions.items-table :products="$products" />
+                        <x-transactions.items-table :products="$products" priceField="unit_cost" priceLabel="Harga Beli" />
                     </div>
                 </x-card>
             </form>
@@ -117,7 +117,7 @@
                         {{-- Supplier --}}
                         <div>
                             <x-input-label for="supplier_id" value="Supplier" />
-                            <x-custom-select id="supplier_id" name="supplier_id" :options="$suppliers"
+                            <x-custom-select id="supplier_id" name="supplier_id" :options="$suppliers->pluck('name', 'id')->toArray()"
                                 placeholder="Pilih Supplier" class="mt-1 block w-full" required />
                             <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
                         </div>
@@ -159,7 +159,7 @@
                     </h3>
 
                     <div class="flex-1">
-                        <x-transactions.items-table :products="$products" />
+                        <x-transactions.items-table :products="$products" priceField="unit_cost" priceLabel="Harga Beli" />
                     </div>
                 </x-card>
             </div>

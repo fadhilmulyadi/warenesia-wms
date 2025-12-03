@@ -182,7 +182,7 @@
             />
         </div>
 
-        @if($currentPaginator && $currentPaginator->hasPages())
+        @if($currentPaginator && ($currentPaginator->hasPages() || $currentPaginator->total() > 0))
             <div class="mt-2">
                 <x-advanced-pagination :paginator="$currentPaginator" />
             </div>

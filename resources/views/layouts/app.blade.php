@@ -11,7 +11,8 @@
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -53,9 +54,7 @@
         toggleSidebar() {
             this.sidebarOpen = !this.sidebarOpen;
         }
-    }"
-        x-init="init()"
-        class="h-screen flex items-stretch overflow-hidden">
+    }" x-init="init()" class="h-screen flex items-stretch overflow-hidden">
 
         {{-- SIDEBAR --}}
         <aside
@@ -66,10 +65,7 @@
             ]">
 
             <div class="h-16 flex items-center px-4 border-b border-slate-800">
-                <div class="flex flex-col"
-                    x-show="sidebarOpen"
-                    x-transition.opacity
-                >
+                <div class="flex flex-col" x-show="sidebarOpen" x-transition.opacity>
                     <span class="font-semibold text-lg tracking-tight">Warenesia</span>
                 </div>
             </div>
@@ -97,10 +93,22 @@
 
                 @can('viewAny', \App\Models\User::class)
                     <a href="{{ route('users.index') }}" class="{{ sidebar_classes(request()->routeIs('users.*')) }}">
-                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-users class="h-4 w-4" />
                         </span>
                         <span class="font-medium" x-show="sidebarOpen" x-transition>User Management</span>
+                    </a>
+                @endcan
+
+                @can('viewAny', \App\Models\Supplier::class)
+                    <a href="{{ route('suppliers.index') }}"
+                        class="{{ sidebar_classes(request()->routeIs('suppliers.*')) }}">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                            <x-lucide-building-2 class="h-4 w-4" />
+                        </span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Suppliers</span>
                     </a>
                 @endcan
 
@@ -110,22 +118,23 @@
                 @endphp
 
                 @if($canViewIncoming || $canViewOutgoing)
-                    <a href="{{ route('transactions.index') }}"
-                        class="{{ sidebar_classes(
-                            request()->routeIs('transactions.*') ||
-                            request()->routeIs('purchases.*') ||
-                            request()->routeIs('sales.*')
-                        ) }}">
-                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-arrow-right-left class="h-4 w-4" />
-                        </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Transaksi</span>
-                    </a>
+                                <a href="{{ route('transactions.index') }}" class="{{ sidebar_classes(
+                        request()->routeIs('transactions.*') ||
+                        request()->routeIs('purchases.*') ||
+                        request()->routeIs('sales.*')
+                    ) }}">
+                                    <span
+                                        class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                                        <x-lucide-arrow-right-left class="h-4 w-4" />
+                                    </span>
+                                    <span class="font-medium" x-show="sidebarOpen" x-transition>Transaksi</span>
+                                </a>
                 @endif
 
                 @can('viewAny', \App\Models\RestockOrder::class)
                     <a href="{{ route('restocks.index') }}" class="{{ sidebar_classes(request()->routeIs('restocks.*')) }}">
-                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-repeat class="h-4 w-4" />
                         </span>
                         <span class="font-medium" x-show="sidebarOpen" x-transition>Restocks</span>
@@ -135,7 +144,8 @@
                 @can('viewSupplierRestocks', \App\Models\RestockOrder::class)
                     <a href="{{ route('supplier.restocks.index') }}"
                         class="{{ sidebar_classes(request()->routeIs('supplier.restocks.*')) }}">
-                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-truck class="h-4 w-4" />
                         </span>
                         <span class="font-medium" x-show="sidebarOpen" x-transition>Supplier Restocks</span>
@@ -144,7 +154,8 @@
 
                 @can('viewAny', \App\Models\Product::class)
                     <a href="{{ route('products.index') }}" class="{{ sidebar_classes(request()->routeIs('products.*')) }}">
-                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-box class="h-4 w-4" />
                         </span>
                         <span class="font-medium" x-show="sidebarOpen" x-transition>Inventory</span>
@@ -152,8 +163,10 @@
                 @endcan
 
                 @can('viewAny', \App\Models\Category::class)
-                    <a href="{{ route('categories.index') }}" class="{{ sidebar_classes(request()->routeIs('categories.*')) }}">
-                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                    <a href="{{ route('categories.index') }}"
+                        class="{{ sidebar_classes(request()->routeIs('categories.*')) }}">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-tags class="h-4 w-4" />
                         </span>
                         <span class="font-medium" x-show="sidebarOpen" x-transition>Categories</span>
@@ -162,7 +175,8 @@
 
                 @can('viewAny', \App\Models\Unit::class)
                     <a href="{{ route('units.index') }}" class="{{ sidebar_classes(request()->routeIs('units.*')) }}">
-                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-ruler class="h-4 w-4" />
                         </span>
                         <span class="font-medium" x-show="sidebarOpen" x-transition>Units</span>
@@ -193,8 +207,8 @@
         </aside>
 
         {{-- OVERLAY MOBILE --}}
-        <div x-cloak x-show="sidebarOpen && !isDesktop" x-transition.opacity
-            class="fixed inset-0 z-20 bg-slate-900/60" @click="sidebarOpen = false"></div>
+        <div x-cloak x-show="sidebarOpen && !isDesktop" x-transition.opacity class="fixed inset-0 z-20 bg-slate-900/60"
+            @click="sidebarOpen = false"></div>
 
         {{-- MAIN AREA --}}
         <div class="flex-1 flex flex-col min-w-0 h-full">
@@ -224,15 +238,11 @@
                 <div class="flex items-center gap-3 flex-none">
 
                     <div class="relative flex-none" x-data="{ open: false }">
-                        <button
-                            type="button"
-                            @click="open = !open"
-                            class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2 py-1.5 hover:bg-slate-200"
-                        >
+                        <button type="button" @click="open = !open"
+                            class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2 py-1.5 hover:bg-slate-200">
                             {{-- Avatar: always visible --}}
                             <div
-                                class="h-9 w-9 rounded-full bg-teal-500 text-slate-900 flex items-center justify-center font-semibold text-sm"
-                            >
+                                class="h-9 w-9 rounded-full bg-teal-500 text-slate-900 flex items-center justify-center font-semibold text-sm">
                                 {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
                             </div>
 
@@ -245,26 +255,15 @@
                             </div>
 
                             {{-- Arrow icon: visible on ≥ sm --}}
-                            <svg
-                                class="hidden sm:block h-4 w-4 text-slate-500"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
+                            <svg class="hidden sm:block h-4 w-4 text-slate-500" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M6 9l6 6 6-6" />
                             </svg>
                         </button>
 
                         {{-- Dropdown --}}
-                        <div
-                            x-cloak
-                            x-show="open"
-                            @click.outside="open = false"
-                            x-transition
-                            class="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-lg border border-slate-200 py-2 text-sm z-20"
-                        >
+                        <div x-cloak x-show="open" @click.outside="open = false" x-transition
+                            class="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-lg border border-slate-200 py-2 text-sm z-20">
                             <form method="POST" action="{{ route('logout') }}" @click.stop>
                                 @csrf
                                 <button type="submit" class="w-full text-left px-3 py-2 hover:bg-slate-50">
@@ -289,4 +288,5 @@
     @stack('scripts')
 
 </body>
+
 </html>

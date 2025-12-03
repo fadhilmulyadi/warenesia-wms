@@ -238,8 +238,8 @@ class MobileIndexConfig
             ],
 
             'fab' => [
-                'enabled' => true,
-                'route' => route('suppliers.create'),
+                'enabled' => false,
+                'route' => null,
                 'label' => 'Tambah Supplier',
                 'icon' => 'plus',
             ],

@@ -23,11 +23,11 @@
             @endphp
 
             <x-mobile.index :items="$users" :config="$mobileIndexConfig" card-view="mobile.users.card" :extra-data="[
-                                'roles' => $roles,
-                                'statuses' => $statuses,
-                                'statusVariants' => $statusVariants ?? [],
-                                'deletionGuards' => $deletionGuards ?? []
-                            ]" />
+                                    'roles' => $roles,
+                                    'statuses' => $statuses,
+                                    'statusVariants' => $statusVariants ?? [],
+                                    'deletionGuards' => $deletionGuards ?? []
+                                ]" />
         </div>
 
         <div class="hidden md:block space-y-4">
@@ -134,11 +134,11 @@
 
                                             @if(auth()->user()->can('delete', $user) && !$guardReason)
                                                 <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                                                                    action: '{{ route('users.destroy', $user) }}',
-                                                                                                                    title: 'Hapus User',
-                                                                                                                    message: 'Yakin ingin menghapus user ini?',
-                                                                                                                    itemName: '{{ addslashes($user->name) }}'
-                                                                                                                })">
+                                                                                                                                action: '{{ route('users.destroy', $user) }}',
+                                                                                                                                title: 'Hapus User',
+                                                                                                                                message: 'Yakin ingin menghapus user ini?',
+                                                                                                                                itemName: '{{ addslashes($user->name) }}'
+                                                                                                                            })">
                                                     Hapus
                                                 </x-table.action-item>
                                             @else
@@ -162,7 +162,7 @@
                     </x-table>
                 </div>
 
-                @if($users->hasPages())
+                @if($users->hasPages() || $users->total() > 0)
                     <div class="p-4 border-t border-slate-200">
                         <x-advanced-pagination :paginator="$users" />
                     </div>
