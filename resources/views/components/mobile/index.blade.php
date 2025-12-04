@@ -130,7 +130,7 @@
     @if($fabEnabled)
         <a
             href="{{ $config['fab']['route'] }}"
-            class="fixed bottom-6 right-6 w-14 h-14 bg-teal-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 z-40"
+            class="fixed bottom-6 right-6 w-14 h-14 bg-teal-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 z-10"
         >
             @php
                 $fabIcon = 'lucide-' . ($config['fab']['icon'] ?? 'plus');

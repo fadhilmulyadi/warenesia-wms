@@ -4,7 +4,7 @@
 @section('page-header')
     <div class="space-y-1">
         <h1 class="text-xl font-semibold text-slate-900">Dashboard</h1>
-        <p class="text-sm text-slate-500">No dashboard available for your role yet.</p>
+        <p class="hidden md:block text-sm text-slate-500">No dashboard available for your role yet.</p>
     </div>
 @endsection
 

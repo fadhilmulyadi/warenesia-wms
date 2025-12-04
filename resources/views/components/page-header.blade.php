@@ -8,7 +8,7 @@
         </h1>
 
         @if($description)
-            <p class="mt-1 text-slate-500 max-w-3xl text-xs sm:text-sm">
+            <p class="hidden md:block mt-1 text-slate-500 max-w-3xl text-xs sm:text-sm">
                 {{ $description }}
             </p>
         @endif

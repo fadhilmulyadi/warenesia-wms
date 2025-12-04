@@ -26,7 +26,7 @@ class ProductBarcodeController extends Controller
 
         return response($image, 200, [
             'Content-Type' => 'image/svg+xml',
-            'Content-Disposition' => 'inline; filename="product-' . $product->id . '-qrcode.png"',
+            'Content-Disposition' => 'attachment; filename="product-' . $product->id . '-qrcode.svg"',
         ]);
     }
 

@@ -3,7 +3,7 @@
     'icon' => null,
 ])
 
-<div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 p-3 shadow-lg">
+<div class="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-white border-t border-slate-200 p-3 shadow-lg">
     <button
         type="submit"
         @if($form) form="{{ $form }}" @endif

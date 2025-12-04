@@ -1,5 +1,3 @@
-
-
 @extends('layouts.app')
 
 @section('title', 'Edit Pembelian')
@@ -70,15 +68,22 @@
                         {{-- Supplier --}}
                         <div>
                             <x-input-label for="supplier_id_mobile" value="Supplier" />
-                            <x-custom-select
-                                id="supplier_id_mobile"
-                                name="supplier_id"
-                                :options="$suppliers->pluck('name', 'id')->toArray()"
-                                :value="old('supplier_id', $purchase->supplier_id)"
-                                placeholder="Pilih Supplier"
-                                class="mt-1 block w-full"
-                                required
-                            />
+                            @if($purchase->restock_order_id)
+                                <input type="hidden" name="supplier_id" value="{{ $purchase->supplier_id }}">
+                                <div class="mt-1 block w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 sm:text-sm px-3 py-2 border">
+                                    {{ $purchase->supplier->name ?? 'Unknown Supplier' }}
+                                </div>
+                            @else
+                                <x-custom-select
+                                    id="supplier_id_mobile"
+                                    name="supplier_id"
+                                    :options="$suppliers->pluck('name', 'id')->toArray()"
+                                    :value="old('supplier_id', $purchase->supplier_id)"
+                                    placeholder="Pilih Supplier"
+                                    class="mt-1 block w-full"
+                                    required
+                                />
+                            @endif
                             <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
                         </div>
 
@@ -121,11 +126,11 @@
     <div class="hidden md:block space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <x-breadcrumbs :items="[
-                'Pembelian' => route('transaction.index', ['tab' => 'incoming']),
+                'Transaksi' => route('transactions.index', ['tab' => 'incoming']),
                 'Edit #' . $purchase->id => '#',
             ]" />
             <div class="flex flex-wrap gap-2 justify-end">
-                <x-action-button href="{{ route('transaction.index', ['tab' => 'incoming']) }}" variant="secondary" icon="arrow-left">
+                <x-action-button href="{{ route('transactions.index', ['tab' => 'incoming']) }}" variant="secondary" icon="arrow-left">
                     Batal
                 </x-action-button>
                 <x-action-button type="submit" form="edit-form" variant="primary" icon="save">
@@ -148,13 +153,20 @@
                     :value="['date' => $purchase->transaction_date->format('Y-m-d'), 'notes' => $purchase->notes]"
                 >
                     <x-input-label value="Supplier" class="mb-1" />
-                    <x-custom-select
-                        name="supplier_id"
-                        :options="$suppliers->pluck('name', 'id')->toArray()"
-                        :value="old('supplier_id', $purchase->supplier_id)"
-                        placeholder="Pilih Supplier"
-                        required
-                    />
+                    @if($purchase->restock_order_id)
+                        <input type="hidden" name="supplier_id" value="{{ $purchase->supplier_id }}">
+                        <div class="block w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 sm:text-sm px-3 py-2 border">
+                            {{ $purchase->supplier->name ?? 'Unknown Supplier' }}
+                        </div>
+                    @else
+                        <x-custom-select
+                            name="supplier_id"
+                            :options="$suppliers->pluck('name', 'id')->toArray()"
+                            :value="old('supplier_id', $purchase->supplier_id)"
+                            placeholder="Pilih Supplier"
+                            required
+                        />
+                    @endif
                 </x-transactions.form-header>
 
                 <div class="mt-8">

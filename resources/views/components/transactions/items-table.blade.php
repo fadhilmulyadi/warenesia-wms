@@ -14,6 +14,7 @@
 
     $pricesData = $products->pluck($masterPriceColumn, 'id');
     $stockData = $products->pluck('current_stock', 'id')->map(fn ($stock) => (int) $stock);
+    $skusData = $products->pluck('sku', 'id');
     
     $productOptions = $products->mapWithKeys(function($product) {
         return [$product->id => "{$product->name} (Stok: {$product->current_stock})"];
@@ -53,6 +54,7 @@ function itemsTable(config) {
         initialItems = [],
         productPrices = {},
         productStocks = {},
+        productSkus = {},
         quantityErrors = {},
         priceField = 'price',
         shouldCheckStock = false
@@ -66,6 +68,7 @@ function itemsTable(config) {
         }],
         productPrices,
         productStocks,
+        productSkus,
         quantityErrors,
         shouldCheckStock,
         priceField,
@@ -162,6 +165,10 @@ function itemsTable(config) {
             }
 
             return backendError;
+        },
+
+        getProductSku(productId) {
+            return this.productSkus[productId] ?? '-';
         }
     }
 }
@@ -173,6 +180,7 @@ function itemsTable(config) {
         initialItems: {{ \Illuminate\Support\Js::from($initialItems) }},
         productPrices: {{ \Illuminate\Support\Js::from($pricesData) }},
         productStocks: {{ \Illuminate\Support\Js::from($stockData) }},
+        productSkus: {{ \Illuminate\Support\Js::from($skusData) }},
         quantityErrors: {{ \Illuminate\Support\Js::from($quantityErrorMap) }},
         priceField: '{{ $priceField }}',
         shouldCheckStock: @js($priceField === 'unit_price')
@@ -243,10 +251,17 @@ function itemsTable(config) {
                             </template>
                         </div>
 
+                        @if($hidePrice)
+                            {{-- SKU Display for Staff --}}
+                            <div class="text-xs text-slate-500">
+                                <span class="font-semibold">SKU:</span> <span x-text="getProductSku(item.product_id)"></span>
+                            </div>
+                        @endif
+
                         {{-- 2. Grid Qty & Harga (Side by Side) --}}
                         <div class="flex gap-2">
                             {{-- Qty --}}
-                            <div class="w-1/3">
+                            <div class="{{ $hidePrice ? 'w-full' : 'w-1/3' }}">
                                 <div class="relative">
                                     <input 
                                         type="number" inputmode="numeric"
@@ -332,7 +347,10 @@ function itemsTable(config) {
     <div class="hidden md:block overflow-x-auto">
         <table class="min-w-full text-xs">
             <x-table.thead>
-                <x-table.th class="w-1/2">Produk</x-table.th>
+                <x-table.th class="{{ $hidePrice ? 'w-5/12' : 'w-1/2' }}">Produk</x-table.th>
+                @if($hidePrice)
+                    <x-table.th class="w-1/4">SKU</x-table.th>
+                @endif
                 <x-table.th align="right" class="min-w-[100px]">Qty</x-table.th>
                 @if(!$hidePrice)
                     <x-table.th align="right" class="min-w-[160px]">{{ $priceLabel }}</x-table.th>
@@ -366,6 +384,13 @@ function itemsTable(config) {
                                 </div>
                             </template>
                         </x-table.td>
+
+                        {{-- SKU (Only if hidePrice is true) --}}
+                        @if($hidePrice)
+                        <x-table.td>
+                            <span class="text-slate-600 font-mono" x-text="getProductSku(item.product_id)"></span>
+                        </x-table.td>
+                        @endif
 
                         {{-- Qty --}}
                         <x-table.td align="right">
