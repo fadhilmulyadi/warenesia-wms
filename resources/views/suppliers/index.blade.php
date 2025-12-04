@@ -18,11 +18,6 @@
 
     {{-- DESKTOP VERSION --}}
     <div class="hidden md:block space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <x-breadcrumbs :items="[
-            'Suppliers' => route('suppliers.index'),
-        ]" />
-        </div>
 
         <x-toolbar>
             <form method="GET" action="{{ route('suppliers.index') }}" class="flex-1 max-w-sm">
@@ -120,11 +115,11 @@
 
                                             @can('delete', $supplier)
                                                 <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
-                                                                    title: 'Delete Supplier',
-                                                                    message: 'Delete this supplier? This action cannot be undone.',
-                                                                    itemName: '{{ $supplier->name }}'
-                                                                })">
+                                                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
+                                                                                    title: 'Delete Supplier',
+                                                                                    message: 'Delete this supplier? This action cannot be undone.',
+                                                                                    itemName: '{{ $supplier->name }}'
+                                                                                })">
                                                     Delete
                                                 </x-table.action-item>
                                             @endcan
@@ -143,12 +138,10 @@
                 </x-table>
             </div>
 
-            @if($suppliers->hasPages() || $suppliers->total() > 0)
-                <div class="p-4 border-t border-slate-200">
-                    <x-advanced-pagination :paginator="$suppliers" />
-                </div>
-            @endif
         </x-card>
+        @if($suppliers->hasPages() || $suppliers->total() > 0)
+            <x-advanced-pagination :paginator="$suppliers" />
+        @endif
     </div>
     <x-confirm-delete-modal />
 @endsection

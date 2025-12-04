@@ -102,6 +102,9 @@
                 <div class="space-y-2">
                     <x-input-label value="Nama Kategori" class="text-sm font-semibold text-slate-700" />
                     <input type="text" x-model="categoryQuick.name" x-on:input="syncCategoryPrefix()" class="w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500" placeholder="Contoh: Peralatan Dapur">
+                    <template x-if="errors.name">
+                        <p class="text-xs text-red-600 mt-1" x-text="errors.name[0]"></p>
+                    </template>
                 </div>
                 <div class="space-y-2">
                     <x-input-label value="SKU Prefix" class="text-sm font-semibold text-slate-700" />
@@ -129,6 +132,9 @@
             <div class="space-y-2">
                 <x-input-label value="Nama Satuan" class="text-sm font-semibold text-slate-700" />
                 <input type="text" x-model="unitQuick.name" class="w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500" placeholder="Contoh: Box, Pcs, Liter">
+                <template x-if="errors.name">
+                    <p class="text-xs text-red-600 mt-1" x-text="errors.name[0]"></p>
+                </template>
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
@@ -204,6 +210,7 @@
                         skuNumber: config.initialSkuNumber || '',
                         categoryQuick: { name: '', prefix: '' },
                         unitQuick: { name: '' },
+                        errors: {},
                         skuHint: '',
                         imagePreview: config.initialImage || null,
                         init() {
@@ -219,28 +226,18 @@
                             this.form.sku = parts.join('-');
                             this.skuHint = this.form.sku || (prefix ? `${prefix}-XXXX` : 'SKU akan dibuat otomatis');
                         },
-                        refreshSelect(refName, options, value) {
-                            const el = this.$refs[refName];
-                            if (el && el.__x) {
-                                el.__x.$data.options = options;
-                                el.__x.$data.value = value ? String(value) : '';
-
-                                const option = value ? (options?.[value] ?? null) : null;
-                                let label = '';
-                                
-                                if (option) {
-                                        if (typeof option === 'object' && option !== null) {
-                                            label = option.label ?? '';
-                                        } else {
-                                            label = String(option);
-                                        }
-                                    }
-
-                                    el.__x.$data.search = label;
-                            }
+                        refreshSelect(inputName, options, value) {
+                            window.dispatchEvent(new CustomEvent('custom-select-update', {
+                                detail: {
+                                    name: inputName,
+                                    options: JSON.parse(JSON.stringify(options)),
+                                    value: value ? String(value) : ''
+                                }
+                            }));
                         },
                         openQuickCategory() {
                             this.categoryQuick = { name: '', prefix: '' };
+                            this.errors = {};
                             this.$dispatch('open-modal', 'quick-category-modal');
                         },
                         generatePrefix(name) {
@@ -300,23 +297,29 @@
                             }
 
                             if (!response.ok) {
-                                alert(data.message || 'Gagal membuat kategori.');
+                                if (response.status === 422) {
+                                    this.errors = data.errors || {};
+                                } else {
+                                    alert(data.message || 'Gagal membuat kategori.');
+                                }
                                 return;
                             }
 
                             this.categoryOptions[data.id] = {
-                                label: `${data.name} (${data.sku_prefix})`,
+                                label: data.name,
                                 image: data.image_path ?? null,
                                 prefix: data.sku_prefix
                             };
                             this.categoryPrefixes[data.id] = data.sku_prefix;
                             this.form.category_id = String(data.id);
-                            this.refreshSelect('categorySelect', this.categoryOptions, this.form.category_id);
+                            this.refreshSelect('category_id', this.categoryOptions, this.form.category_id);
                             this.updateSkuHint();
                             this.$dispatch('close-modal', 'quick-category-modal');
+                            this.$dispatch('notify', { message: 'Kategori berhasil dibuat.', type: 'success' });
                         },
                         openQuickUnit() {
                             this.unitQuick = { name: '' };
+                            this.errors = {};
                             this.$dispatch('open-modal', 'quick-unit-modal');
                         },
                         async saveQuickUnit() {
@@ -344,14 +347,19 @@
                             }
 
                             if (!response.ok) {
-                                alert(data.message || 'Gagal membuat satuan.');
+                                if (response.status === 422) {
+                                    this.errors = data.errors || {};
+                                } else {
+                                    alert(data.message || 'Gagal membuat satuan.');
+                                }
                                 return;
                             }
 
                             this.unitOptions[data.id] = data.name;
                             this.form.unit_id = String(data.id);
-                            this.refreshSelect('unitSelect', this.unitOptions, this.form.unit_id);
+                            this.refreshSelect('unit_id', this.unitOptions, this.form.unit_id);
                             this.$dispatch('close-modal', 'quick-unit-modal');
+                            this.$dispatch('notify', { message: 'Satuan berhasil dibuat.', type: 'success' });
                         },
                         handleImage(event) {
                             if (this.readonly) {

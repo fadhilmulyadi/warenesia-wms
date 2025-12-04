@@ -1,7 +1,7 @@
 @props([
     'name' => '',
     'dynamic_name' => null,
-    'options' => [], 
+    'options' => [],
     'value' => null,
     'placeholder' => 'Pilih opsi',
     'id' => null,
@@ -29,6 +29,7 @@
 @endphp
 
     <div
+        @custom-select-update.window="if($event.detail.name === inputName) { options = normalizeOptions($event.detail.options); if($event.detail.value) value = $event.detail.value; }"
         x-data="{
             open: false,
             value: @js($currentValue),
@@ -182,7 +183,6 @@
     x-modelable="value"
     data-name="{{ $inputName }}"
     {{ $attributes->merge(['class' => "relative {$width} h-[42px]"]) }}
-    x-ref="container"
     @click.outside="close()"
     wire:ignore.self
 >

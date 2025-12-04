@@ -11,7 +11,7 @@
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    
+
     <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -91,24 +91,13 @@
                     <span class="font-medium" x-show="sidebarOpen" x-transition>Dashboard</span>
                 </a>
 
-                @can('viewAny', \App\Models\User::class)
-                    <a href="{{ route('users.index') }}" class="{{ sidebar_classes(request()->routeIs('users.*')) }}">
+                @can('viewAny', \App\Models\Product::class)
+                    <a href="{{ route('products.index') }}" class="{{ sidebar_classes(request()->routeIs('products.*')) }}">
                         <span
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-users class="h-4 w-4" />
+                            <x-lucide-box class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>User Management</span>
-                    </a>
-                @endcan
-
-                @can('viewAny', \App\Models\Supplier::class)
-                    <a href="{{ route('suppliers.index') }}"
-                        class="{{ sidebar_classes(request()->routeIs('suppliers.*')) }}">
-                        <span
-                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-building-2 class="h-4 w-4" />
-                        </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Suppliers</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Inventory</span>
                     </a>
                 @endcan
 
@@ -152,13 +141,14 @@
                     </a>
                 @endcan
 
-                @can('viewAny', \App\Models\Product::class)
-                    <a href="{{ route('products.index') }}" class="{{ sidebar_classes(request()->routeIs('products.*')) }}">
+                @can('viewAny', \App\Models\Supplier::class)
+                    <a href="{{ route('suppliers.index') }}"
+                        class="{{ sidebar_classes(request()->routeIs('suppliers.*')) }}">
                         <span
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-box class="h-4 w-4" />
+                            <x-lucide-building-2 class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Inventory</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Suppliers</span>
                     </a>
                 @endcan
 
@@ -180,6 +170,16 @@
                             <x-lucide-ruler class="h-4 w-4" />
                         </span>
                         <span class="font-medium" x-show="sidebarOpen" x-transition>Units</span>
+                    </a>
+                @endcan
+
+                @can('viewAny', \App\Models\User::class)
+                    <a href="{{ route('users.index') }}" class="{{ sidebar_classes(request()->routeIs('users.*')) }}">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                            <x-lucide-users class="h-4 w-4" />
+                        </span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>User Management</span>
                     </a>
                 @endcan
             </nav>

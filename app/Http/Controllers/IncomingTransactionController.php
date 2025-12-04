@@ -11,7 +11,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Support\CsvExporter;
 use App\Support\TransactionPrefill;
-use App\Services\TransactionService;
+use App\Services\IncomingTransactionService;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -31,7 +31,7 @@ class IncomingTransactionController extends Controller
     private const ROLE_STAFF = 'staff';
     private const EXPORT_CHUNK_SIZE = 200;
 
-    public function __construct(private readonly TransactionService $transactionService)
+    public function __construct(private readonly IncomingTransactionService $transactionService)
     {
     }
 
@@ -95,7 +95,7 @@ class IncomingTransactionController extends Controller
         $validated = $request->validated();
 
         try {
-            $transaction = $this->transactionService->createIncoming($validated, $request->user());
+            $transaction = $this->transactionService->create($validated, $request->user());
 
             return redirect()
                 ->route('purchases.show', $transaction)
@@ -207,7 +207,7 @@ class IncomingTransactionController extends Controller
         $validated = $request->validated();
 
         try {
-            $this->transactionService->updateIncoming($purchase, $validated, $request->user());
+            $this->transactionService->update($purchase, $validated, $request->user());
 
             return redirect()
                 ->route('purchases.show', $purchase)
@@ -243,7 +243,7 @@ class IncomingTransactionController extends Controller
         $this->authorize('verify', $purchase);
 
         try {
-            $this->transactionService->approveIncoming($purchase, $request->user());
+            $this->transactionService->verify($purchase, $request->user());
 
             return redirect()
                 ->route('purchases.show', $purchase)
@@ -264,7 +264,7 @@ class IncomingTransactionController extends Controller
         $this->authorize('complete', $purchase);
 
         try {
-            $this->transactionService->completeIncoming($purchase, $request->user());
+            $this->transactionService->complete($purchase, $request->user());
 
             return redirect()
                 ->route('purchases.show', $purchase)
@@ -281,7 +281,7 @@ class IncomingTransactionController extends Controller
         $this->authorize('reject', $purchase);
 
         try {
-            $this->transactionService->rejectIncoming($purchase, $request->user(), $request->input('reason'));
+            $this->transactionService->reject($purchase, $request->user(), $request->input('reason'));
 
             return redirect()
                 ->route('purchases.show', $purchase)
@@ -337,7 +337,7 @@ class IncomingTransactionController extends Controller
             IncomingTransaction::STATUS_PENDING => 'Pending',
             IncomingTransaction::STATUS_VERIFIED => 'Verified',
             IncomingTransaction::STATUS_COMPLETED => 'Completed',
-            // IncomingTransaction::STATUS_REJECTED => 'Rejected',
+            IncomingTransaction::STATUS_REJECTED => 'Rejected',
         ];
     }
 

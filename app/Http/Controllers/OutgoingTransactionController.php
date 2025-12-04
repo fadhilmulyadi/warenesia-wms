@@ -11,7 +11,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Support\CsvExporter;
 use App\Support\TransactionPrefill;
-use App\Services\TransactionService;
+use App\Services\OutgoingTransactionService;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -31,7 +31,7 @@ class OutgoingTransactionController extends Controller
     private const ROLE_STAFF = 'staff';
     private const EXPORT_CHUNK_SIZE = 200;
 
-    public function __construct(private readonly TransactionService $transactionService)
+    public function __construct(private readonly OutgoingTransactionService $transactionService)
     {
     }
 
@@ -92,7 +92,7 @@ class OutgoingTransactionController extends Controller
         $validated = $request->validated();
 
         try {
-            $transaction = $this->transactionService->createOutgoing($validated, $request->user());
+            $transaction = $this->transactionService->create($validated, $request->user());
 
             return redirect()
                 ->route('sales.show', $transaction)
@@ -205,7 +205,7 @@ class OutgoingTransactionController extends Controller
         $validated = $request->validated();
 
         try {
-            $this->transactionService->updateOutgoing($sale, $validated, $request->user());
+            $this->transactionService->update($sale, $validated, $request->user());
 
             return redirect()
                 ->route('sales.show', $sale)
@@ -245,7 +245,7 @@ class OutgoingTransactionController extends Controller
         $this->authorize('approve', $sale);
 
         try {
-            $this->transactionService->approveOutgoing($sale, $request->user());
+            $this->transactionService->approve($sale, $request->user());
 
             return redirect()
                 ->route('sales.show', $sale)
@@ -266,7 +266,7 @@ class OutgoingTransactionController extends Controller
         $this->authorize('ship', $sale);
 
         try {
-            $this->transactionService->shipOutgoing($sale, $request->user());
+            $this->transactionService->ship($sale, $request->user());
 
             return redirect()
                 ->route('sales.show', $sale)

@@ -12,6 +12,17 @@ class IncomingTransaction extends Model
 {
     use HasFactory;
 
+    public function recalculateTotals(): void
+    {
+        $totals = \App\Services\Support\TransactionTotalsCalculator::calculate($this->items);
+
+        $this->total_items = $totals['total_items'];
+        $this->total_quantity = $totals['total_quantity'];
+        $this->total_amount = $totals['total_amount'];
+
+        $this->save();
+    }
+
     public const STATUS_PENDING = 'pending';
     public const STATUS_VERIFIED = 'verified';
     public const STATUS_COMPLETED = 'completed';

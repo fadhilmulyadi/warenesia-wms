@@ -39,17 +39,27 @@
                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
             @endforeach
             
-            <div class="relative">
+            <div class="relative" x-data="{ query: '{{ request($config['search']['param']) }}' }">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <x-lucide-search class="h-5 w-5 text-slate-400" />
                 </div>
                 <input
                     type="search"
                     name="{{ $config['search']['param'] }}"
-                    value="{{ request($config['search']['param']) }}"
-                    class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-500 focus:outline-none focus:placeholder-slate-400 focus:ring-1 focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+                    x-model="query"
+                    class="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-lg leading-5 bg-white placeholder-slate-500 focus:outline-none focus:placeholder-slate-400 focus:ring-1 focus:ring-teal-500 focus:border-teal-500 sm:text-sm [&::-webkit-search-cancel-button]:hidden"
                     placeholder="{{ $config['search']['placeholder'] }}"
                 >
+                <button
+                    type="button"
+                    x-show="query.length > 0"
+                    x-transition
+                    x-on:click="query = ''; $nextTick(() => $el.closest('form').submit())"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-teal-500 hover:text-teal-600"
+                    style="display: none;"
+                >
+                    <x-lucide-x class="h-5 w-5" />
+                </button>
             </div>
         </form>
     @endif

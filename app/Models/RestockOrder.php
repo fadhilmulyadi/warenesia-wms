@@ -7,16 +7,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Services\Support\TransactionTotalsCalculator;
 
 class RestockOrder extends Model
 {
     use HasFactory;
 
-    public const STATUS_PENDING    = 'pending';
-    public const STATUS_CONFIRMED  = 'confirmed';
+    public function recalculateTotals(): void
+    {
+        $totals = TransactionTotalsCalculator::calculate($this->items);
+
+        $this->total_items = $totals['total_items'];
+        $this->total_quantity = $totals['total_quantity'];
+        $this->total_amount = $totals['total_amount'];
+
+        $this->save();
+    }
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_CONFIRMED = 'confirmed';
     public const STATUS_IN_TRANSIT = 'in_transit';
-    public const STATUS_RECEIVED   = 'received';
-    public const STATUS_CANCELLED  = 'cancelled';
+    public const STATUS_RECEIVED = 'received';
+    public const STATUS_CANCELLED = 'cancelled';
 
     public const MIN_RATING = 1;
     public const MAX_RATING = 5;
@@ -24,7 +36,7 @@ class RestockOrder extends Model
     public const DEFAULT_PER_PAGE = 10;
 
     private const PURCHASE_ORDER_PREFIX = 'PO';
-    private const SEQUENCE_PAD_LENGTH   = 4;
+    private const SEQUENCE_PAD_LENGTH = 4;
 
     protected $fillable = [
         'po_number',
@@ -45,13 +57,13 @@ class RestockOrder extends Model
     ];
 
     protected $casts = [
-        'order_date'              => 'date',
-        'expected_delivery_date'  => 'date',
-        'total_items'             => 'integer',
-        'total_quantity'          => 'integer',
-        'total_amount'            => 'decimal:2',
-        'rating'                  => 'integer',
-        'rating_given_at'         => 'datetime',
+        'order_date' => 'date',
+        'expected_delivery_date' => 'date',
+        'total_items' => 'integer',
+        'total_quantity' => 'integer',
+        'total_amount' => 'decimal:2',
+        'rating' => 'integer',
+        'rating_given_at' => 'datetime',
     ];
 
     public static function generateNextPurchaseOrderNumber(): string
@@ -92,11 +104,11 @@ class RestockOrder extends Model
     public static function statusOptions(): array
     {
         return [
-            self::STATUS_PENDING    => 'Pending',
-            self::STATUS_CONFIRMED  => 'Confirmed',
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_CONFIRMED => 'Confirmed',
             self::STATUS_IN_TRANSIT => 'In transit',
-            self::STATUS_RECEIVED   => 'Received',
-            self::STATUS_CANCELLED  => 'Cancelled',
+            self::STATUS_RECEIVED => 'Received',
+            self::STATUS_CANCELLED => 'Cancelled',
         ];
     }
 

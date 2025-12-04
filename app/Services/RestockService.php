@@ -48,13 +48,10 @@ class RestockService
                     'notes' => $validatedData['notes'] ?? null,
                 ]);
 
-                $totals = $this->createItems($restockOrder, $itemsData);
+                $this->createItems($restockOrder, $itemsData);
 
-                $restockOrder->update([
-                    'total_items' => $totals['total_items'],
-                    'total_quantity' => $totals['total_quantity'],
-                    'total_amount' => $totals['total_amount'],
-                ]);
+                $restockOrder->load('items');
+                $restockOrder->recalculateTotals();
 
                 $this->logActivity(
                     $creator,
@@ -70,7 +67,7 @@ class RestockService
 
     public function markInTransit(RestockOrder $restock, ?User $actor = null): void
     {
-        if (! $restock->canBeMarkedInTransit()) {
+        if (!$restock->canBeMarkedInTransit()) {
             throw new DomainException('Only confirmed orders can be marked as in transit.');
         }
 
@@ -88,7 +85,7 @@ class RestockService
 
     public function markReceived(RestockOrder $restock, ?User $actor = null): void
     {
-        if (! $restock->canBeMarkedReceived()) {
+        if (!$restock->canBeMarkedReceived()) {
             throw new DomainException('Only in transit orders can be marked as received.');
         }
 
@@ -125,7 +122,7 @@ class RestockService
 
     public function cancel(RestockOrder $restock, ?User $actor = null): void
     {
-        if (! $restock->canBeCancelled()) {
+        if (!$restock->canBeCancelled()) {
             throw new DomainException('Only pending or confirmed orders can be cancelled.');
         }
 
@@ -143,7 +140,7 @@ class RestockService
 
     public function supplierConfirm(RestockOrder $restock, User $supplier): void
     {
-        if (! $restock->canBeConfirmedBySupplier()) {
+        if (!$restock->canBeConfirmedBySupplier()) {
             throw new DomainException('Only pending orders can be confirmed.');
         }
 
@@ -166,7 +163,7 @@ class RestockService
 
     public function supplierReject(RestockOrder $restock, User $supplier, ?string $reason = null): void
     {
-        if (! $restock->canBeConfirmedBySupplier()) {
+        if (!$restock->canBeConfirmedBySupplier()) {
             throw new DomainException('Only pending orders can be rejected.');
         }
 
@@ -207,19 +204,12 @@ class RestockService
         return $items;
     }
 
-    private function createItems(RestockOrder $restockOrder, array $itemsData): array
+    private function createItems(RestockOrder $restockOrder, array $itemsData): void
     {
-        $totalItems = count($itemsData);
-        $totalQuantity = 0;
-        $totalAmount = 0.0;
-
         foreach ($itemsData as $itemData) {
             $quantity = (int) $itemData['quantity'];
             $unitCost = isset($itemData['unit_cost']) ? (float) $itemData['unit_cost'] : 0.0;
             $lineTotal = $quantity * $unitCost;
-
-            $totalQuantity += $quantity;
-            $totalAmount += $lineTotal;
 
             RestockOrderItem::create([
                 'restock_order_id' => $restockOrder->id,
@@ -229,12 +219,6 @@ class RestockService
                 'line_total' => $lineTotal,
             ]);
         }
-
-        return [
-            'total_items' => $totalItems,
-            'total_quantity' => $totalQuantity,
-            'total_amount' => $totalAmount,
-        ];
     }
 
     private function logActivity(?User $user, string $action, string $description, object $subject): void
@@ -258,7 +242,7 @@ class RestockService
             } catch (QueryException $exception) {
                 $attempts++;
 
-                if (! $this->isUniqueConstraintViolation($exception) || $attempts >= $maxAttempts) {
+                if (!$this->isUniqueConstraintViolation($exception) || $attempts >= $maxAttempts) {
                     throw $exception;
                 }
             }

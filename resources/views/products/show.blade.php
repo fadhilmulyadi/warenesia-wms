@@ -53,17 +53,17 @@
             <x-mobile.card>
                 <div class="flex items-start justify-between gap-2">
                     <div class="space-y-1">
-                        <div class="text-xs font-semibold uppercase text-slate-400">
+                        <div class="text-xs font-semibold uppercase text-slate-500">
                             SKU: {{ $product->sku }}
                         </div>
-                        <h1 class="text-sm font-semibold text-slate-900">
+                        <h1 class="text-base font-medium text-slate-900">
                             {{ $product->name }}
                         </h1>
                         <div class="flex flex-wrap gap-1 pt-1">
-                            <x-badge variant="gray">
+                            <x-badge variant="gray" class="text-xs">
                                 {{ $categoryName }}
                             </x-badge>
-                            <x-badge :variant="$stockVariant">
+                            <x-badge :variant="$stockVariant" class="text-xs">
                                 {{ $stockLabel }}
                             </x-badge>
                         </div>
@@ -75,31 +75,31 @@
                     @endif
                 </div>
 
-                <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div class="mt-4 grid grid-cols-2 gap-4 text-xs">
                     <div class="space-y-0.5">
-                        <div class="text-xs text-slate-400">Stok Saat Ini</div>
-                        <div class="font-semibold text-slate-900 flex items-baseline gap-1">
+                        <div class="text-xs text-slate-500">Stok Saat Ini</div>
+                        <div class="font-medium text-slate-900 text-sm flex items-baseline gap-1">
                             <span>{{ number_format($stock, 0, ',', '.') }}</span>
-                            <span class="text-[11px] text-slate-500">{{ $unitName }}</span>
+                            <span class="text-xs text-slate-500">{{ $unitName }}</span>
                         </div>
                     </div>
                     <div class="space-y-0.5">
-                        <div class="text-xs text-slate-400">Stok Minimum</div>
-                        <div class="font-semibold text-slate-900">
+                        <div class="text-xs text-slate-500">Stok Minimum</div>
+                        <div class="font-medium text-slate-900 text-sm">
                             {{ number_format($minStock, 0, ',', '.') }}
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-3 flex gap-2">
+                <div class="mt-4 flex gap-3">
                     <a href="{{ route('products.edit', $product) }}"
-                        class="flex-1 h-9 rounded-lg bg-slate-100 text-slate-800 text-xs font-semibold flex items-center justify-center gap-2 hover:bg-slate-200 transition">
+                        class="flex-1 h-11 rounded-lg bg-slate-100 text-slate-800 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-slate-200 transition">
                         <x-lucide-pencil class="w-4 h-4" />
                         Edit Produk
                     </a>
 
                     <a href="{{ route('restocks.create', ['product' => $product]) }}"
-                        class="flex-1 h-9 rounded-lg bg-teal-600 text-white text-xs font-semibold flex items-center justify-center gap-2 hover:bg-teal-700 transition">
+                        class="flex-1 h-11 rounded-lg bg-teal-600 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-teal-700 transition">
                         <x-lucide-package-plus class="w-4 h-4" />
                         Restock
                     </a>
@@ -108,10 +108,10 @@
 
             {{-- HARGA & INFO LAIN --}}
             <x-mobile.card>
-                <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Harga & Informasi
                 </h2>
-                <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
                     <x-mobile.stat-row label="Harga Beli (HPP)" :value="number_format($product->purchase_price, 0, ',', '.')" prefix="Rp" />
                     <x-mobile.stat-row label="Harga Jual" :value="number_format($product->sale_price, 0, ',', '.')"
                         prefix="Rp" />
@@ -122,21 +122,21 @@
 
             {{-- QR CODE & LABEL --}}
             <x-mobile.card>
-                <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     QR & Label
                 </h2>
-                <div class="flex flex-col items-center gap-2">
+                <div class="flex flex-col items-center gap-4">
                     <div class="bg-white p-3 rounded-xl border border-slate-200">
                         {!! QrCode::format('svg')->size(120)->margin(1)->generate($product->getBarcodePayload()) !!}
                     </div>
-                    <div class="flex gap-2 w-full">
+                    <div class="flex gap-3 w-full">
                         <a href="{{ route('products.barcode', $product) }}"
-                            class="flex-1 h-9 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 flex items-center justify-center gap-2 hover:bg-slate-50">
+                            class="flex-1 h-11 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 flex items-center justify-center gap-2 hover:bg-slate-50">
                             <x-lucide-download class="w-4 h-4" />
                             Download QR
                         </a>
                         <a href="{{ route('products.barcode.label', $product) }}"
-                            class="flex-1 h-9 rounded-lg bg-slate-900 text-xs font-semibold text-white flex items-center justify-center gap-2 hover:bg-black">
+                            class="flex-1 h-11 rounded-lg bg-slate-900 text-sm font-semibold text-white flex items-center justify-center gap-2 hover:bg-black">
                             <x-lucide-printer class="w-4 h-4" />
                             Print Label
                         </a>
@@ -147,10 +147,10 @@
             {{-- DESKRIPSI --}}
             @if($product->description)
                 <x-mobile.card>
-                    <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                    <h2 class="text-sm font-semibold text-slate-900 mb-3">
                         Deskripsi
                     </h2>
-                    <p class="text-xs leading-relaxed text-slate-600">
+                    <p class="text-sm leading-relaxed text-slate-900">
                         {!! nl2br(e($product->description)) !!}
                     </p>
                 </x-mobile.card>
@@ -158,10 +158,10 @@
 
             {{-- STATISTIK & RIWAYAT --}}
             <x-mobile.card>
-                <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Statistik Transaksi
                 </h2>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-4">
                     <x-mobile.stat-row label="Total Transaksi" :value="number_format($totalTransactions, 0, ',', '.')" />
                     <x-mobile.stat-row label="Masuk" :value="number_format($totalIncoming, 0, ',', '.')" />
                     <x-mobile.stat-row label="Keluar" :value="number_format($totalOutgoing, 0, ',', '.')" />
@@ -170,10 +170,10 @@
 
             @if($recentTransactions->isNotEmpty())
                 <x-mobile.card>
-                    <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                    <h2 class="text-sm font-semibold text-slate-900 mb-4">
                         Riwayat Transaksi Terbaru
                     </h2>
-                    <div class="space-y-2">
+                    <div class="space-y-4 divide-y divide-slate-100">
                         @foreach($recentTransactions->take(5) as $transaction)
                             @php
                                 $type = strtoupper((string) data_get($transaction, 'type', data_get($transaction, 'direction', '')));
@@ -185,20 +185,20 @@
                                 $quantity = data_get($transaction, 'quantity', data_get($transaction, 'qty', data_get($transaction, 'total_quantity', 0)));
                                 $reference = data_get($transaction, 'reference_number') ?? data_get($transaction, 'transaction_number') ?? '-';
                             @endphp
-                            <div class="flex items-center justify-between text-xs py-1.5 border-b border-slate-50 last:border-0">
-                                <div>
-                                    <div class="font-semibold text-slate-900">
-                                        {{ $isIncoming ? 'IN' : 'OUT' }}
+                            <div class="{{ $loop->first ? '' : 'pt-4' }}">
+                                <div class="flex items-center justify-between mb-1">
+                                    <div class="font-medium text-slate-900 text-sm">
+                                        {{ $isIncoming ? 'Barang Masuk' : 'Barang Keluar' }}
                                     </div>
-                                    <div class="text-[11px] text-slate-500">
-                                        {{ $formattedDate }} · {{ $reference }}
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="font-semibold {{ $isIncoming ? 'text-emerald-600' : 'text-rose-600' }}">
+                                    <div class="font-bold text-sm {{ $isIncoming ? 'text-emerald-600' : 'text-rose-600' }}">
                                         {{ $isIncoming ? '+' : '-' }}{{ number_format(abs((float) $quantity), 0, ',', '.') }}
                                     </div>
-                                    <div class="text-[11px] text-slate-400">
+                                </div>
+                                <div class="flex items-center justify-between text-xs text-slate-500">
+                                    <div>
+                                        {{ $formattedDate }} · {{ $reference }}
+                                    </div>
+                                    <div>
                                         {{ $unitName }}
                                     </div>
                                 </div>
@@ -239,7 +239,7 @@
                 <x-card class="p-6 space-y-6 h-full">
 
                     <p class="text-base font-semibold text-slate-900 mb-2">
-                        IDENTITAS PRODUK
+                        Identitas Produk
                     </p>
 
                     <div class="space-y-6">
@@ -314,7 +314,7 @@
                 <x-card class="p-6 space-y-6 h-full">
 
                     <p class="text-base font-semibold text-slate-900 mb-1">
-                        DATA OPERASIONAL PRODUK
+                        Data Operasional Produk
                     </p>
 
                     {{-- Harga & Stok --}}

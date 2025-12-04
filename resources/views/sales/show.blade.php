@@ -40,20 +40,20 @@
             <x-mobile.card>
                 <div class="flex items-start justify-between gap-2">
                     <div>
-                        <div class="text-xs text-slate-400">No Transaksi</div>
-                        <div class="text-sm font-semibold text-slate-900">
+                        <div class="text-xs text-slate-500">No Transaksi</div>
+                        <div class="text-base font-medium text-slate-900">
                             #{{ $sale->transaction_number }}
                         </div>
-                        <div class="mt-1 text-[11px] text-slate-500">
-                            Customer: {{ $sale->customer_name ?? '-' }}
+                        <div class="mt-1 text-sm text-slate-900">
+                            Customer: <span class="font-medium">{{ $sale->customer_name ?? '-' }}</span>
                         </div>
                     </div>
-                    <x-badge :variant="$statusVariant">
+                    <x-badge :variant="$statusVariant" class="text-xs">
                         {{ $statusLabel }}
                     </x-badge>
                 </div>
 
-                <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div class="mt-4 grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
                     <x-mobile.stat-row label="Tanggal" :value="$sale->transaction_date?->format('d M Y') ?? '-'" />
                     <x-mobile.stat-row label="Total Item" :value="number_format($totalItems, 0, ',', '.')" />
                     <x-mobile.stat-row label="Total Qty" :value="number_format($totalQty, 0, ',', '.')" />
@@ -64,15 +64,15 @@
             {{-- ACTION CARD --}}
             @canany(['approve', 'ship'], $sale)
                 <x-mobile.card>
-                    <div class="space-y-2 text-xs">
+                    <div class="space-y-3">
                         @can('approve', $sale)
                             <form method="POST" action="{{ route('sales.approve', $sale) }}">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
-                                    class="w-full h-9 rounded-lg bg-teal-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-teal-700"
+                                    class="w-full h-11 rounded-lg bg-teal-600 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-teal-700"
                                     onclick="return confirm('Approve this transaction and reduce stock?')">
-                                    <x-lucide-check class="w-4 h-4" />
+                                    <x-lucide-check class="w-5 h-5" />
                                     Approve & Kurangi Stok
                                 </button>
                             </form>
@@ -83,9 +83,9 @@
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
-                                    class="w-full h-9 rounded-lg bg-slate-900 text-white font-semibold flex items-center justify-center gap-2 hover:bg-black"
+                                    class="w-full h-11 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-black"
                                     onclick="return confirm('Mark this transaction as shipped?')">
-                                    <x-lucide-send class="w-4 h-4" />
+                                    <x-lucide-send class="w-5 h-5" />
                                     Tandai Terkirim
                                 </button>
                             </form>
@@ -96,17 +96,17 @@
 
             {{-- INFO DETAIL --}}
             <x-mobile.card>
-                <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Informasi Transaksi
                 </h2>
-                <div class="space-y-2 text-xs">
+                <div class="space-y-4 text-xs">
                     <x-mobile.stat-row label="Customer" :value="$sale->customer_name ?? '-'" />
                     <x-mobile.stat-row label="Disetujui oleh" :value="$sale->approvedBy?->name ?? '-'" />
 
                     @if($sale->notes)
-                        <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                            <div class="font-semibold text-slate-700 mb-1">Catatan</div>
-                            <p class="leading-relaxed">
+                        <div class="pt-3 border-t border-slate-100">
+                            <div class="text-xs text-slate-500 mb-1">Catatan</div>
+                            <p class="leading-relaxed text-sm text-slate-900">
                                 {!! nl2br(e($sale->notes)) !!}
                             </p>
                         </div>
@@ -114,61 +114,51 @@
                 </div>
             </x-mobile.card>
 
-            {{-- TABEL PRODUK --}}
+            {{-- DAFTAR ITEM (STACKED LIST) --}}
             <x-mobile.card>
-                <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                <h2 class="text-sm font-semibold text-slate-900 mb-4">
                     Detail Produk
                 </h2>
-                <div class="overflow-x-auto -mx-4 px-4">
-                    <x-table>
-                        <x-table.thead>
-                            <x-table.th>Product</x-table.th>
-                            <x-table.th align="right">Qty</x-table.th>
-                            <x-table.th align="right">Price</x-table.th>
-                            <x-table.th align="right">Subtotal</x-table.th>
-                        </x-table.thead>
+                <div class="space-y-4 divide-y divide-slate-100">
+                    @forelse($sale->items as $item)
+                        <div class="{{ $loop->first ? '' : 'pt-4' }}">
+                            {{-- Baris 1: Nama Produk --}}
+                            <div class="font-medium text-slate-900 text-sm mb-1">
+                                {{ optional($item->product)->name ?? '-' }}
+                            </div>
 
-                        <x-table.tbody>
-                            @forelse($sale->items as $item)
-                                <x-table.tr>
-                                    <x-table.td>
-                                        <div class="flex flex-col">
-                                            <span class="font-medium text-slate-900">
-                                                {{ optional($item->product)->name ?? '-' }}
-                                            </span>
-                                            <span class="text-xs text-slate-500">
-                                                {{ optional($item->product)->sku ?? '-' }}
-                                            </span>
-                                        </div>
-                                    </x-table.td>
-                                    <x-table.td align="right" class="font-semibold text-slate-900">
-                                        {{ number_format($item->quantity, 0, ',', '.') }}
-                                    </x-table.td>
-                                    <x-table.td align="right">
-                                        {{ number_format($item->unit_price, 2, ',', '.') }}
-                                    </x-table.td>
-                                    <x-table.td align="right" class="font-semibold text-slate-900">
-                                        {{ number_format($item->line_total, 2, ',', '.') }}
-                                    </x-table.td>
-                                </x-table.tr>
-                            @empty
-                                <x-table.tr>
-                                    <x-table.td colspan="4" class="text-center text-slate-500">
-                                        Tidak ada produk.
-                                    </x-table.td>
-                                </x-table.tr>
-                            @endforelse
+                            <div class="flex justify-between items-start">
+                                {{-- Baris 2: SKU & Harga Satuan --}}
+                                <div class="text-xs text-slate-500 space-y-0.5">
+                                    <div>SKU: {{ optional($item->product)->sku ?? '-' }}</div>
+                                    <div>@ {{ number_format($item->unit_price, 2, ',', '.') }}</div>
+                                </div>
 
-                            @if($sale->items->count() > 0)
-                                <x-table.tr class="bg-slate-50 font-semibold">
-                                    <x-table.td colspan="3" align="right" class="text-slate-900">Total</x-table.td>
-                                    <x-table.td align="right" class="text-slate-900">
-                                        Rp {{ number_format($sale->total_amount, 2, ',', '.') }}
-                                    </x-table.td>
-                                </x-table.tr>
-                            @endif
-                        </x-table.tbody>
-                    </x-table>
+                                {{-- Baris 3: Total Harga & Qty --}}
+                                <div class="text-right">
+                                    <div class="font-bold text-slate-900 text-sm">
+                                        Rp {{ number_format($item->line_total, 2, ',', '.') }}
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-0.5">
+                                        x{{ number_format($item->quantity, 0, ',', '.') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center text-slate-500 py-4 text-sm">
+                            Tidak ada produk.
+                        </div>
+                    @endforelse
+
+                    @if($sale->items->count() > 0)
+                        <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-sm font-semibold text-slate-900">Total</span>
+                            <span class="text-sm font-bold text-slate-900">
+                                Rp {{ number_format($sale->total_amount, 2, ',', '.') }}
+                            </span>
+                        </div>
+                    @endif
                 </div>
             </x-mobile.card>
         </div>

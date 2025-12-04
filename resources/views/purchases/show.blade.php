@@ -42,20 +42,20 @@
             <x-mobile.card>
                 <div class="flex items-start justify-between gap-2">
                     <div>
-                        <div class="text-xs text-slate-400">No Transaksi</div>
-                        <div class="text-sm font-semibold text-slate-900">
+                        <div class="text-xs text-slate-500">No Transaksi</div>
+                        <div class="text-base font-medium text-slate-900">
                             #{{ $purchase->transaction_number }}
                         </div>
-                        <div class="mt-1 text-[11px] text-slate-500">
-                            Supplier: {{ $purchase->supplier?->name ?? '-' }}
+                        <div class="mt-1 text-sm text-slate-900">
+                            Supplier: <span class="font-medium">{{ $purchase->supplier?->name ?? '-' }}</span>
                         </div>
                     </div>
-                    <x-badge :variant="$statusVariant">
+                    <x-badge :variant="$statusVariant" class="text-xs">
                         {{ $statusLabel }}
                     </x-badge>
                 </div>
 
-                <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div class="mt-4 grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
                     <x-mobile.stat-row label="Tanggal" :value="$purchase->transaction_date?->format('d M Y') ?? '-'" />
                     <x-mobile.stat-row label="Total Item" :value="number_format($totalItems, 0, ',', '.')" />
                     <x-mobile.stat-row label="Total Qty" :value="number_format($totalQty, 0, ',', '.')" />
@@ -66,15 +66,15 @@
             {{-- ACTION CARD --}}
             @canany(['verify', 'reject', 'complete'], $purchase)
                 <x-mobile.card>
-                    <div class="space-y-2 text-xs">
+                    <div class="space-y-3">
                         @can('verify', $purchase)
                             <form method="POST" action="{{ route('purchases.verify', $purchase) }}">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
-                                    class="w-full h-9 rounded-lg bg-teal-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-teal-700"
+                                    class="w-full h-11 rounded-lg bg-teal-600 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-teal-700"
                                     onclick="return confirm('Verifikasi transaksi ini dan perbarui stok?')">
-                                    <x-lucide-check class="w-4 h-4" />
+                                    <x-lucide-check class="w-5 h-5" />
                                     Verifikasi
                                 </button>
                             </form>
@@ -85,9 +85,9 @@
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
-                                    class="w-full h-9 rounded-lg bg-slate-900 text-white font-semibold flex items-center justify-center gap-2 hover:bg-black"
+                                    class="w-full h-11 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-black"
                                     onclick="return confirm('Mark this transaction as completed?')">
-                                    <x-lucide-check-circle class="w-4 h-4" />
+                                    <x-lucide-check-circle class="w-5 h-5" />
                                     Tandai Selesai
                                 </button>
                             </form>
@@ -97,14 +97,14 @@
                             <form method="POST" action="{{ route('purchases.reject', $purchase) }}">
                                 @csrf
                                 @method('PATCH')
-                                <div class="space-y-2">
+                                <div class="space-y-3">
                                     <input type="text" name="reason"
-                                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs"
+                                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                                         placeholder="Alasan penolakan (opsional)">
                                     <button type="submit"
-                                        class="w-full h-9 rounded-lg bg-rose-100 text-rose-700 font-semibold flex items-center justify-center gap-2 hover:bg-rose-200"
+                                        class="w-full h-11 rounded-lg bg-rose-100 text-rose-700 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-rose-200"
                                         onclick="return confirm('Reject this transaction?')">
-                                        <x-lucide-x class="w-4 h-4" />
+                                        <x-lucide-x class="w-5 h-5" />
                                         Tolak
                                     </button>
                                 </div>
@@ -116,17 +116,17 @@
 
             {{-- INFO DETAIL --}}
             <x-mobile.card>
-                <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Informasi Transaksi
                 </h2>
-                <div class="space-y-2 text-xs">
+                <div class="space-y-4 text-xs">
                     <x-mobile.stat-row label="Supplier" :value="$purchase->supplier?->name ?? '-'" />
                     <x-mobile.stat-row label="Diverifikasi oleh" :value="$purchase->verifiedBy?->name ?? '-'" />
 
                     @if($purchase->notes)
-                        <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
-                            <div class="font-semibold text-slate-700 mb-1">Catatan</div>
-                            <p class="leading-relaxed">
+                        <div class="pt-3 border-t border-slate-100">
+                            <div class="text-xs text-slate-500 mb-1">Catatan</div>
+                            <p class="leading-relaxed text-sm text-slate-900">
                                 {!! nl2br(e($purchase->notes)) !!}
                             </p>
                         </div>
@@ -134,61 +134,51 @@
                 </div>
             </x-mobile.card>
 
-            {{-- TABEL PRODUK --}}
+            {{-- DAFTAR ITEM (STACKED LIST) --}}
             <x-mobile.card>
-                <h2 class="text-sm font-semibold text-slate-900 mb-2">
+                <h2 class="text-sm font-semibold text-slate-900 mb-4">
                     Detail Produk
                 </h2>
-                <div class="overflow-x-auto -mx-4 px-4">
-                    <x-table>
-                        <x-table.thead>
-                            <x-table.th>Product</x-table.th>
-                            <x-table.th align="right">Qty</x-table.th>
-                            <x-table.th align="right">Price</x-table.th>
-                            <x-table.th align="right">Subtotal</x-table.th>
-                        </x-table.thead>
+                <div class="space-y-4 divide-y divide-slate-100">
+                    @forelse($purchase->items as $item)
+                        <div class="{{ $loop->first ? '' : 'pt-4' }}">
+                            {{-- Baris 1: Nama Produk --}}
+                            <div class="font-medium text-slate-900 text-sm mb-1">
+                                {{ optional($item->product)->name ?? '-' }}
+                            </div>
 
-                        <x-table.tbody>
-                            @forelse($purchase->items as $item)
-                                <x-table.tr>
-                                    <x-table.td>
-                                        <div class="flex flex-col">
-                                            <span class="font-medium text-slate-900">
-                                                {{ optional($item->product)->name ?? '-' }}
-                                            </span>
-                                            <span class="text-xs text-slate-500">
-                                                {{ optional($item->product)->sku ?? '-' }}
-                                            </span>
-                                        </div>
-                                    </x-table.td>
-                                    <x-table.td align="right" class="font-semibold text-slate-900">
-                                        {{ number_format($item->quantity, 0, ',', '.') }}
-                                    </x-table.td>
-                                    <x-table.td align="right">
-                                        {{ number_format($item->unit_cost, 2, ',', '.') }}
-                                    </x-table.td>
-                                    <x-table.td align="right" class="font-semibold text-slate-900">
-                                        {{ number_format($item->line_total, 2, ',', '.') }}
-                                    </x-table.td>
-                                </x-table.tr>
-                            @empty
-                                <x-table.tr>
-                                    <x-table.td colspan="4" class="text-center text-slate-500">
-                                        Tidak ada produk.
-                                    </x-table.td>
-                                </x-table.tr>
-                            @endforelse
+                            <div class="flex justify-between items-start">
+                                {{-- Baris 2: SKU & Harga Satuan --}}
+                                <div class="text-xs text-slate-500 space-y-0.5">
+                                    <div>SKU: {{ optional($item->product)->sku ?? '-' }}</div>
+                                    <div>@ {{ number_format($item->unit_cost, 2, ',', '.') }}</div>
+                                </div>
 
-                            @if($purchase->items->count() > 0)
-                                <x-table.tr class="bg-slate-50 font-semibold">
-                                    <x-table.td colspan="3" align="right" class="text-slate-900">Total</x-table.td>
-                                    <x-table.td align="right" class="text-slate-900">
-                                        Rp {{ number_format($purchase->total_amount, 2, ',', '.') }}
-                                    </x-table.td>
-                                </x-table.tr>
-                            @endif
-                        </x-table.tbody>
-                    </x-table>
+                                {{-- Baris 3: Total Harga & Qty --}}
+                                <div class="text-right">
+                                    <div class="font-bold text-slate-900 text-sm">
+                                        Rp {{ number_format($item->line_total, 2, ',', '.') }}
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-0.5">
+                                        x{{ number_format($item->quantity, 0, ',', '.') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center text-slate-500 py-4 text-sm">
+                            Tidak ada produk.
+                        </div>
+                    @endforelse
+
+                    @if($purchase->items->count() > 0)
+                        <div class="pt-4 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-sm font-semibold text-slate-900">Total</span>
+                            <span class="text-sm font-bold text-slate-900">
+                                Rp {{ number_format($purchase->total_amount, 2, ',', '.') }}
+                            </span>
+                        </div>
+                    @endif
                 </div>
             </x-mobile.card>
         </div>
@@ -214,12 +204,6 @@
                     @endif
                 </div>
             </div>
-
-            @if(session('success'))
-                <x-card class="p-4 bg-emerald-50 border-emerald-200 text-emerald-800">
-                    {{ session('success') }}
-                </x-card>
-            @endif
 
             @canany(['verify', 'reject', 'complete'], $purchase)
                 <x-card class="p-4">

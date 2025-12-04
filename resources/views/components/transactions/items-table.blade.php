@@ -195,87 +195,120 @@ function itemsTable(config) {
         @endif
     </div>
 
-    <div class="md:hidden bg-slate-50/50 p-3 space-y-3">
-        <template x-for="(item, index) in items" :key="index">
-            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative space-y-3">
-                
-                @if(!$readonly)
-                    <button type="button" @click="removeItem(index)" 
-                        class="absolute top-2 right-2 bg-rose-500 text-white p-1.5 rounded-lg hover:bg-rose-600 shadow-sm transition-colors z-10"
-                        title="Hapus Item">
-                        <x-lucide-trash-2 class="w-4 h-4" />
-                    </button>
-                @endif
-
-                <div class="pr-6"> {{-- Padding right agar tidak tertutup tombol hapus --}}
-                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Produk</label>
-                    <x-custom-select
-                        x-bind:data-name="'items[' + index + '][product_id]'"
-                        :options="$productOptions"
-                        placeholder="Pilih Produk"
-                        x-model="item.product_id"
-                        x-bind:value="String(item.product_id || '')"
-                        :disabled="$readonly"
-                        :required="true"
-                        width="w-full"
-                    />
-                </div>
-
-                {{-- Row 2: Grid Qty & Harga --}}
-                <div class="grid grid-cols-2 gap-3">
-                    {{-- Qty --}}
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Qty</label>
-                        <input 
-                            type="number" 
-                            :name="`items[${index}][quantity]`" 
-                            x-model="item.quantity"
-                            min="1"
-                            class="w-full rounded-lg border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
-                            :disabled="@js($readonly)"
-                            required
-                        >
-                        <x-form-error :message="null" x-bind:message="stockError(index)" />
+    {{-- MOBILE VERSION (REPLACEMENT) --}}
+    <div class="md:hidden bg-slate-50 min-h-[300px] flex flex-col relative">
+        
+        {{-- LIST ITEM CONTAINER --}}
+        <div class="p-3 space-y-3 pb-24"> {{-- Padding bottom besar agar tidak tertutup sticky footer --}}
+            
+            <template x-for="(item, index) in items" :key="index">
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm relative animate-fade-in-up">
+                    
+                    {{-- HEADER CARD: Item Number & Delete --}}
+                    <div class="flex justify-between items-start mb-2 pb-2 border-b border-slate-50">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Item #<span x-text="index + 1"></span></div>
+                        
+                        @if(!$readonly)
+                            <button type="button" @click="removeItem(index)" 
+                                class="text-rose-400 hover:text-rose-600 p-1 -mr-1" title="Hapus Item">
+                                <x-lucide-x class="w-4 h-4" />
+                            </button>
+                        @endif
                     </div>
 
-                    {{-- Harga --}}
-                    <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">{{ $priceLabel }}</label>
-                        <input 
-                            type="number" 
-                            :name="`items[${index}][{{ $priceField }}]`" 
-                            x-model="item.{{ $priceField }}"
-                            min="0"
-                            class="w-full rounded-lg border-slate-200 text-sm text-right focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
-                            :disabled="@js($readonly)"
-                        >
+                    {{-- INPUT FIELDS --}}
+                    <div class="space-y-3">
+                        
+                        {{-- 1. Produk (Full Width) --}}
+                        <div>
+                            <x-custom-select
+                                x-bind:data-name="'items[' + index + '][product_id]'"
+                                :options="$productOptions"
+                                placeholder="Pilih Produk"
+                                x-model="item.product_id"
+                                x-bind:value="String(item.product_id || '')"
+                                :disabled="$readonly"
+                                :required="true"
+                                width="w-full"
+                                class="text-sm"
+                            />
+                        </div>
+
+                        {{-- 2. Grid Qty & Harga (Side by Side) --}}
+                        <div class="flex gap-2">
+                            {{-- Qty --}}
+                            <div class="w-1/3">
+                                <div class="relative">
+                                    <input 
+                                        type="number" inputmode="numeric"
+                                        :name="`items[${index}][quantity]`" 
+                                        x-model="item.quantity"
+                                        min="1"
+                                        placeholder="Qty"
+                                        class="w-full pl-2 pr-1 py-2 rounded-lg border-slate-200 text-sm font-semibold text-center focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
+                                        :disabled="@js($readonly)"
+                                        required
+                                    >
+                                    <span class="absolute top-0 right-1 text-[9px] text-slate-400 h-full flex items-center pointer-events-none">pcs</span>
+                                </div>
+                                {{-- Error message container --}}
+                                <div class="text-[10px] text-rose-500 leading-tight mt-1" x-text="stockError(index)"></div>
+                            </div>
+
+                            {{-- Harga --}}
+                            <div class="flex-1">
+                                <div class="relative">
+                                    <span class="absolute top-0 left-2 text-slate-400 h-full flex items-center pointer-events-none text-xs">Rp</span>
+                                    <input 
+                                        type="number" inputmode="numeric"
+                                        :name="`items[${index}][{{ $priceField }}]`" 
+                                        x-model="item.{{ $priceField }}"
+                                        min="0"
+                                        class="w-full pl-8 pr-2 py-2 rounded-lg border-slate-200 text-sm text-right font-medium focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
+                                        :disabled="@js($readonly)"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- FOOTER CARD: Subtotal Highlight --}}
+                    <div class="mt-3 bg-slate-50 -mx-3 -mb-3 px-3 py-2 rounded-b-xl flex justify-between items-center border-t border-slate-100">
+                        <span class="text-[10px] uppercase font-bold text-slate-500">Subtotal</span>
+                        <span class="text-sm font-bold text-teal-700" 
+                              x-text="new Intl.NumberFormat('id-ID').format(item.quantity * item.{{ $priceField }})">
+                        </span>
                     </div>
                 </div>
+            </template>
 
-                {{-- Row 3: Subtotal Card --}}
-                <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
-                    <span class="text-xs text-slate-500 font-medium">Subtotal</span>
-                    <span class="text-sm font-bold text-slate-700" 
-                          x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.quantity * item.{{ $priceField }})">
-                    </span>
+            {{-- Empty State --}}
+            <template x-if="items.length === 0">
+                <div class="flex flex-col items-center justify-center py-10 text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                    <x-lucide-package-open class="w-8 h-8 mb-2 opacity-50" />
+                    <span class="text-xs">Belum ada item</span>
+                </div>
+            </template>
+            
+            {{-- Tombol Tambah (Di dalam flow scroll) --}}
+            @if(!$readonly)
+                <button type="button" @click="addItem()" 
+                    class="w-full py-3 border-2 border-dashed border-teal-200 text-teal-600 rounded-xl hover:bg-teal-50 hover:border-teal-300 transition-all font-semibold text-sm flex items-center justify-center gap-2">
+                    <x-lucide-plus class="w-4 h-4" />
+                    Tambah Baris Item
+                </button>
+            @endif
+        </div>
+
+        {{-- STICKY FOOTER GRAND TOTAL --}}
+        <div class="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 p-4">
+            <div class="flex justify-between items-end">
+                <div class="text-xs font-medium text-slate-500 mb-1">Total Estimasi</div>
+                <div class="text-lg font-bold text-slate-900 leading-none"
+                     x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
+                     .format(items.reduce((acc, item) => acc + (item.quantity * item.{{ $priceField }}), 0))">
                 </div>
             </div>
-        </template>
-
-        {{-- Mobile Empty State --}}
-        <template x-if="items.length === 0">
-            <div class="text-center py-6 text-slate-400 text-xs">
-                Belum ada item ditambahkan.
-            </div>
-        </template>
-
-        {{-- Mobile Grand Total --}}
-        <div class="bg-teal-50 rounded-lg p-3 border border-teal-100 flex justify-between items-center">
-            <span class="text-xs font-bold uppercase text-teal-800">Grand Total</span>
-            <span class="text-base font-bold text-teal-700"
-                x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' })
-                .format(items.reduce((acc, item) => acc + (item.quantity * item.{{ $priceField }}), 0))">
-            </span>
         </div>
     </div>
 
