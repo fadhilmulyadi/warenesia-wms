@@ -35,7 +35,7 @@ class ProductPolicy
 
     public function delete(User $user, Product $product): bool
     {
-        return $user->role === 'admin';
+        return $this->canManage($user);
     }
 
     public function export(User $user): bool

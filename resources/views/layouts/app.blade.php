@@ -65,10 +65,30 @@
                 isDesktop ? 'translate-x-0' : (sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full')
             ]">
 
-            <div class="h-16 flex items-center px-4 border-b border-slate-800">
-                <div class="flex flex-col" x-show="sidebarOpen" x-transition.opacity>
-                    <span class="font-semibold text-lg tracking-tight">Warenesia</span>
+            {{-- HEADER SIDEBAR --}}
+            <div class="h-16 flex items-center border-b border-slate-800 transition-all duration-300"
+                :class="sidebarOpen ? 'justify-between px-4' : 'justify-center px-0'">
+
+                {{-- Logo & Judul --}}
+                <div class="flex items-center gap-3 overflow-hidden"
+                    @click="!sidebarOpen && isDesktop ? toggleSidebar() : null"
+                    :class="!sidebarOpen && isDesktop ? 'cursor-pointer' : ''">
+
+                    {{-- Icon Box --}}
+                    <x-lucide-box class="h-8 w-8 text-teal-400 flex-shrink-0 transition-transform duration-300"
+                        x-bind:class="sidebarOpen ? '' : 'scale-110'" />
+
+                    {{-- Teks Warenesia --}}
+                    <div class="flex flex-col" x-show="sidebarOpen" x-transition>
+                        <span class="font-semibold text-2xl tracking-tight leading-none text-white">Warenesia</span>
+                    </div>
                 </div>
+
+                {{-- Tombol Toggle --}}
+                <button type="button" @click="toggleSidebar()" x-show="sidebarOpen && isDesktop"
+                    class="hidden lg:flex items-center justify-center p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <x-lucide-chevron-left class="h-5 w-5" />
+                </button>
             </div>
 
             {{-- NAVIGATION --}}
@@ -98,7 +118,7 @@
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-box class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Inventory</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Produk</span>
                     </a>
                 @endcan
 
@@ -127,7 +147,7 @@
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-repeat class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Restocks</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Restock</span>
                     </a>
                 @endcan
 
@@ -149,7 +169,7 @@
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-building-2 class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Suppliers</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Supplier</span>
                     </a>
                 @endcan
 
@@ -160,7 +180,7 @@
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-tags class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Categories</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Kategori</span>
                     </a>
                 @endcan
 
@@ -170,7 +190,7 @@
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-ruler class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Units</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Satuan</span>
                     </a>
                 @endcan
 
@@ -196,15 +216,6 @@
                 </button>
             </div>
 
-            {{-- COLLAPSE --}}
-            <button type="button" @click="sidebarOpen = !sidebarOpen"
-                class="hidden lg:flex absolute -right-3 top-20 h-7 w-7 rounded-full bg-slate-900 border border-slate-700 items-center justify-center text-slate-200 shadow-md hover:bg-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform duration-200"
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    :class="sidebarOpen ? '' : 'rotate-180'">
-                    <path d="M15 18l-6-6 6-6" />
-                </svg>
-            </button>
         </aside>
 
         {{-- OVERLAY MOBILE --}}
@@ -225,7 +236,6 @@
                         <x-lucide-menu class="h-5 w-5" />
                     </button>
 
-                    {{-- PAGE HEADER DARI @section --}}
                     <div class="flex-1 min-w-0 flex items-center">
                         @hasSection('page-header')
                             <div class="w-full">
@@ -235,19 +245,19 @@
                     </div>
                 </div>
 
-                {{-- USER MENU — REPLACED VERSION --}}
+                {{-- USER MENU --}}
                 <div class="flex items-center gap-3 flex-none">
 
                     <div class="relative flex-none" x-data="{ open: false }">
                         <button type="button" @click="open = !open"
                             class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2 py-1.5 hover:bg-slate-200">
-                            {{-- Avatar: always visible --}}
+                            {{-- Avatar --}}
                             <div
                                 class="h-9 w-9 rounded-full bg-teal-500 text-slate-900 flex items-center justify-center font-semibold text-sm">
                                 {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
                             </div>
 
-                            {{-- Text: visible on ≥ sm --}}
+                            {{-- Text --}}
                             <div class="hidden sm:flex flex-col items-start min-w-0 max-w-[160px]">
                                 <span class="text-xs text-slate-500 leading-none">Logged in as</span>
                                 <span class="text-sm font-medium leading-none truncate">
@@ -255,7 +265,6 @@
                                 </span>
                             </div>
 
-                            {{-- Arrow icon: visible on ≥ sm --}}
                             <svg class="hidden sm:block h-4 w-4 text-slate-500" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M6 9l6 6 6-6" />

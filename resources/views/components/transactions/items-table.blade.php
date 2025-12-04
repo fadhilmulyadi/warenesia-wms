@@ -8,16 +8,11 @@
 ])
 
 @php
-    $masterPriceColumn = ($priceField === 'unit_cost') 
-        ? 'purchase_price' 
-        : 'sale_price';
-
-    $pricesData = $products->pluck($masterPriceColumn, 'id');
     $stockData = $products->pluck('current_stock', 'id')->map(fn ($stock) => (int) $stock);
     $skusData = $products->pluck('sku', 'id');
     
     $productOptions = $products->mapWithKeys(function($product) {
-        return [$product->id => "{$product->name} (Stok: {$product->current_stock})"];
+        return [$product->id => "{$product->name}"];
     })->toArray();
 
     $quantityErrorMap = collect($errors?->getMessages() ?? [])
@@ -52,11 +47,9 @@ if (! window.submitFormWithValidation) {
 function itemsTable(config) {
     const {
         initialItems = [],
-        productPrices = {},
         productStocks = {},
         productSkus = {},
         quantityErrors = {},
-        priceField = 'price',
         shouldCheckStock = false
     } = config;
 
@@ -64,14 +57,11 @@ function itemsTable(config) {
         items: initialItems.length > 0 ? initialItems : [{ 
             product_id: '',
             quantity: 1,
-            [priceField]: 0,
         }],
-        productPrices,
         productStocks,
         productSkus,
         quantityErrors,
         shouldCheckStock,
-        priceField,
         currentIndex: null,
 
         init() {
@@ -102,7 +92,6 @@ function itemsTable(config) {
             this.items.push({
                 product_id: '',
                 quantity: 1,
-                [this.priceField]: 0,
             });
         },
 
@@ -112,7 +101,19 @@ function itemsTable(config) {
 
         onProductChange(index, productId) {
             this.items[index].product_id = productId;
-            this.items[index][this.priceField] = this.productPrices[productId] ?? 0;
+        },
+
+        getProductStock(productId) {
+            if (!productId) return null;
+            return Number(this.productStocks[productId] ?? 0);
+        },
+
+        getStockClass(productId) {
+            const stock = this.getProductStock(productId);
+            if (stock === null) return 'text-slate-300 bg-slate-50 border-slate-200'; // Belum pilih
+            if (stock === 0) return 'text-rose-600 bg-rose-50 border-rose-100 font-bold'; // Habis
+            if (stock < 5) return 'text-amber-600 bg-amber-50 border-amber-100 font-bold'; // Sekarat
+            return 'text-slate-600 bg-slate-100 border-slate-200'; // Aman
         },
 
         isStockInsufficient(index) {
@@ -126,7 +127,7 @@ function itemsTable(config) {
                 return false;
             }
 
-            const availableStock = Number(this.productStocks[item.product_id] ?? 0);
+            const availableStock = this.getProductStock(item.product_id);
             const requestedQty = Number(item.quantity ?? 0);
 
             return Number.isFinite(requestedQty) && Number.isFinite(availableStock) && requestedQty > availableStock;
@@ -160,7 +161,7 @@ function itemsTable(config) {
             }
 
             if (this.isStockInsufficient(index)) {
-                const availableStock = Number(this.productStocks[item.product_id] ?? 0);
+                const availableStock = this.getProductStock(item.product_id);
                 return `Stok tidak mencukupi. Tersedia: ${availableStock}.`;
             }
 
@@ -175,14 +176,12 @@ function itemsTable(config) {
 </script>
 
 <div 
-    class="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm"
+    class="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm max-w-6xl mx-auto"
     x-data="itemsTable({
         initialItems: {{ \Illuminate\Support\Js::from($initialItems) }},
-        productPrices: {{ \Illuminate\Support\Js::from($pricesData) }},
         productStocks: {{ \Illuminate\Support\Js::from($stockData) }},
         productSkus: {{ \Illuminate\Support\Js::from($skusData) }},
         quantityErrors: {{ \Illuminate\Support\Js::from($quantityErrorMap) }},
-        priceField: '{{ $priceField }}',
         shouldCheckStock: @js($priceField === 'unit_price')
     })"
     x-init="
@@ -204,11 +203,11 @@ function itemsTable(config) {
         @endif
     </div>
 
-    {{-- MOBILE VERSION (REPLACEMENT) --}}
+    {{-- MOBILE VERSION --}}
     <div class="md:hidden bg-slate-50 min-h-[300px] flex flex-col relative">
         
         {{-- LIST ITEM CONTAINER --}}
-        <div class="p-3 space-y-3 pb-24"> {{-- Padding bottom besar agar tidak tertutup sticky footer --}}
+        <div class="p-3 space-y-3 pb-24">
             
             <template x-for="(item, index) in items" :key="index">
                 <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm relative animate-fade-in-up"
@@ -230,7 +229,7 @@ function itemsTable(config) {
                     {{-- INPUT FIELDS --}}
                     <div class="space-y-3">
                         
-                        {{-- 1. Produk (Full Width) --}}
+                        {{-- Produk --}}
                         <div>
                             <x-custom-select
                                 x-bind:data-name="'items[' + index + '][product_id]'"
@@ -242,7 +241,13 @@ function itemsTable(config) {
                                 :required="true"
                                 width="w-full"
                                 class="text-sm"
+                                :is-static="true"
                             />
+                            {{-- Pesan error stok --}}
+                            <div class="text-[10px] text-rose-500 mt-1.5 font-medium flex items-center gap-1" x-show="stockError(index)">
+                                <x-lucide-alert-circle class="w-3 h-3" />
+                                <span x-text="stockError(index)"></span>
+                            </div>
                             <template x-if="item.original_quantity && item.quantity != item.original_quantity">
                                 <div class="text-[10px] text-yellow-600 mt-1 font-medium flex items-center gap-1">
                                     <x-lucide-alert-triangle class="w-3 h-3" />
@@ -251,64 +256,52 @@ function itemsTable(config) {
                             </template>
                         </div>
 
-                        @if($hidePrice)
-                            {{-- SKU Display for Staff --}}
-                            <div class="text-xs text-slate-500">
-                                <span class="font-semibold">SKU:</span> <span x-text="getProductSku(item.product_id)"></span>
-                            </div>
-                        @endif
-
-                        {{-- 2. Grid Qty & Harga (Side by Side) --}}
+                        {{-- SKU --}}
                         <div class="flex gap-2">
-                            {{-- Qty --}}
-                            <div class="{{ $hidePrice ? 'w-full' : 'w-1/3' }}">
-                                <div class="relative">
-                                    <input 
-                                        type="number" inputmode="numeric"
-                                        :name="`items[${index}][quantity]`" 
-                                        x-model="item.quantity"
-                                        min="1"
-                                        placeholder="Qty"
-                                        class="w-full pl-2 pr-1 py-2 rounded-lg border-slate-200 text-sm font-semibold text-center focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
-                                        :class="{ 'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity }"
-                                        :disabled="@js($readonly)"
-                                        required
-                                    >
-                                    <span class="absolute top-0 right-1 text-[9px] text-slate-400 h-full flex items-center pointer-events-none">pcs</span>
-                                </div>
-                                {{-- Error message container --}}
-                                <div class="text-[10px] text-rose-500 leading-tight mt-1" x-text="stockError(index)"></div>
+                            {{-- SKU --}}
+                            <div class="w-1/2">
+                                <label class="text-[10px] text-slate-400 font-medium mb-1 block">SKU</label>
+                                <input 
+                                    type="text" 
+                                    readonly
+                                    :value="getProductSku(item.product_id)"
+                                    class="w-full px-2 py-1.5 rounded-xl border-slate-200 bg-slate-50 text-slate-500 text-xs font-mono shadow-sm focus:ring-0"
+                                >
                             </div>
+                            
+                            {{-- Stock --}}
+                            <div class="w-1/2">
+                                <label class="text-[10px] text-slate-400 font-medium mb-1 block">Stok</label>
+                                <input 
+                                    type="text" 
+                                    readonly
+                                    :value="getProductStock(item.product_id) !== null ? getProductStock(item.product_id) : '-'"
+                                    class="w-full px-2 py-1.5 rounded-xl border-slate-200 bg-slate-50 text-slate-500 shadow-sm text-xs text-center focus:ring-0"
+                                    :class="getStockClass(item.product_id)"
+                                >
+                            </div>
+                        </div>
 
-                            {{-- Harga --}}
-                            @if(!$hidePrice)
-                            <div class="flex-1">
-                                <div class="relative">
-                                    <span class="absolute top-0 left-2 text-slate-400 h-full flex items-center pointer-events-none text-xs">Rp</span>
-                                    <input 
-                                        type="number" inputmode="numeric"
-                                        :name="`items[${index}][{{ $priceField }}]`" 
-                                        x-model="item.{{ $priceField }}"
-                                        min="0"
-                                        class="w-full pl-8 pr-2 py-2 rounded-lg border-slate-200 text-sm text-right font-medium focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
-                                        :disabled="@js($readonly)"
-                                    >
-                                </div>
+                        {{-- Qty Input --}}
+                        <div>
+                             <label class="text-[10px] text-slate-400 font-medium mb-1 block">Quantity</label>
+                            <div class="relative">
+                                <input 
+                                    type="number" inputmode="numeric"
+                                    :name="`items[${index}][quantity]`" 
+                                    x-model="item.quantity"
+                                    min="1"
+                                    :max="shouldCheckStock ? (getProductStock(item.product_id) || 999999) : 999999"
+                                    placeholder="Qty"
+                                    class="w-full pl-2 pr-1 py-2 rounded-lg border-slate-200 text-sm font-semibold text-center focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
+                                    :class="{ 'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity }"
+                                    :disabled="@js($readonly)"
+                                    required
+                                >
+                                <span class="absolute top-0 right-1 text-[9px] text-slate-400 h-full flex items-center pointer-events-none">pcs</span>
                             </div>
-                            @endif
                         </div>
                     </div>
-
-                    {{-- FOOTER CARD: Subtotal Highlight --}}
-                    @if(!$hidePrice)
-                    <div class="mt-3 bg-slate-50 -mx-3 -mb-3 px-3 py-2 rounded-b-xl flex justify-between items-center border-t border-slate-100"
-                         :class="{ 'bg-yellow-50/50 border-yellow-100': item.original_quantity && item.quantity != item.original_quantity }">
-                        <span class="text-[10px] uppercase font-bold text-slate-500">Subtotal</span>
-                        <span class="text-sm font-bold text-teal-700" 
-                              x-text="new Intl.NumberFormat('id-ID').format(item.quantity * item.{{ $priceField }})">
-                        </span>
-                    </div>
-                    @endif
                 </div>
             </template>
 
@@ -320,7 +313,7 @@ function itemsTable(config) {
                 </div>
             </template>
             
-            {{-- Tombol Tambah (Di dalam flow scroll) --}}
+            {{-- Tombol Tambah --}}
             @if(!$readonly)
                 <button type="button" @click="addItem()" 
                     class="w-full py-3 border-2 border-dashed border-teal-200 text-teal-600 rounded-xl hover:bg-teal-50 hover:border-teal-300 transition-all font-semibold text-sm flex items-center justify-center gap-2">
@@ -329,43 +322,38 @@ function itemsTable(config) {
                 </button>
             @endif
         </div>
-
-        {{-- STICKY FOOTER GRAND TOTAL --}}
-        @if(!$hidePrice)
-        <div class="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 p-4">
-            <div class="flex justify-between items-end">
-                <div class="text-xs font-medium text-slate-500 mb-1">Total Estimasi</div>
-                <div class="text-lg font-bold text-slate-900 leading-none"
-                     x-text="new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })
-                     .format(items.reduce((acc, item) => acc + (item.quantity * item.{{ $priceField }}), 0))">
-                </div>
-            </div>
-        </div>
-        @endif
     </div>
 
-    <div class="hidden md:block overflow-x-auto">
-        <table class="min-w-full text-xs">
-            <x-table.thead>
-                <x-table.th class="{{ $hidePrice ? 'w-5/12' : 'w-1/2' }}">Produk</x-table.th>
-                @if($hidePrice)
-                    <x-table.th class="w-1/4">SKU</x-table.th>
-                @endif
-                <x-table.th align="right" class="min-w-[100px]">Qty</x-table.th>
-                @if(!$hidePrice)
-                    <x-table.th align="right" class="min-w-[160px]">{{ $priceLabel }}</x-table.th>
-                    <x-table.th align="right" class="w-36">Total</x-table.th>
-                @endif
-                @if(!$readonly) <x-table.th class="w-10"></x-table.th> @endif
-            </x-table.thead>
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block overflow-x-visible">
+        <table class="w-full text-sm text-left">
+            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                <tr>
+                    {{-- Produk --}}
+                    <th scope="col" class="px-4 py-3 font-semibold pl-6 w-auto">Produk</th>
+                    
+                    {{-- SKU --}}
+                    <th scope="col" class="px-4 py-3 font-semibold w-40">SKU</th>
 
-            <x-table.tbody>
+                    {{-- Stok --}}
+                    <th scope="col" class="px-4 py-3 font-semibold w-32 text-center">Stok</th>
+                    
+                    {{-- Qty --}}
+                    <th scope="col" class="px-4 py-3 font-semibold w-40 text-center">Qty Input</th>
+                    
+                    @if(!$readonly)
+                        <th scope="col" class="px-4 py-3 w-16"></th>
+                    @endif
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-slate-100">
                 <template x-for="(item, index) in items" :key="index">
-                    <tr class="group border-b border-slate-50 last:border-b-0 hover:bg-slate-50 transition-colors text-sm"
+                    <tr class="group hover:bg-slate-50 transition-colors"
                         :class="{ 'bg-yellow-50 hover:bg-yellow-50': item.original_quantity && item.quantity != item.original_quantity }">
                         
-                        {{-- Produk --}}
-                        <x-table.td>
+                        {{-- Input Produk --}}
+                        <td class="px-4 py-3 pl-6 align-top">
                             <x-custom-select
                                 x-bind:data-name="'items[' + index + '][product_id]'"
                                 :options="$productOptions"
@@ -377,96 +365,82 @@ function itemsTable(config) {
                                 width="w-full"
                                 dropUp
                             />
+                            <div class="text-[10px] text-rose-500 mt-1.5 font-medium flex items-center gap-1" x-show="stockError(index)">
+                                <x-lucide-alert-circle class="w-3 h-3" />
+                                <span x-text="stockError(index)"></span>
+                            </div>
                             <template x-if="item.original_quantity && item.quantity != item.original_quantity">
                                 <div class="text-[10px] text-yellow-600 mt-1 font-medium flex items-center gap-1">
                                     <x-lucide-alert-triangle class="w-3 h-3" />
                                     <span>PO Qty: <span x-text="item.original_quantity"></span></span>
                                 </div>
                             </template>
-                        </x-table.td>
+                        </td>
 
-                        {{-- SKU (Only if hidePrice is true) --}}
-                        @if($hidePrice)
-                        <x-table.td>
-                            <span class="text-slate-600 font-mono" x-text="getProductSku(item.product_id)"></span>
-                        </x-table.td>
-                        @endif
-
-                        {{-- Qty --}}
-                        <x-table.td align="right">
+                        {{-- SKU --}}
+                        <td class="px-4 py-3 align-top">
                             <input 
-                                type="number" 
-                                :name="`items[${index}][quantity]`" 
-                                x-model="item.quantity"
-                                min="1"
-                                class="w-full h-[42px] rounded-xl shadow-sm border-slate-300 text-sm text-right focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
-                                :class="{ 'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity }"
-                                :disabled="@js($readonly)"
-                                required
+                                type="text" 
+                                readonly
+                                :value="getProductSku(item.product_id)"
+                                class="w-full rounded-xl h-[42px] bg-slate-50 text-slate-500 border-slate-200 text-sm font-mono shadow-sm focus:ring-0 "
                             >
-                            <x-form-error 
-                                :message="null"
-                                x-bind:message="stockError(index)"
-                            />
-                        </x-table.td>
+                        </td>
 
-                        {{-- Harga --}}
-                        @if(!$hidePrice)
-                        <x-table.td align="right">
+                        {{-- Stok --}}
+                        <td class="px-4 py-3 align-top">
                             <input 
-                                type="number" 
-                                :name="`items[${index}][{{ $priceField }}]`" 
-                                x-model="item.{{ $priceField }}"
-                                min="0"
-                                class="w-full h-[42px] rounded-xl shadow-sm border-slate-300 text-sm text-right focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
-                                :disabled="@js($readonly)"
+                                type="text" 
+                                readonly
+                                :value="getProductStock(item.product_id) !== null ? getProductStock(item.product_id) : '-'"
+                                class="w-full text-center rounded-xl h-[42px] bg-slate-50 text-slate-500 border-slate-200 shadow-sm text-sm font-bold focus:ring-0"
+                                :class="getStockClass(item.product_id)"
                             >
-                        </x-table.td>
-                        @endif
+                        </td>
 
-                        {{-- Subtotal --}}
-                        @if(!$hidePrice)
-                        <x-table.td align="right">
-                            <div class="py-2 font-medium text-slate-700 text-sm">
-                                <span x-text="new Intl.NumberFormat('id-ID').format(item.quantity * item.{{ $priceField }})"></span>
+                        {{-- Quantity Input --}}
+                        <td class="px-4 py-3 align-top">
+                            <div class="relative w-28 mx-auto">
+                                <input 
+                                    type="number" 
+                                    :name="`items[${index}][quantity]`" 
+                                    x-model="item.quantity"
+                                    min="1"
+                                    :max="shouldCheckStock ? (getProductStock(item.product_id) || 999999) : 999999"
+                                    class="w-full text-center h-[42px] rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm font-bold text-slate-700"
+                                    :class="{ 
+                                        'border-rose-300 ring-rose-200 bg-rose-50 text-rose-700': stockError(index),
+                                        'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity,
+                                        'bg-slate-100': !item.product_id 
+                                    }"
+                                    :disabled="@js($readonly) || !item.product_id"
+                                    required
+                                >
                             </div>
-                        </x-table.td>
-                        @endif
+                        </td>
 
-                        {{-- Hapus --}}
+                        {{-- Delete --}}
                         @if(!$readonly)
-                            <x-table.td align="center">
+                            <td class="px-4 py-3 align-top pt-3 text-center">
                                 <button type="button" @click="removeItem(index)" 
-                                    class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                                    title="Hapus baris">
+                                    class="text-slate-400 hover:text-rose-600 transition-colors p-1">
                                     <x-lucide-trash-2 class="w-4 h-4" />
                                 </button>
-                            </x-table.td>
+                            </td>
                         @endif
-
                     </tr>
                 </template>
-            </x-table.tbody>
 
-            {{-- Footer Total --}}
-            @if(!$hidePrice)
-            <tfoot class="bg-slate-50 border-t border-slate-200 font-bold text-slate-700">
-                <tr>
-                    <td colspan="3" class="px-3 py-3 text-right uppercase text-[10px] tracking-wider text-slate-500">
-                        Grand Total
-                    </td>
-                    <td class="px-3 py-3 text-right text-sm text-teal-700">
-                        <span 
-                            x-text="
-                                new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' })
-                                .format(items.reduce((acc, item) => acc + (item.quantity * item.{{ $priceField }}), 0))
-                            "
-                        ></span>
-                    </td>
-                    @if(!$readonly) <td></td> @endif
-                </tr>
-            </tfoot>
-            @endif
+                {{-- Empty State --}}
+                 <template x-if="items.length === 0">
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-slate-400 border-dashed border-b border-slate-200">
+                           <x-lucide-package-open class="w-8 h-8 mb-2 opacity-50 mx-auto" />
+                           <span class="text-sm">Belum ada item</span>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
         </table>
     </div>
 </div>

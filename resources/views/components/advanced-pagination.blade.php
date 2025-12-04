@@ -3,7 +3,7 @@
 @php
     /** @var \Illuminate\Pagination\LengthAwarePaginator $paginator */
     $perPage = $paginator->perPage();
-    $capacityOptions = [10, 25, 50, 100];
+    $capacityOptions = [10, 25, 50, 100, 250];
     $lastPage = $paginator->lastPage();
 
     // Helper URL

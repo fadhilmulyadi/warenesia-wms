@@ -149,7 +149,7 @@
                 <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Status Restock
                 </h2>
-                @include('components.restocks-status-timeline', ['status' => $restock->status])
+                @include('components.mobile-restocks-status-timeline', ['status' => $restock->status])
             </x-mobile.card>
 
             {{-- INFO PESANAN --}}
@@ -220,11 +220,6 @@
             <x-mobile.card>
                 <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
                     <p class="text-sm font-semibold text-slate-900">Rating Supplier</p>
-                    @if($restock->hasRating())
-                        <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-                            Rated
-                        </span>
-                    @endif
                 </div>
 
                 @if(! $restock->hasRating())
@@ -304,7 +299,7 @@
         <div class="hidden md:block space-y-6 text-sm text-slate-700">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <x-breadcrumbs :items="[
-                    'Transaksi' => route('transactions.index', ['tab' => 'restocks']),
+                    'Data Restock' => route('restocks.index', ['tab' => 'restocks']),
                     'Detail Restock' => route('restocks.show', $restock),
                 ]" />
 
@@ -497,194 +492,98 @@
                 </x-table>
             </x-card>
 
-            <!-- <x-card class="p-6 space-y-4">
-                <div class="flex flex-wrap items-start justify-between gap-3">
-                    <p class="text-base font-semibold text-slate-900">Rating Supplier</p>
-                    @if($restock->hasRating())
-                        <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-                            Rated
-                        </span>
-                    @endif
+            <x-card class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base font-bold text-slate-900">Rating Supplier</h3>
                 </div>
 
                 @if(! $restock->isReceived())
-                    <p class="text-sm text-slate-500">
-                        Rating dapat diberikan setelah restock ini berstatus received.
-                    </p>
+                    <div class="rounded-lg bg-slate-50 p-4 text-sm text-slate-500 text-center border border-dashed border-slate-200">
+                        Rating dapat diberikan setelah pesanan diterima.
+                    </div>
                 @elseif(! $restock->hasRating())
                     @can('rate', $restock)
-                        <form method="POST" action="{{ route('restocks.rate', $restock) }}" class="space-y-4">
+                        {{-- FORM RATING --}}
+                        <form method="POST" action="{{ route('restocks.rate', $restock) }}">
                             @csrf
                             @method('PATCH')
 
-                            <div class="space-y-2">
-                                <x-input-label for="rating" value="Rating ({{ \App\Models\RestockOrder::MIN_RATING }}-{{ \App\Models\RestockOrder::MAX_RATING }})" />
-                                <select
-                                    id="rating"
-                                    name="rating"
-                                    class="w-full rounded-lg border-slate-200 text-sm"
-                                >
-                                    @for($i = \App\Models\RestockOrder::MIN_RATING; $i <= \App\Models\RestockOrder::MAX_RATING; $i++)
-                                        <option value="{{ $i }}" @selected((int) old('rating', $restock->rating) === $i)>
-                                            {{ $i }}
-                                        </option>
-                                    @endfor
-                                </select>
-                                <x-input-error class="mt-1" :messages="$errors->get('rating')" />
-                            </div>
+                            {{-- Layout Grid: Kiri Bintang, Kanan Textarea --}}
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                
+                                {{-- KOLOM KIRI: BINTANG (Span 4 kolom) --}}
+                                <div class="lg:col-span-4 space-y-3">
+                                    <label class="block text-sm font-medium text-slate-700">Berikan Penilaian</label>
+                                    
+                                    {{-- Interactive Star Component using Alpine.js --}}
+                                    <div x-data="{ rating: 0, hoverRating: 0 }" class="flex items-center gap-1">
+                                        {{-- Hidden Input untuk dikirim ke server --}}
+                                        <input type="hidden" name="rating" :value="rating" required>
 
-                            <div class="space-y-2">
-                                <x-input-label for="rating_notes" value="Feedback (opsional)" />
-                                <textarea
-                                    id="rating_notes"
-                                    name="rating_notes"
-                                    rows="3"
-                                    class="w-full rounded-lg border-slate-200 text-sm"
-                                    placeholder="Bagikan catatan tentang kecepatan, akurasi, atau kualitas pengiriman."
-                                >{{ old('rating_notes', $restock->rating_notes) }}</textarea>
-                                <x-input-error class="mt-1" :messages="$errors->get('rating_notes')" />
-                            </div>
+                                        <template x-for="i in 5">
+                                            <button type="button" 
+                                                @click="rating = i" 
+                                                @mouseenter="hoverRating = i" 
+                                                @mouseleave="hoverRating = 0"
+                                                class="focus:outline-none transition-transform active:scale-90"
+                                            >
+                                                <svg class="w-8 h-8 transition-colors duration-200" 
+                                                    :class="(hoverRating >= i || rating >= i) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300 fill-transparent'"
+                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <p class="text-xs text-slate-500">Klik bintang untuk menilai.</p>
+                                    <x-input-error :messages="$errors->get('rating')" />
+                                </div>
 
-                            <div class="flex flex-wrap items-center gap-2">
-                                <x-action-button type="submit" variant="primary" icon="star">
-                                    Simpan Rating
-                                </x-action-button>
-                                <x-action-button href="{{ route('restocks.show', $restock) }}" variant="secondary">
-                                    Batal
-                                </x-action-button>
-                            </div>
-                        </form>
-                    @else
-                        <p class="text-sm text-slate-500">
-                            Anda tidak memiliki izin untuk memberikan rating.
-                        </p>
-                    @endcan
-                @else
-                    <div class="space-y-3">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <div class="flex items-center gap-2">
-                                <span class="text-2xl font-semibold text-slate-900">
-                                    {{ $restock->rating }}/{{ \App\Models\RestockOrder::MAX_RATING }}
-                                </span>
-                                <div class="flex items-center gap-1">
-                                    @for($i = \App\Models\RestockOrder::MIN_RATING; $i <= \App\Models\RestockOrder::MAX_RATING; $i++)
-                                        <x-lucide-star class="h-5 w-5 {{ $i <= (int) $restock->rating ? 'text-yellow-400' : 'text-slate-300' }}" />
-                                    @endfor
+                                {{-- KOLOM KANAN: TEXTAREA (Span 8 kolom) --}}
+                                <div class="lg:col-span-8 space-y-3">
+                                    <x-input-label for="rating_notes" value="Ulasan (Opsional)" />
+                                    <textarea
+                                        id="rating_notes"
+                                        name="rating_notes"
+                                        rows="3"
+                                        class="w-full rounded-lg border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
+                                        placeholder="Bagaimana kualitas barang dan kecepatan pengiriman?"
+                                    >{{ old('rating_notes') }}</textarea>
+                                    
+                                    <div class="flex justify-end pt-2">
+                                        <x-action-button type="submit" variant="primary" icon="send">
+                                            Kirim Ulasan
+                                        </x-action-button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="text-sm text-slate-500">
-                                Dinilai oleh {{ $restock->ratingGivenBy->name ?? 'Unknown user' }}
-                                @if($restock->rating_given_at)
-                                    pada {{ $restock->rating_given_at->format('d M Y H:i') }}
-                                @endif
+                        </form>
+                    @endcan
+                @else
+                    {{-- VIEW MODE --}}
+                    <div class="flex items-start gap-4 bg-slate-50 p-4 rounded-xl">
+                        <div class="flex-shrink-0 text-center px-4 border-r border-slate-200">
+                            <span class="block text-3xl font-bold text-slate-900">{{ $restock->rating }}</span>
+                            <div class="flex justify-center gap-0.5 text-yellow-400 mt-1">
+                                @for($i=1; $i<=5; $i++)
+                                    <x-lucide-star class="w-4 h-4 {{ $i <= $restock->rating ? 'fill-current' : 'text-slate-300' }}" />
+                                @endfor
                             </div>
                         </div>
-
-                        @if($restock->rating_notes)
-                            <div class="rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-800 whitespace-pre-line">
-                                {{ $restock->rating_notes }}
-                            </div>
-                        @endif
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+                                Ulasan dari {{ $restock->ratingGivenBy->name ?? 'User' }}
+                            </p>
+                            <p class="text-slate-800 text-sm italic">
+                                "{{ $restock->rating_notes ?? 'Tidak ada catatan ulasan.' }}"
+                            </p>
+                            <p class="text-xs text-slate-400 mt-2">
+                                {{ $restock->rating_given_at?->format('d M Y, H:i') }}
+                            </p>
+                        </div>
                     </div>
                 @endif
-            </x-card> -->
-            <x-card class="p-6">
-    <div class="flex items-center justify-between mb-4">
-        <h3 class="text-base font-bold text-slate-900">Rating Supplier</h3>
-        @if($restock->hasRating())
-            <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                Rated
-            </span>
-        @endif
-    </div>
-
-    @if(! $restock->isReceived())
-        <div class="rounded-lg bg-slate-50 p-4 text-sm text-slate-500 text-center border border-dashed border-slate-200">
-            Rating dapat diberikan setelah pesanan diterima.
-        </div>
-    @elseif(! $restock->hasRating())
-        @can('rate', $restock)
-            {{-- FORM RATING --}}
-            <form method="POST" action="{{ route('restocks.rate', $restock) }}">
-                @csrf
-                @method('PATCH')
-
-                {{-- Layout Grid: Kiri Bintang, Kanan Textarea --}}
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    
-                    {{-- KOLOM KIRI: BINTANG (Span 4 kolom) --}}
-                    <div class="lg:col-span-4 space-y-3">
-                        <label class="block text-sm font-medium text-slate-700">Berikan Penilaian</label>
-                        
-                        {{-- Interactive Star Component using Alpine.js --}}
-                        <div x-data="{ rating: 0, hoverRating: 0 }" class="flex items-center gap-1">
-                            {{-- Hidden Input untuk dikirim ke server --}}
-                            <input type="hidden" name="rating" :value="rating" required>
-
-                            <template x-for="i in 5">
-                                <button type="button" 
-                                    @click="rating = i" 
-                                    @mouseenter="hoverRating = i" 
-                                    @mouseleave="hoverRating = 0"
-                                    class="focus:outline-none transition-transform active:scale-90"
-                                >
-                                    <svg class="w-8 h-8 transition-colors duration-200" 
-                                         :class="(hoverRating >= i || rating >= i) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300 fill-transparent'"
-                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                    </svg>
-                                </button>
-                            </template>
-                        </div>
-                        <p class="text-xs text-slate-500">Klik bintang untuk menilai.</p>
-                        <x-input-error :messages="$errors->get('rating')" />
-                    </div>
-
-                    {{-- KOLOM KANAN: TEXTAREA (Span 8 kolom) --}}
-                    <div class="lg:col-span-8 space-y-3">
-                        <x-input-label for="rating_notes" value="Ulasan (Opsional)" />
-                        <textarea
-                            id="rating_notes"
-                            name="rating_notes"
-                            rows="3"
-                            class="w-full rounded-lg border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
-                            placeholder="Bagaimana kualitas barang dan kecepatan pengiriman?"
-                        >{{ old('rating_notes') }}</textarea>
-                        
-                        <div class="flex justify-end pt-2">
-                            <x-action-button type="submit" variant="primary" icon="send">
-                                Kirim Ulasan
-                            </x-action-button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        @endcan
-    @else
-        {{-- VIEW MODE (JIKA SUDAH DI-RATE) --}}
-        <div class="flex items-start gap-4 bg-slate-50 p-4 rounded-xl">
-            <div class="flex-shrink-0 text-center px-4 border-r border-slate-200">
-                <span class="block text-3xl font-bold text-slate-900">{{ $restock->rating }}</span>
-                <div class="flex justify-center gap-0.5 text-yellow-400 mt-1">
-                    @for($i=1; $i<=5; $i++)
-                        <x-lucide-star class="w-4 h-4 {{ $i <= $restock->rating ? 'fill-current' : 'text-slate-300' }}" />
-                    @endfor
-                </div>
-            </div>
-            <div>
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
-                    Ulasan dari {{ $restock->ratingGivenBy->name ?? 'User' }}
-                </p>
-                <p class="text-slate-800 text-sm italic">
-                    "{{ $restock->rating_notes ?? 'Tidak ada catatan ulasan.' }}"
-                </p>
-                <p class="text-xs text-slate-400 mt-2">
-                    {{ $restock->rating_given_at?->format('d M Y, H:i') }}
-                </p>
-            </div>
-        </div>
-    @endif
-</x-card>
+            </x-card>
         </div>
     </div>
     <x-confirm-modal />

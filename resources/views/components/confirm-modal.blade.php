@@ -9,6 +9,13 @@
         btnText: 'Ya, Lanjutkan',
         btnClass: 'bg-slate-900 hover:bg-slate-800 text-white',
         type: 'info', // info, success, warning, danger
+        
+        // Input fields
+        inputName: '',
+        inputLabel: '',
+        inputPlaceholder: '',
+        inputType: 'text',
+        inputValue: '',
 
         open(event) {
             this.show = true;
@@ -19,7 +26,13 @@
             this.btnText = event.detail.btnText || 'Ya, Lanjutkan';
             this.type = event.detail.type || 'info';
 
-            // Set button class based on type if not provided
+            // Input fields
+            this.inputName = event.detail.inputName || '';
+            this.inputLabel = event.detail.inputLabel || '';
+            this.inputPlaceholder = event.detail.inputPlaceholder || '';
+            this.inputType = event.detail.inputType || 'text';
+            this.inputValue = ''; // Reset input value
+
             if (event.detail.btnClass) {
                 this.btnClass = event.detail.btnClass;
             } else {
@@ -94,12 +107,23 @@
                             </template>
                         </div>
 
-                        <div class="mt-3 sm:ml-4 sm:mt-0">
+                        <div class="mt-3 sm:ml-4 sm:mt-0 w-full">
                             <h3 class="text-base font-semibold leading-6 text-slate-900" x-text="title"></h3>
 
                             <div class="mt-2">
                                 <p class="text-sm text-slate-600" x-html="message"></p>
                             </div>
+
+                            {{-- Optional Input Field --}}
+                            <template x-if="inputName">
+                                <div class="mt-4 text-left">
+                                    <label x-show="inputLabel" class="block text-sm font-medium text-slate-700 mb-1"
+                                        x-text="inputLabel"></label>
+                                    <input :type="inputType" :name="inputName" x-model="inputValue"
+                                        class="w-full rounded-lg border-slate-300 text-sm focus:border-slate-900 focus:ring-slate-900"
+                                        :placeholder="inputPlaceholder" required>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -109,6 +133,12 @@
                     <form :action="action" method="POST">
                         @csrf
                         <input type="hidden" name="_method" :value="method">
+
+                        {{-- Hidden input to pass the value from x-model to the form submission --}}
+                        <template x-if="inputName">
+                            <input type="hidden" :name="inputName" :value="inputValue">
+                        </template>
+
                         <button type="submit"
                             class="inline-flex w-full justify-center rounded-lg px-3 py-2 text-sm font-semibold shadow-sm sm:ml-3 sm:w-auto"
                             :class="btnClass" x-text="btnText">

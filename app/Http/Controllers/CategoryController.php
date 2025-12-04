@@ -146,7 +146,7 @@ class CategoryController extends Controller
             ->route('categories.index')
             ->with('success', 'Kategori berhasil dihapus.');
     }
-
+        
     public function quickStore(CategoryStoreRequest $request)
     {
         $this->authorize('create', Category::class);

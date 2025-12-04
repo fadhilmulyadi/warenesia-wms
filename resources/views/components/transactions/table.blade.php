@@ -12,7 +12,7 @@
         ? \App\Models\IncomingTransaction::class
         : \App\Models\OutgoingTransaction::class;
 
-    $counterpartyLabel = $isIncoming ? 'Pemasok' : 'Customer';
+    $counterpartyLabel = $isIncoming ? 'Supplier' : 'Customer';
 @endphp
 
 <x-table>
