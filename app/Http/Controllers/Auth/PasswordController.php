@@ -16,6 +16,6 @@ class PasswordController extends Controller
     {
         $users->resetPassword($request->user(), $request->validated()['password']);
 
-        return back()->with('status', 'password-updated');
+        return back()->with('success', 'Password berhasil diperbarui.');
     }
 }

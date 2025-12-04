@@ -315,7 +315,7 @@
                             this.refreshSelect('category_id', this.categoryOptions, this.form.category_id);
                             this.updateSkuHint();
                             this.$dispatch('close-modal', 'quick-category-modal');
-                            this.$dispatch('notify', { message: 'Kategori berhasil dibuat.', type: 'success' });
+                            this.$dispatch('notify', { message: 'Kategori berhasil ditambahkan.', type: 'success' });
                         },
                         openQuickUnit() {
                             this.unitQuick = { name: '' };
@@ -359,7 +359,7 @@
                             this.form.unit_id = String(data.id);
                             this.refreshSelect('unit_id', this.unitOptions, this.form.unit_id);
                             this.$dispatch('close-modal', 'quick-unit-modal');
-                            this.$dispatch('notify', { message: 'Satuan berhasil dibuat.', type: 'success' });
+                            this.$dispatch('notify', { message: 'Satuan berhasil ditambahkan.', type: 'success' });
                         },
                         handleImage(event) {
                             if (this.readonly) {

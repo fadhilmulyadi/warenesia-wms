@@ -101,7 +101,7 @@ class RestockOrderController extends Controller
 
             return redirect()
                 ->route('restocks.show', $restockOrder)
-                ->with('success', 'Restock order created successfully. Waiting for supplier confirmation.');
+                ->with('success', 'Restock order berhasil ditambahkan.');
         } catch (InvalidArgumentException $exception) {
             return back()
                 ->withInput()
@@ -155,7 +155,7 @@ class RestockOrderController extends Controller
 
         return redirect()
             ->route('restocks.show', $restockOrder)
-            ->with('success', 'Supplier rating has been saved successfully.');
+            ->with('success', 'Rating berhasil disimpan.');
     }
 
     public function markInTransit(RestockOrder $restock): RedirectResponse
@@ -167,7 +167,7 @@ class RestockOrderController extends Controller
 
             return redirect()
                 ->route('restocks.show', $restock)
-                ->with('success', 'Restock order marked as in transit.');
+                ->with('success', 'Restock order berhasil diproses.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
@@ -186,7 +186,7 @@ class RestockOrderController extends Controller
 
             return redirect()
                 ->route('restocks.show', $restock)
-                ->with('success', 'Restock order marked as received.');
+                ->with('success', 'Restock order berhasil diproses.');
         } catch (DomainException | ModelNotFoundException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
@@ -211,7 +211,7 @@ class RestockOrderController extends Controller
 
             return redirect()
                 ->route('restocks.show', $restock)
-                ->with('success', 'Restock order cancelled.');
+                ->with('success', 'Restock order berhasil dibatalkan.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
@@ -329,7 +329,7 @@ class RestockOrderController extends Controller
 
             return redirect()
                 ->route('supplier.restocks.show', $restock)
-                ->with('success', 'Restock order confirmed.');
+                ->with('success', 'Restock order berhasil disetujui.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('supplier.restocks.show', $restock)
@@ -348,7 +348,7 @@ class RestockOrderController extends Controller
 
             return redirect()
                 ->route('supplier.restocks.show', $restock)
-                ->with('success', 'Restock order rejected.');
+                ->with('success', 'Restock order berhasil ditolak.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('supplier.restocks.show', $restock)

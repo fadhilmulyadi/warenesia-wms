@@ -87,14 +87,14 @@ class UnitController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'id'   => $unit->id,
+                'id' => $unit->id,
                 'name' => $unit->name,
             ], 201);
         }
 
         return redirect()
             ->back()
-            ->with('success', 'Satuan berhasil dibuat.')
+            ->with('success', 'Satuan berhasil ditambahkan.')
             ->with('newUnitId', $unit->id);
     }
 }

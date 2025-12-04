@@ -96,7 +96,7 @@ class OutgoingTransactionController extends Controller
 
             return redirect()
                 ->route('sales.show', $transaction)
-                ->with('success', 'Outgoing transaction created successfully. Pending approval.');
+                ->with('success', 'Transaksi keluar berhasil ditambahkan.');
         } catch (InvalidArgumentException $exception) {
             return back()
                 ->withInput()
@@ -209,7 +209,7 @@ class OutgoingTransactionController extends Controller
 
             return redirect()
                 ->route('sales.show', $sale)
-                ->with('success', 'Transaksi barang keluar berhasil diperbarui.');
+                ->with('success', 'Transaksi keluar berhasil diperbarui.');
 
         } catch (InvalidArgumentException $exception) {
             return back()
@@ -237,7 +237,7 @@ class OutgoingTransactionController extends Controller
 
         return redirect()
             ->route('transactions.index', ['tab' => 'outgoing'])
-            ->with('success', 'Transaksi barang keluar berhasil dihapus.');
+            ->with('success', 'Transaksi keluar berhasil dihapus.');
     }
 
     public function approve(Request $request, OutgoingTransaction $sale): RedirectResponse
@@ -249,7 +249,7 @@ class OutgoingTransactionController extends Controller
 
             return redirect()
                 ->route('sales.show', $sale)
-                ->with('success', 'Transaction approved and stock updated.');
+                ->with('success', 'Transaksi keluar berhasil disetujui.');
         } catch (InsufficientStockException | DomainException | ModelNotFoundException $exception) {
             return redirect()
                 ->route('sales.show', $sale)
@@ -270,7 +270,7 @@ class OutgoingTransactionController extends Controller
 
             return redirect()
                 ->route('sales.show', $sale)
-                ->with('success', 'Transaction marked as shipped.');
+                ->with('success', 'Transaksi keluar berhasil diproses.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('sales.show', $sale)

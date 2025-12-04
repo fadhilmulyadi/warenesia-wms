@@ -51,6 +51,13 @@
                 </x-action-button>
             </div>
         </div>
+        <form
+            id="product-form"
+            method="POST"
+            action="{{ route('products.store') }}"
+            enctype="multipart/form-data"
+        >
+            @csrf
             @include('products.form.form', [
                 'product' => null,
                 'categories' => $categories,

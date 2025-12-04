@@ -41,7 +41,7 @@ class UserController extends Controller
         ]);
 
         $deletionGuards = collect($users->items())
-            ->mapWithKeys(fn (User $user) => [
+            ->mapWithKeys(fn(User $user) => [
                 $user->id => $this->userManagement->deletionGuardReason($user, $request->user()),
             ]);
 
@@ -78,7 +78,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'User berhasil dibuat.');
+            ->with('success', 'User berhasil ditambahkan.');
     }
 
     public function edit(Request $request, User $user): View
@@ -107,7 +107,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('users.edit', $user)
-            ->with('success', 'Data user berhasil diperbarui.');
+            ->with('success', 'User berhasil diperbarui.');
     }
 
     public function destroy(User $user): RedirectResponse
@@ -131,7 +131,7 @@ class UserController extends Controller
 
         try {
             $this->userManagement->approveSupplier($user, $request->user());
-        } catch (DomainException|\Throwable $exception) {
+        } catch (DomainException | \Throwable $exception) {
             return back()->withErrors(['approve' => $exception->getMessage()]);
         }
 
@@ -145,7 +145,7 @@ class UserController extends Controller
         $allowedSorts = ['created_at', 'last_login_at', 'name', 'email'];
 
         $sort = $request->query('sort', 'created_at');
-        if (! in_array($sort, $allowedSorts, true)) {
+        if (!in_array($sort, $allowedSorts, true)) {
             $sort = 'created_at';
         }
 

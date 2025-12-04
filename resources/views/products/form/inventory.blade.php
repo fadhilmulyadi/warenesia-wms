@@ -49,12 +49,13 @@
 
             {{-- Min Stok --}}
             <div>
-                <x-input-label for="min_stock" value="Stok Minimum (Alert)" class="text-sm font-semibold text-slate-700" />
+                <x-input-label for="min_stock" value="Stok Minimum (Alert) *" class="text-sm font-semibold text-slate-700" />
                 <input 
                     type="number" 
                     id="min_stock"
                     name="min_stock" 
                     value="{{ old('min_stock', $product->min_stock) }}"
+                    required
                     @disabled($readonly)
                     @class([
                         'mt-1 block w-full rounded-lg text-sm',
@@ -70,7 +71,7 @@
             x-data="rackLocationField('{{ old('rack_location', $product->rack_location ?? '') }}')"
             class="space-y-1"
         >
-            <x-input-label for="rack_location" value="Lokasi Rak Gudang" class="text-sm font-semibold text-slate-700" />
+            <x-input-label for="rack_location" value="Lokasi Rak Gudang *" class="text-sm font-semibold text-slate-700" />
             <div class="flex mt-1">
                 <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 text-slate-500">
                     <x-lucide-map-pin class="w-4 h-4" />
@@ -82,6 +83,7 @@
                     x-model="value"
                     x-on:input="format()"
                     maxlength="7"
+                    required
                     autocomplete="off"
                     placeholder="Contoh: A12-03"
                     @disabled($readonly)

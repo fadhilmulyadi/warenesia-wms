@@ -15,7 +15,7 @@
 
         {{-- Kategori --}}
         <div class="relative space-y-2">
-            <x-input-label for="category_id" value="Kategori" class="mb-1.5 text-sm font-semibold text-slate-700" />
+            <x-input-label for="category_id" value="Kategori *" class="mb-1.5 text-sm font-semibold text-slate-700" />
 
             <div class="flex items-center gap-2">
                 <div class="flex-1 min-w-0">
@@ -38,7 +38,7 @@
 
         {{-- Supplier --}}
         <div class="relative space-y-2">
-            <x-input-label for="supplier_id" value="Supplier Utama"
+            <x-input-label for="supplier_id" value="Supplier Utama *"
                 class="mb-1.5 text-sm font-semibold text-slate-700" />
 
             <div class="flex items-center gap-2">
@@ -53,7 +53,7 @@
 
         {{-- Satuan --}}
         <div class="relative space-y-2">
-            <x-input-label for="unit_id" value="Satuan Dasar" class="mb-1.5 text-sm font-semibold text-slate-700" />
+            <x-input-label for="unit_id" value="Satuan Dasar *" class="mb-1.5 text-sm font-semibold text-slate-700" />
 
             <div class="flex items-center gap-2">
                 <div class="flex-1 min-w-0">

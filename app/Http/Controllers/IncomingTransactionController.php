@@ -116,7 +116,7 @@ class IncomingTransactionController extends Controller
 
             return redirect()
                 ->route('purchases.show', $transaction)
-                ->with('success', 'Incoming transaction created successfully. Pending verification.');
+                ->with('success', 'Transaksi masuk berhasil ditambahkan.');
         } catch (InvalidArgumentException $exception) {
             return back()
                 ->withInput()
@@ -264,7 +264,7 @@ class IncomingTransactionController extends Controller
 
             return redirect()
                 ->route('purchases.show', $purchase)
-                ->with('success', 'Transaction verified and stock updated.');
+                ->with('success', 'Transaksi masuk berhasil disetujui.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('purchases.show', $purchase)
@@ -285,7 +285,7 @@ class IncomingTransactionController extends Controller
 
             return redirect()
                 ->route('purchases.show', $purchase)
-                ->with('success', 'Transaction marked as completed.');
+                ->with('success', 'Transaksi masuk berhasil diproses.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('purchases.show', $purchase)
@@ -302,7 +302,7 @@ class IncomingTransactionController extends Controller
 
             return redirect()
                 ->route('purchases.show', $purchase)
-                ->with('success', 'Transaction rejected.');
+                ->with('success', 'Transaksi masuk berhasil ditolak.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('purchases.show', $purchase)

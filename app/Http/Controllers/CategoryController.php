@@ -155,15 +155,15 @@ class CategoryController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'id'         => $category->id,
-                'name'       => $category->name,
+                'id' => $category->id,
+                'name' => $category->name,
                 'sku_prefix' => $category->sku_prefix,
             ], 201);
         }
 
         return redirect()
             ->back()
-            ->with('success', 'Category created successfully.')
+            ->with('success', 'Kategori berhasil ditambahkan.')
             ->with('newCategoryId', $category->id);
     }
 

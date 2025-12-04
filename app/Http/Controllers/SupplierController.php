@@ -82,7 +82,7 @@ class SupplierController extends Controller
 
         return redirect()
             ->route('suppliers.index')
-            ->with('success', 'Supplier created successfully.');
+            ->with('success', 'Supplier berhasil ditambahkan.');
     }
 
     /**
@@ -114,7 +114,7 @@ class SupplierController extends Controller
 
         return redirect()
             ->route('suppliers.index')
-            ->with('success', 'Supplier updated successfully.');
+            ->with('success', 'Supplier berhasil diperbarui.');
     }
 
     /**
@@ -134,7 +134,7 @@ class SupplierController extends Controller
 
         return redirect()
             ->route('suppliers.index')
-            ->with('success', 'Supplier deleted successfully.');
+            ->with('success', 'Supplier berhasil dihapus.');
     }
 
     public function export(Request $request): StreamedResponse

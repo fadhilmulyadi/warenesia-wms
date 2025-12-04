@@ -20,15 +20,15 @@ class ProductStoreRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'category_id' => ['required', 'exists:categories,id'],
-            'supplier_id' => ['nullable', 'exists:suppliers,id'],
-            'description' => ['nullable', 'string'],
+            'supplier_id' => ['required', 'exists:suppliers,id'],
+            'description' => ['required', 'string'],
             'purchase_price' => ['required', 'numeric', 'min:0'],
             'sale_price' => ['required', 'numeric', 'min:0'],
             'min_stock' => ['required', 'integer', 'min:0'],
             'current_stock' => ['required', 'integer', 'min:0'],
             'unit_id' => ['required', 'exists:units,id'],
-            'rack_location' => ['nullable', 'regex:/^[A-Z][0-9]{2}-[0-9]{2}$/'],
-            'image' => ['nullable', 'image', 'max:2048'],
+            'rack_location' => ['required', 'regex:/^[A-Z][0-9]{2}-[0-9]{2}$/'],
+            'image' => ['required', 'image', 'max:2048'],
         ];
     }
 

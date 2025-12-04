@@ -24,6 +24,6 @@ class SupplierRegistrationController extends Controller
 
         return redirect()
             ->route('login')
-            ->with('status', 'Pendaftaran supplier berhasil, menunggu persetujuan admin.');
+            ->with('success', 'Supplier berhasil ditambahkan.');
     }
 }

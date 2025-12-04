@@ -38,8 +38,8 @@ class RestockOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'items.required' => 'At least one product must be added to the restock order.',
-            'items.min' => 'At least one product must be added to the restock order.',
+            'items.required' => 'Setidaknya satu produk harus ditambahkan ke pesanan restock.',
+            'items.min' => 'Setidaknya satu produk harus ditambahkan ke pesanan restock.',
         ];
     }
 
