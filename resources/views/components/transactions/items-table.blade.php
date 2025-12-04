@@ -3,7 +3,8 @@
     'priceLabel' => 'Harga',
     'priceField' => 'price',
     'readonly' => false,
-    'initialItems' => []
+    'initialItems' => [],
+    'hidePrice' => false
 ])
 
 @php
@@ -202,10 +203,12 @@ function itemsTable(config) {
         <div class="p-3 space-y-3 pb-24"> {{-- Padding bottom besar agar tidak tertutup sticky footer --}}
             
             <template x-for="(item, index) in items" :key="index">
-                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm relative animate-fade-in-up">
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm relative animate-fade-in-up"
+                     :class="{ 'bg-yellow-50 border-yellow-200': item.original_quantity && item.quantity != item.original_quantity }">
                     
                     {{-- HEADER CARD: Item Number & Delete --}}
-                    <div class="flex justify-between items-start mb-2 pb-2 border-b border-slate-50">
+                    <div class="flex justify-between items-start mb-2 pb-2 border-b border-slate-50"
+                         :class="{ 'border-yellow-100': item.original_quantity && item.quantity != item.original_quantity }">
                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Item #<span x-text="index + 1"></span></div>
                         
                         @if(!$readonly)
@@ -232,6 +235,12 @@ function itemsTable(config) {
                                 width="w-full"
                                 class="text-sm"
                             />
+                            <template x-if="item.original_quantity && item.quantity != item.original_quantity">
+                                <div class="text-[10px] text-yellow-600 mt-1 font-medium flex items-center gap-1">
+                                    <x-lucide-alert-triangle class="w-3 h-3" />
+                                    <span>PO Qty: <span x-text="item.original_quantity"></span></span>
+                                </div>
+                            </template>
                         </div>
 
                         {{-- 2. Grid Qty & Harga (Side by Side) --}}
@@ -246,6 +255,7 @@ function itemsTable(config) {
                                         min="1"
                                         placeholder="Qty"
                                         class="w-full pl-2 pr-1 py-2 rounded-lg border-slate-200 text-sm font-semibold text-center focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
+                                        :class="{ 'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity }"
                                         :disabled="@js($readonly)"
                                         required
                                     >
@@ -256,6 +266,7 @@ function itemsTable(config) {
                             </div>
 
                             {{-- Harga --}}
+                            @if(!$hidePrice)
                             <div class="flex-1">
                                 <div class="relative">
                                     <span class="absolute top-0 left-2 text-slate-400 h-full flex items-center pointer-events-none text-xs">Rp</span>
@@ -269,16 +280,20 @@ function itemsTable(config) {
                                     >
                                 </div>
                             </div>
+                            @endif
                         </div>
                     </div>
 
                     {{-- FOOTER CARD: Subtotal Highlight --}}
-                    <div class="mt-3 bg-slate-50 -mx-3 -mb-3 px-3 py-2 rounded-b-xl flex justify-between items-center border-t border-slate-100">
+                    @if(!$hidePrice)
+                    <div class="mt-3 bg-slate-50 -mx-3 -mb-3 px-3 py-2 rounded-b-xl flex justify-between items-center border-t border-slate-100"
+                         :class="{ 'bg-yellow-50/50 border-yellow-100': item.original_quantity && item.quantity != item.original_quantity }">
                         <span class="text-[10px] uppercase font-bold text-slate-500">Subtotal</span>
                         <span class="text-sm font-bold text-teal-700" 
                               x-text="new Intl.NumberFormat('id-ID').format(item.quantity * item.{{ $priceField }})">
                         </span>
                     </div>
+                    @endif
                 </div>
             </template>
 
@@ -301,6 +316,7 @@ function itemsTable(config) {
         </div>
 
         {{-- STICKY FOOTER GRAND TOTAL --}}
+        @if(!$hidePrice)
         <div class="sticky bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 p-4">
             <div class="flex justify-between items-end">
                 <div class="text-xs font-medium text-slate-500 mb-1">Total Estimasi</div>
@@ -310,6 +326,7 @@ function itemsTable(config) {
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
     <div class="hidden md:block overflow-x-auto">
@@ -317,14 +334,17 @@ function itemsTable(config) {
             <x-table.thead>
                 <x-table.th class="w-1/2">Produk</x-table.th>
                 <x-table.th align="right" class="min-w-[100px]">Qty</x-table.th>
-                <x-table.th align="right" class="min-w-[160px]">{{ $priceLabel }}</x-table.th>
-                <x-table.th align="right" class="w-36">Total</x-table.th>
+                @if(!$hidePrice)
+                    <x-table.th align="right" class="min-w-[160px]">{{ $priceLabel }}</x-table.th>
+                    <x-table.th align="right" class="w-36">Total</x-table.th>
+                @endif
                 @if(!$readonly) <x-table.th class="w-10"></x-table.th> @endif
             </x-table.thead>
 
             <x-table.tbody>
                 <template x-for="(item, index) in items" :key="index">
-                    <tr class="group border-b border-slate-50 last:border-b-0 hover:bg-slate-50 transition-colors text-sm">
+                    <tr class="group border-b border-slate-50 last:border-b-0 hover:bg-slate-50 transition-colors text-sm"
+                        :class="{ 'bg-yellow-50 hover:bg-yellow-50': item.original_quantity && item.quantity != item.original_quantity }">
                         
                         {{-- Produk --}}
                         <x-table.td>
@@ -339,6 +359,12 @@ function itemsTable(config) {
                                 width="w-full"
                                 dropUp
                             />
+                            <template x-if="item.original_quantity && item.quantity != item.original_quantity">
+                                <div class="text-[10px] text-yellow-600 mt-1 font-medium flex items-center gap-1">
+                                    <x-lucide-alert-triangle class="w-3 h-3" />
+                                    <span>PO Qty: <span x-text="item.original_quantity"></span></span>
+                                </div>
+                            </template>
                         </x-table.td>
 
                         {{-- Qty --}}
@@ -349,6 +375,7 @@ function itemsTable(config) {
                                 x-model="item.quantity"
                                 min="1"
                                 class="w-full h-[42px] rounded-xl shadow-sm border-slate-300 text-sm text-right focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
+                                :class="{ 'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity }"
                                 :disabled="@js($readonly)"
                                 required
                             >
@@ -359,6 +386,7 @@ function itemsTable(config) {
                         </x-table.td>
 
                         {{-- Harga --}}
+                        @if(!$hidePrice)
                         <x-table.td align="right">
                             <input 
                                 type="number" 
@@ -369,13 +397,16 @@ function itemsTable(config) {
                                 :disabled="@js($readonly)"
                             >
                         </x-table.td>
+                        @endif
 
                         {{-- Subtotal --}}
+                        @if(!$hidePrice)
                         <x-table.td align="right">
                             <div class="py-2 font-medium text-slate-700 text-sm">
                                 <span x-text="new Intl.NumberFormat('id-ID').format(item.quantity * item.{{ $priceField }})"></span>
                             </div>
                         </x-table.td>
+                        @endif
 
                         {{-- Hapus --}}
                         @if(!$readonly)
@@ -393,6 +424,7 @@ function itemsTable(config) {
             </x-table.tbody>
 
             {{-- Footer Total --}}
+            @if(!$hidePrice)
             <tfoot class="bg-slate-50 border-t border-slate-200 font-bold text-slate-700">
                 <tr>
                     <td colspan="3" class="px-3 py-3 text-right uppercase text-[10px] tracking-wider text-slate-500">
@@ -409,6 +441,7 @@ function itemsTable(config) {
                     @if(!$readonly) <td></td> @endif
                 </tr>
             </tfoot>
+            @endif
         </table>
     </div>
 </div>

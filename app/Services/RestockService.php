@@ -31,7 +31,7 @@ class RestockService
                     'po_number',
                     'PO',
                     4,
-                    'order_date'
+                    ''
                 );
 
                 $restockOrder = RestockOrder::create([
@@ -90,23 +90,6 @@ class RestockService
         }
 
         DB::transaction(function () use ($restock, $actor): void {
-            $restock->loadMissing('items.product');
-
-            foreach ($restock->items as $item) {
-                $product = $item->product;
-
-                if ($product === null) {
-                    throw new ModelNotFoundException('One or more products in this restock no longer exist.');
-                }
-
-                $this->stockAdjustments->increaseStock(
-                    $product,
-                    (int) $item->quantity,
-                    'restock_received',
-                    $restock
-                );
-            }
-
             $restock->update([
                 'status' => RestockOrder::STATUS_RECEIVED,
             ]);
@@ -114,7 +97,7 @@ class RestockService
             $this->logActivity(
                 $actor,
                 'MARK_RESTOCK_RECEIVED',
-                sprintf('Restock #%s ditandai received dan stok diperbarui.', $restock->po_number),
+                sprintf('Restock #%s ditandai received (menunggu proses masuk gudang).', $restock->po_number),
                 $restock
             );
         });

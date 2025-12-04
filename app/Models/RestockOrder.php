@@ -19,7 +19,7 @@ class RestockOrder extends Model
 
         $this->total_items = $totals['total_items'];
         $this->total_quantity = $totals['total_quantity'];
-        $this->total_amount = $totals['total_amount'];
+        $this->total_amount = number_format($totals['total_amount'], 2, '.', '');
 
         $this->save();
     }
@@ -185,5 +185,10 @@ class RestockOrder extends Model
         }
 
         return (int) $this->rating_given_by === (int) $user->id;
+    }
+
+    public function incomingTransaction(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(IncomingTransaction::class);
     }
 }

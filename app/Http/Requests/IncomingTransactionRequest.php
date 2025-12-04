@@ -22,6 +22,7 @@ class IncomingTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'restock_order_id' => ['nullable', 'exists:restock_orders,id'],
             'transaction_date' => ['required', 'date'],
             'supplier_id' => ['required', 'exists:suppliers,id'],
             'notes' => ['nullable', 'string'],
@@ -33,7 +34,7 @@ class IncomingTransactionRequest extends FormRequest
         ];
     }
 
-        public function messages(): array
+    public function messages(): array
     {
         return [
             'items.required' => 'At least one product must be added to the transaction.',

@@ -51,15 +51,23 @@
                         {{-- Supplier --}}
                         <div>
                             <x-input-label for="supplier_id_mobile" value="Supplier" />
-                            <x-custom-select
-                                id="supplier_id_mobile"
-                                name="supplier_id"
-                                :options="$suppliers->pluck('name', 'id')->toArray()"
-                                :value="$prefilledSupplierId"
-                                placeholder="Pilih Supplier"
-                                class="mt-1 block w-full"
-                                required
-                            />
+                            @if(isset($restockOrder))
+                                <input type="hidden" name="supplier_id" value="{{ $restockOrder->supplier_id }}">
+                                <input type="hidden" name="restock_order_id" value="{{ $restockOrder->id }}">
+                                <div class="mt-1 block w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 sm:text-sm px-3 py-2 border">
+                                    {{ $restockOrder->supplier->name ?? 'Unknown Supplier' }}
+                                </div>
+                            @else
+                                <x-custom-select
+                                    id="supplier_id_mobile"
+                                    name="supplier_id"
+                                    :options="$suppliers->pluck('name', 'id')->toArray()"
+                                    :value="$prefilledSupplierId"
+                                    placeholder="Pilih Supplier"
+                                    class="mt-1 block w-full"
+                                    required
+                                />
+                            @endif
                             <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
                         </div>
 
@@ -85,7 +93,11 @@
                     </h3>
                     
                     <div class="overflow-x-auto -mx-4 px-4">
-                        <x-transactions.items-table :products="$products" :initial-items="$initialItems ?? []" />
+                        <x-transactions.items-table 
+                            :products="$products" 
+                            :initial-items="$initialItems ?? []" 
+                            :hide-price="auth()->user()->role === 'staff'"
+                        />
                     </div>
                 </x-card>
             </form>
@@ -117,18 +129,30 @@
             <x-card class="p-6">
                 <x-transactions.form-header>
                     <x-input-label value="Supplier" class="mb-1" />
-                    <x-custom-select
-                        name="supplier_id"
-                        :options="$suppliers->pluck('name', 'id')->toArray()"
-                        :value="$prefilledSupplierId"
-                        placeholder="Pilih Supplier"
-                        required
-                    />
+                    @if(isset($restockOrder))
+                        <input type="hidden" name="supplier_id" value="{{ $restockOrder->supplier_id }}">
+                        <input type="hidden" name="restock_order_id" value="{{ $restockOrder->id }}">
+                        <div class="block w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 sm:text-sm px-3 py-2 border">
+                            {{ $restockOrder->supplier->name ?? 'Unknown Supplier' }}
+                        </div>
+                    @else
+                        <x-custom-select
+                            name="supplier_id"
+                            :options="$suppliers->pluck('name', 'id')->toArray()"
+                            :value="$prefilledSupplierId"
+                            placeholder="Pilih Supplier"
+                            required
+                        />
+                    @endif
                 </x-transactions.form-header>
 
                 <div class="mt-8">
                     <h3 class="text-base font-semibold text-slate-900 mb-4">Daftar Item</h3>
-                    <x-transactions.items-table :products="$products" :initial-items="$initialItems ?? []" />
+                    <x-transactions.items-table 
+                        :products="$products" 
+                        :initial-items="$initialItems ?? []" 
+                        :hide-price="auth()->user()->role === 'staff'"
+                    />
                 </div>
             </x-card>
         </form>

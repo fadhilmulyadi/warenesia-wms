@@ -85,45 +85,60 @@
             <x-mobile.card>
                 <div class="space-y-3">
                     @can('cancel', $restock)
-                        <form method="POST" action="{{ route('restocks.cancel', $restock) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button 
-                                type="submit"
-                                class="w-full h-11 rounded-lg bg-rose-100 text-rose-700 font-semibold flex items-center justify-center gap-2 hover:bg-rose-200 text-sm"
-                            >
-                                <x-lucide-x-circle class="w-5 h-5" />
-                                Batalkan Restock
-                            </button>
-                        </form>
+                        <button 
+                            type="button"
+                            x-data
+                            @click="$dispatch('open-confirm-modal', {
+                                action: '{{ route('restocks.cancel', $restock) }}',
+                                method: 'PATCH',
+                                title: 'Batalkan Restock?',
+                                message: 'Apakah Anda yakin ingin membatalkan restock ini? Stok yang sudah diterima (jika ada) akan dikembalikan.',
+                                btnText: 'Ya, Batalkan',
+                                type: 'danger'
+                            })"
+                            class="w-full h-11 rounded-lg bg-rose-100 text-rose-700 font-semibold flex items-center justify-center gap-2 hover:bg-rose-200 text-sm"
+                        >
+                            <x-lucide-x-circle class="w-5 h-5" />
+                            Batalkan Restock
+                        </button>
                     @endcan
 
                     @can('markInTransit', $restock)
-                        <form method="POST" action="{{ route('restocks.mark-in-transit', $restock) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button 
-                                type="submit"
-                                class="w-full h-11 rounded-lg bg-slate-900 text-white font-semibold flex items-center justify-center gap-2 hover:bg-black text-sm"
-                            >
-                                <x-lucide-truck class="w-5 h-5" />
-                                Tandai Dikirim
-                            </button>
-                        </form>
+                        <button 
+                            type="button"
+                            x-data
+                            @click="$dispatch('open-confirm-modal', {
+                                action: '{{ route('restocks.mark-in-transit', $restock) }}',
+                                method: 'PATCH',
+                                title: 'Tandai Dikirim?',
+                                message: 'Apakah Anda yakin ingin menandai restock ini sebagai dikirim (In Transit)?',
+                                btnText: 'Ya, Tandai Dikirim',
+                                type: 'info'
+                            })"
+                            class="w-full h-11 rounded-lg bg-slate-900 text-white font-semibold flex items-center justify-center gap-2 hover:bg-black text-sm"
+                        >
+                            <x-lucide-truck class="w-5 h-5" />
+                            Tandai Dikirim
+                        </button>
                     @endcan
 
                     @can('markReceived', $restock)
-                        <form method="POST" action="{{ route('restocks.mark-received', $restock) }}">
-                            @csrf
-                            @method('PATCH')
-                            <button 
-                                type="submit"
-                                class="w-full h-11 rounded-lg bg-teal-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-teal-700 text-sm"
-                            >
-                                <x-lucide-check-circle class="w-5 h-5" />
-                                Tandai Diterima
-                            </button>
-                        </form>
+                        <button 
+                            type="button"
+                            x-data
+                            @click="$dispatch('open-confirm-modal', {
+                                action: '{{ route('restocks.mark-received', $restock) }}',
+                                method: 'PATCH',
+                                title: 'Tandai Diterima?',
+                                message: 'Pastikan Anda telah memeriksa fisik barang. Stok produk akan bertambah sesuai jumlah yang diterima.',
+                                btnText: 'Ya, Terima Barang',
+                                type: 'success'
+                            })"
+                            class="w-full h-11 rounded-lg bg-teal-600 text-white font-semibold flex items-center justify-center gap-2 hover:bg-teal-700 text-sm"
+                        >
+                            <x-lucide-check-circle class="w-5 h-5" />
+                            Tandai Diterima
+                        </button>
                     @endcan
                 </div>
             </x-mobile.card>
@@ -299,33 +314,60 @@
                     </x-action-button>
 
                     @can('cancel', $restock)
-                        <form method="POST" action="{{ route('restocks.cancel', $restock) }}">
-                            @csrf
-                            @method('PATCH')
-                            <x-action-button type="submit" variant="outline-danger" icon="x">
-                                Batalkan
-                            </x-action-button>
-                        </form>
+                        <x-action-button 
+                            type="button" 
+                            variant="outline-danger" 
+                            icon="x"
+                            x-data
+                            @click="$dispatch('open-confirm-modal', {
+                                action: '{{ route('restocks.cancel', $restock) }}',
+                                method: 'PATCH',
+                                title: 'Batalkan Restock?',
+                                message: 'Apakah Anda yakin ingin membatalkan restock ini? Stok yang sudah diterima (jika ada) akan dikembalikan.',
+                                btnText: 'Ya, Batalkan',
+                                type: 'danger'
+                            })"
+                        >
+                            Batalkan
+                        </x-action-button>
                     @endcan
 
                     @can('markInTransit', $restock)
-                        <form method="POST" action="{{ route('restocks.mark-in-transit', $restock) }}">
-                            @csrf
-                            @method('PATCH')
-                            <x-action-button type="submit" variant="primary" icon="truck">
-                                Tandai dikirim
-                            </x-action-button>
-                        </form>
+                        <x-action-button 
+                            type="button" 
+                            variant="primary" 
+                            icon="truck"
+                            x-data
+                            @click="$dispatch('open-confirm-modal', {
+                                action: '{{ route('restocks.mark-in-transit', $restock) }}',
+                                method: 'PATCH',
+                                title: 'Tandai Dikirim?',
+                                message: 'Apakah Anda yakin ingin menandai restock ini sebagai dikirim (In Transit)?',
+                                btnText: 'Ya, Tandai Dikirim',
+                                type: 'info'
+                            })"
+                        >
+                            Tandai dikirim
+                        </x-action-button>
                     @endcan
 
                     @can('markReceived', $restock)
-                        <form method="POST" action="{{ route('restocks.mark-received', $restock) }}">
-                            @csrf
-                            @method('PATCH')
-                            <x-action-button type="submit" variant="primary" icon="check-circle">
-                                Tandai diterima
-                            </x-action-button>
-                        </form>
+                        <x-action-button 
+                            type="button" 
+                            variant="primary" 
+                            icon="check-circle"
+                            x-data
+                            @click="$dispatch('open-confirm-modal', {
+                                action: '{{ route('restocks.mark-received', $restock) }}',
+                                method: 'PATCH',
+                                title: 'Tandai Diterima?',
+                                message: 'Pastikan Anda telah memeriksa fisik barang. Stok produk akan bertambah sesuai jumlah yang diterima.',
+                                btnText: 'Ya, Terima Barang',
+                                type: 'success'
+                            })"
+                        >
+                            Tandai diterima
+                        </x-action-button>
                     @endcan
                 </div>
             </div>
@@ -645,4 +687,5 @@
 </x-card>
         </div>
     </div>
+    <x-confirm-modal />
 @endsection

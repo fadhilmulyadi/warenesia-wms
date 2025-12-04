@@ -52,7 +52,6 @@ class IncomingTransactionController extends Controller
 
         $suppliers = Supplier::orderBy('name')->get();
         $products = Product::orderBy('name')->get();
-
         $today = now()->toDateString();
 
         $prefill = TransactionPrefill::forPurchases($request);
@@ -62,7 +61,24 @@ class IncomingTransactionController extends Controller
         $prefilledUnitCost = $prefill['unit_cost'];
 
         $initialItems = [];
-        if ($prefilledProductId) {
+        $restockOrder = null;
+
+        if ($request->has('restock_order_id')) {
+            $restockOrder = \App\Models\RestockOrder::with('items.product')->find($request->query('restock_order_id'));
+
+            if ($restockOrder) {
+                $prefilledSupplierId = $restockOrder->supplier_id;
+
+                foreach ($restockOrder->items as $item) {
+                    $initialItems[] = [
+                        'product_id' => $item->product_id,
+                        'quantity' => $item->quantity,
+                        'unit_cost' => $item->unit_cost,
+                        'original_quantity' => $item->quantity, // For discrepancy check
+                    ];
+                }
+            }
+        } elseif ($prefilledProductId) {
             $initialItems[] = [
                 'product_id' => (int) $prefilledProductId,
                 'quantity' => (int) $prefilledQuantity,
@@ -80,7 +96,8 @@ class IncomingTransactionController extends Controller
                 'prefilledSupplierId',
                 'prefilledQuantity',
                 'prefilledUnitCost',
-                'initialItems'
+                'initialItems',
+                'restockOrder'
             )
         );
     }

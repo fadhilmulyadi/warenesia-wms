@@ -26,6 +26,7 @@ class IncomingTransactionService extends BaseTransactionService
 
                 $transaction = IncomingTransaction::create([
                     'transaction_number' => $transactionNumber,
+                    'restock_order_id' => $validatedData['restock_order_id'] ?? null,
                     'transaction_date' => $validatedData['transaction_date'],
                     'supplier_id' => $validatedData['supplier_id'],
                     'created_by' => $creator->id,

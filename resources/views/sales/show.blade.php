@@ -66,29 +66,33 @@
                 <x-mobile.card>
                     <div class="space-y-3">
                         @can('approve', $sale)
-                            <form method="POST" action="{{ route('sales.approve', $sale) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit"
-                                    class="w-full h-11 rounded-lg bg-teal-600 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-teal-700"
-                                    onclick="return confirm('Approve this transaction and reduce stock?')">
-                                    <x-lucide-check class="w-5 h-5" />
-                                    Approve & Kurangi Stok
-                                </button>
-                            </form>
+                            <button type="button" x-data @click="$dispatch('open-confirm-modal', {
+                                                action: '{{ route('sales.approve', $sale) }}',
+                                                method: 'PATCH',
+                                                title: 'Approve Transaksi?',
+                                                message: 'Apakah Anda yakin ingin menyetujui transaksi ini? Stok akan dikurangi secara otomatis.',
+                                                btnText: 'Ya, Approve',
+                                                type: 'success'
+                                            })"
+                                class="w-full h-11 rounded-lg bg-teal-600 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-teal-700">
+                                <x-lucide-check class="w-5 h-5" />
+                                Approve & Kurangi Stok
+                            </button>
                         @endcan
 
                         @can('ship', $sale)
-                            <form method="POST" action="{{ route('sales.ship', $sale) }}">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit"
-                                    class="w-full h-11 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-black"
-                                    onclick="return confirm('Mark this transaction as shipped?')">
-                                    <x-lucide-send class="w-5 h-5" />
-                                    Tandai Terkirim
-                                </button>
-                            </form>
+                            <button type="button" x-data @click="$dispatch('open-confirm-modal', {
+                                                action: '{{ route('sales.ship', $sale) }}',
+                                                method: 'PATCH',
+                                                title: 'Tandai Terkirim?',
+                                                message: 'Apakah Anda yakin ingin menandai transaksi ini sebagai terkirim?',
+                                                btnText: 'Ya, Tandai Terkirim',
+                                                type: 'info'
+                                            })"
+                                class="w-full h-11 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-black">
+                                <x-lucide-send class="w-5 h-5" />
+                                Tandai Terkirim
+                            </button>
                         @endcan
                     </div>
                 </x-mobile.card>
@@ -192,25 +196,29 @@
 
                         <div class="flex flex-wrap items-center gap-2">
                             @can('approve', $sale)
-                                <form method="POST" action="{{ route('sales.approve', $sale) }}">
-                                    @csrf
-                                    @method('PATCH')
-                                    <x-action-button type="button" variant="primary" icon="check"
-                                        onclick="return confirm('Approve this transaction and reduce stock?')">
-                                        Approve & kurangi stok
-                                    </x-action-button>
-                                </form>
+                                <x-action-button type="button" variant="primary" icon="check" x-data @click="$dispatch('open-confirm-modal', {
+                                                    action: '{{ route('sales.approve', $sale) }}',
+                                                    method: 'PATCH',
+                                                    title: 'Approve Transaksi?',
+                                                    message: 'Apakah Anda yakin ingin menyetujui transaksi ini? Stok akan dikurangi secara otomatis.',
+                                                    btnText: 'Ya, Approve',
+                                                    type: 'success'
+                                                })">
+                                    Approve & kurangi stok
+                                </x-action-button>
                             @endcan
 
                             @can('ship', $sale)
-                                <form method="POST" action="{{ route('sales.ship', $sale) }}">
-                                    @csrf
-                                    @method('PATCH')
-                                    <x-action-button type="button" variant="secondary" icon="send"
-                                        onclick="return confirm('Mark this transaction as shipped?')">
-                                        Tandai terkirim
-                                    </x-action-button>
-                                </form>
+                                <x-action-button type="button" variant="secondary" icon="send" x-data @click="$dispatch('open-confirm-modal', {
+                                                    action: '{{ route('sales.ship', $sale) }}',
+                                                    method: 'PATCH',
+                                                    title: 'Tandai Terkirim?',
+                                                    message: 'Apakah Anda yakin ingin menandai transaksi ini sebagai terkirim?',
+                                                    btnText: 'Ya, Tandai Terkirim',
+                                                    type: 'info'
+                                                })">
+                                    Tandai terkirim
+                                </x-action-button>
                             @endcan
                         </div>
                     </div>
@@ -383,4 +391,6 @@
             </x-card>
         </div>
     </div>
+
+    <x-confirm-modal />
 @endsection

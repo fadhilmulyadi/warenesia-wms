@@ -12,7 +12,12 @@
         <x-slot:fields>
             @if($errors->any())
                 <div class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 mb-4">
-                    Terdapat kesalahan input. Periksa kembali formulir di bawah.
+                    <p class="font-bold">Terdapat kesalahan input:</p>
+                    <ul class="list-disc list-inside mt-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 
@@ -97,7 +102,12 @@
 
     @if($errors->any())
         <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            Terdapat kesalahan input. Periksa kembali formulir di bawah.
+            <p class="font-bold">Terdapat kesalahan input:</p>
+            <ul class="list-disc list-inside mt-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 

@@ -10,6 +10,7 @@ use App\Support\MobileIndex\SaleConfig;
 use App\Support\MobileIndex\SupplierConfig;
 use App\Support\MobileIndex\UnitConfig;
 use App\Support\MobileIndex\UserConfig;
+use App\Support\MobileIndex\SupplierRestockConfig;
 
 class MobileIndexConfig
 {
@@ -51,5 +52,10 @@ class MobileIndexConfig
     public static function units(): array
     {
         return UnitConfig::config();
+    }
+
+    public static function supplierRestocks($statusOptions): array
+    {
+        return SupplierRestockConfig::config($statusOptions);
     }
 }

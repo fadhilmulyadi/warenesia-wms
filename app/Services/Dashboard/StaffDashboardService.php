@@ -23,8 +23,9 @@ class StaffDashboardService
             'productSkuMap' => $products->mapWithKeys(fn($p) => [$p->sku => $p->id]),
             'suppliers' => $this->suppliers(),
             'todayTransactions' => $this->todayTransactions($user),
+            'poReadyToReceive' => $this->poReadyToReceive(),
             'prefilledType' => $prefill['type'],
-            'prefilledSupplierId' => $prefill['supplier_id'],
+            'prefilledSupplierId' => $prefill['prefilledSupplierId'] ?? $prefill['supplier_id'], // Fix potential key mismatch if any
             'prefilledCustomerName' => $prefill['customer_name'],
             'prefilledProductId' => $prefill['product_id'],
             'prefilledQuantity' => $prefill['quantity'],
@@ -32,6 +33,15 @@ class StaffDashboardService
             'prefilledUnitCost' => $prefill['unit_cost'],
             'defaultDate' => now()->toDateString(),
         ];
+    }
+
+    private function poReadyToReceive()
+    {
+        return \App\Models\RestockOrder::where('status', \App\Models\RestockOrder::STATUS_RECEIVED)
+            ->whereDoesntHave('incomingTransaction')
+            ->with(['supplier', 'items'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
     }
 
     private function formProducts()

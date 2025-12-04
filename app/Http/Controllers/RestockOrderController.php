@@ -134,7 +134,7 @@ class RestockOrderController extends Controller
     {
         $this->authorize('rate', $restockOrder);
 
-        if (! $restockOrder->canBeRated()) {
+        if (!$restockOrder->canBeRated()) {
             return redirect()
                 ->route('restocks.show', $restockOrder)
                 ->withErrors([
@@ -187,7 +187,7 @@ class RestockOrderController extends Controller
             return redirect()
                 ->route('restocks.show', $restock)
                 ->with('success', 'Restock order marked as received.');
-        } catch (DomainException|ModelNotFoundException $exception) {
+        } catch (DomainException | ModelNotFoundException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
                 ->withErrors([

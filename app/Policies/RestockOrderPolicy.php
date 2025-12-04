@@ -45,7 +45,7 @@ class RestockOrderPolicy
 
     public function rate(User $user, RestockOrder $restock): bool
     {
-        return $user->role === 'manager'
+        return $this->canManage($user)
             && $restock->status === RestockOrder::STATUS_RECEIVED
             && $restock->rating === null;
     }
@@ -57,7 +57,7 @@ class RestockOrderPolicy
 
     public function viewSupplierRestocks(User $user, mixed $restock = null): bool
     {
-        if (! $user->isSupplier()) {
+        if (!$user->isSupplier()) {
             return false;
         }
 

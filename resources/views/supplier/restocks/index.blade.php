@@ -3,14 +3,36 @@
 @section('title', 'Pesanan Saya')
 
 @section('page-header')
-    <x-page-header
-        title="Pesanan Saya"
-        description="Pantau status pesanan pembelian yang ditugaskan kepada perusahaan Anda."
-    />
+    <div class="hidden md:block">
+        <x-page-header
+            title="Pesanan Saya"
+            description="Pantau status pesanan pembelian yang ditugaskan kepada perusahaan Anda."
+        />
+    </div>
+
+    <div class="md:hidden">
+        <x-mobile-header
+            title="Pesanan Saya"
+        />
+    </div>
 @endsection
 
 @section('content')
-    <div class="space-y-4 text-xs max-w-6xl mx-auto">
+    @php
+        $mobileIndexConfig = \App\Support\MobileIndexConfig::supplierRestocks($statusOptions);
+    @endphp
+
+    {{-- MOBILE VERSION --}}
+    <div class="md:hidden">
+        <x-mobile.index
+            :items="$restockOrders"
+            :config="$mobileIndexConfig"
+            card-view="mobile.supplier.restocks.card"
+        />
+    </div>
+
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-4 text-xs max-w-6xl mx-auto">
 
         {{-- 
             1. TOOLBAR + FILTER BAR 

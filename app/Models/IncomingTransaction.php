@@ -18,7 +18,7 @@ class IncomingTransaction extends Model
 
         $this->total_items = $totals['total_items'];
         $this->total_quantity = $totals['total_quantity'];
-        $this->total_amount = $totals['total_amount'];
+        $this->total_amount = number_format($totals['total_amount'], 2, '.', '');
 
         $this->save();
     }
@@ -32,6 +32,7 @@ class IncomingTransaction extends Model
 
     protected $fillable = [
         'transaction_number',
+        'restock_order_id',
         'transaction_date',
         'supplier_id',
         'created_by',
