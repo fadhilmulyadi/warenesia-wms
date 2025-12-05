@@ -3,9 +3,12 @@
 @section('title', 'Tambah User')
 
 @section('page-header')
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header title="Tambah User" description="Buat akun pengguna baru untuk WMS." />
     </div>
+
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header title="Tambah User" back="{{ route('users.index') }}" />
     </div>
@@ -13,8 +16,7 @@
 
 @section('content')
     <div class="max-w-6xl mx-auto">
-        {{-- MOBILE VERSION --}}
-        {{-- MOBILE VERSION --}}
+        {{-- MOBILE FORM --}}
         <x-mobile.form form-id="user-form-mobile" save-label="Simpan User" save-icon="save">
             <x-slot:fields>
                 @if($errors->any())
@@ -27,15 +29,17 @@
                     <div class="p-4 space-y-4">
                         <form id="user-form-mobile" method="POST" action="{{ route('users.store') }}" class="space-y-4">
                             @csrf
-                            @include('users._form', ['user' => null, 'roles' => $roles, 'statuses' => $statuses])
+                            @include('users.form', ['user' => null, 'roles' => $roles, 'statuses' => $statuses])
                         </form>
                     </div>
                 </x-card>
             </x-slot:fields>
         </x-mobile.form>
 
-        {{-- DESKTOP VERSION --}}
+        {{-- PAGE CONTENT --}}
         <div class="hidden md:block space-y-4">
+
+            {{-- TOOLBAR --}}
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <x-breadcrumbs :items="['Users' => route('users.index'), 'Tambah User' => '#']" />
 
@@ -52,6 +56,7 @@
 
             <x-card>
                 <div class="p-4 sm:p-6 space-y-4">
+                    {{-- SECTION: Header --}}
                     <div class="flex flex-col gap-1">
                         <h2 class="text-base font-semibold text-slate-900">Informasi Akun</h2>
                         <p class="text-xs text-slate-500">Lengkapi detail user, role, dan status aktif.</p>
@@ -63,9 +68,10 @@
                         </div>
                     @endif
 
+                    {{-- FORM --}}
                     <form id="user-form" method="POST" action="{{ route('users.store') }}" class="space-y-4">
                         @csrf
-                        @include('users._form', ['user' => null, 'roles' => $roles, 'statuses' => $statuses])
+                        @include('users.form', ['user' => null, 'roles' => $roles, 'statuses' => $statuses])
                     </form>
                 </div>
             </x-card>

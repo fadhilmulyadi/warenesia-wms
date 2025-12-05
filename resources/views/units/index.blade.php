@@ -11,15 +11,15 @@
         $mobileIndexConfig = \App\Support\MobileIndexConfig::units();
     @endphp
 
-    {{-- MOBILE VERSION --}}
+    {{-- MOBILE LIST --}}
     <div class="md:hidden">
         <x-mobile.index :items="$units" :config="$mobileIndexConfig" card-view="mobile.units.card" />
     </div>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-4 text-xs max-w-6xl mx-auto">
 
-        {{-- Toolbar: search + tombol tambah (mirip restock index) --}}
+        {{-- TOOLBAR --}}
         <x-toolbar>
             <div class="flex flex-wrap items-center justify-between gap-3 w-full">
                 <form method="GET" action="{{ route('units.index') }}" class="w-full sm:w-auto">
@@ -34,7 +34,7 @@
             </div>
         </x-toolbar>
 
-        {{-- Tabel data satuan --}}
+        {{-- TABLE --}}
         <x-table>
             <x-table.thead>
                 <x-table.th>Nama</x-table.th>
@@ -66,11 +66,11 @@
 
                                 @if(!$unit->products_count)
                                     <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                                            action: '{{ route('units.destroy', $unit) }}',
-                                                                                            title: 'Hapus Satuan',
-                                                                                            message: 'Yakin ingin menghapus satuan ini?',
-                                                                                            itemName: '{{ $unit->name }}'
-                                                                                        })">
+                                                                                                        action: '{{ route('units.destroy', $unit) }}',
+                                                                                                        title: 'Hapus Satuan',
+                                                                                                        message: 'Yakin ingin menghapus satuan ini?',
+                                                                                                        itemName: '{{ $unit->name }}'
+                                                                                                    })">
                                         Hapus
                                     </x-table.action-item>
                                 @else

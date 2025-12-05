@@ -3,9 +3,12 @@
 @section('title', 'Tambah Satuan')
 
 @section('page-header')
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header title="Tambah Satuan" description="Daftarkan satuan baru untuk digunakan di produk." />
     </div>
+
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header title="Tambah Satuan" back="{{ route('units.index') }}" />
     </div>
@@ -13,8 +16,8 @@
 
 @section('content')
     <div class="max-w-6xl mx-auto text-sm text-slate-700">
-        {{-- MOBILE VERSION --}}
-        {{-- MOBILE VERSION --}}
+
+        {{-- MOBILE FORM --}}
         <x-mobile.form form-id="unit-form-mobile" save-label="Simpan Satuan" save-icon="save">
             <x-slot:fields>
                 @if($errors->any())
@@ -37,9 +40,9 @@
             </x-slot:fields>
         </x-mobile.form>
 
-        {{-- DESKTOP VERSION --}}
+        {{-- PAGE CONTENT --}}
         <div class="hidden md:block space-y-6">
-            {{-- Header: breadcrumbs + tombol aksi --}}
+            {{-- TOOLBAR --}}
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <x-breadcrumbs :items="[
             'Satuan' => route('units.index'),
@@ -57,7 +60,7 @@
                 </div>
             </div>
 
-            {{-- Error alert (gaya restock) --}}
+            {{-- ERROR --}}
             @if($errors->any())
                 <x-card class="p-4 border border-rose-200 bg-rose-50 text-rose-800">
                     <p class="font-semibold text-slate-900">Periksa kembali isian Anda:</p>
@@ -69,7 +72,7 @@
                 </x-card>
             @endif
 
-            {{-- Form utama --}}
+            {{-- FORM --}}
             <form id="unit-form" action="{{ route('units.store') }}" method="POST" class="space-y-6">
                 @csrf
 

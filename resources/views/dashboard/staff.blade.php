@@ -22,15 +22,16 @@
 @endphp
 
 @section('content')
+    {{-- DASHBOARD INIT --}}
     <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6" x-data="staffDashboard({
-                                    skuMap: @js($productSkuMap), 
-                                    products: @js($productOptions) 
-                                 })">
+                                            skuMap: @js($productSkuMap), 
+                                            products: @js($productOptions) 
+                                         })">
 
-        {{-- LEFT SIDE--}}
+        {{-- LEFT SIDE --}}
         <div class="space-y-6 lg:col-span-3">
 
-            {{-- PO SIAP DITERIMA --}}
+            {{-- SECTION: PO Ready --}}
             <x-dashboard.card padding="p-0">
                 <div class="px-4 pt-4 mb-4 space-y-1">
                     <h3 class="text-sm font-semibold text-slate-900">PO Siap Diterima</h3>
@@ -44,7 +45,7 @@
                             @foreach($poReadyToReceive as $po)
                                 <div class="p-4 flex items-center justify-between hover:bg-slate-50 transition group">
 
-                                    {{-- Info PO --}}
+                                    {{-- PO Info --}}
                                     <div class="min-w-0 flex-1 pr-4">
                                         <div class="flex items-center gap-2 mb-1">
                                             <span class="font-bold text-slate-800 text-sm tracking-tight">
@@ -61,7 +62,7 @@
                                         </div>
                                     </div>
 
-                                    {{-- Action Button (Standardized) --}}
+                                    {{-- ACTION --}}
                                     <x-action-button href="{{ route('purchases.create', ['restock_order_id' => $po->id]) }}"
                                         variant="primary" size="sm" icon="arrow-right">
                                         Proses
@@ -71,7 +72,7 @@
                         </div>
                     </div>
                 @else
-                    {{-- Empty State --}}
+                    {{-- EMPTY STATE --}}
                     <div class="flex flex-col items-center justify-center py-8 text-center px-4 border-t border-slate-100">
                         <div class="bg-slate-50 p-3 rounded-full mb-3">
                             <x-lucide-check-circle class="w-6 h-6 text-slate-300" />
@@ -82,9 +83,9 @@
                 @endif
             </x-dashboard.card>
 
-            {{-- QUICK ACTION & ENTRY --}}
+            {{-- SECTION: Quick Action --}}
             <div class="space-y-4">
-                {{-- Scan Action Header --}}
+                {{-- SCANNER ENTRY --}}
                 <div
                     class="bg-teal-50 border border-teal-100 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
@@ -97,14 +98,13 @@
                         </div>
                     </div>
 
-                    {{-- Scan Button --}}
                     <x-action-button type="button" variant="primary" icon="scan-line"
                         x-on:click="openScanModal('incoming')">
                         Mulai Scan
                     </x-action-button>
                 </div>
 
-                {{-- Component Quick Entry --}}
+                {{-- FORM: Quick Entry --}}
                 <x-dashboard.quick-entry :supplierOptions="$supplierOptions" :productOptions="$productOptions"
                     :productStocks="$productStocks" :prefilledType="$prefilledType"
                     :prefilledSupplierId="$prefilledSupplierId" :prefilledProductId="$prefilledProductId"
@@ -114,6 +114,7 @@
 
         {{-- RIGHT SIDE --}}
         <div class="space-y-6 lg:col-span-3">
+            {{-- SECTION: Today Transactions --}}
             <x-dashboard.card title="Transaksi Hari Ini" subtitle="5-10 transaksi yang kamu buat hari ini." padding="p-4">
                 @if(count($todayList) === 0)
                     <div
@@ -126,146 +127,17 @@
             </x-dashboard.card>
         </div>
 
-        {{-- Scan Modal Component --}}
+        {{-- MODAL --}}
         <x-dashboard.scan-modal />
 
     </div>
 
-    {{-- LOGIC SCANNER --}}
-    <script>
+    {{-- SCRIPTS --}}
+    <script type="module">
+        import staffDashboard from '/resources/js/modules/scanner/staffScanner.js';
+
         document.addEventListener('alpine:init', () => {
-            Alpine.data('staffDashboard', ({ skuMap, products }) => ({
-                isScanOpen: false,
-                scanMode: 'incoming',
-                scanner: null,
-                cameras: [],
-                selectedCamera: null,
-                isFileScanning: false,
-                dragOver: false,
-
-                init() {
-                    this.$watch('isScanOpen', (value) => {
-                        if (value) {
-                            this.$nextTick(() => this.initScanner());
-                        } else {
-                            this.stopScanner();
-                        }
-                    });
-                },
-
-                async initScanner() {
-                    if (!this.scanner) {
-                        this.scanner = new Scanner(
-                            "reader",
-                            (decodedText, decodedResult) => this.handleScanSuccess(decodedText, decodedResult),
-                            (errorMessage) => this.handleScanFailure(errorMessage)
-                        );
-                    }
-
-                    if (this.cameras.length === 0) {
-                        this.cameras = await this.scanner.getCameras();
-                    }
-
-                    if (this.cameras.length > 0) {
-                        // Prefer back camera if available
-                        const backCamera = this.cameras.find(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('belakang'));
-                        this.selectedCamera = backCamera ? backCamera.id : this.cameras[0].id;
-                        this.startScanner();
-                    } else {
-                        console.warn("No cameras found.");
-                    }
-                },
-
-                async startScanner() {
-                    if (this.selectedCamera) {
-                        this.isFileScanning = false;
-                        await this.scanner.start(this.selectedCamera);
-                    }
-                },
-
-                async stopScanner() {
-                    if (this.scanner) {
-                        await this.scanner.stop();
-                    }
-                },
-
-                handleScanSuccess(decodedText, decodedResult) {
-                    console.log(`Scan result: ${decodedText}`);
-
-                    const sku = decodedText.trim();
-                    // Access skuMap from closure scope
-                    const productId = skuMap[sku];
-
-                    if (productId) {
-                        // 1. Dispatch event to prefill Quick Entry form
-                        window.dispatchEvent(new CustomEvent('barcode-prefill', {
-                            detail: {
-                                mode: this.scanMode,
-                                product_id: productId
-                            }
-                        }));
-
-                        // 2. Show Success Toast
-                        window.dispatchEvent(new CustomEvent('notify', {
-                            detail: {
-                                message: 'Produk berhasil ditambahkan',
-                                type: 'success'
-                            }
-                        }));
-
-                        // 3. Close Modal
-                        this.closeScanModal();
-                    } else {
-                        // Product Not Found
-                        window.dispatchEvent(new CustomEvent('notify', {
-                            detail: {
-                                message: `Produk dengan SKU '${sku}' tidak ditemukan.`,
-                                type: 'error'
-                            }
-                        }));
-                    }
-                },
-
-                handleScanFailure(errorMessage) {
-                    // console.warn(`Scan error: ${errorMessage}`);
-                },
-
-                async handleFileUpload(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        this.scanFile(file);
-                    }
-                },
-
-                async handleDrop(event) {
-                    this.dragOver = false;
-                    const file = event.dataTransfer.files[0];
-                    if (file) {
-                        this.scanFile(file);
-                    }
-                },
-
-                async scanFile(file) {
-                    this.isFileScanning = true;
-                    try {
-                        await this.stopScanner();
-                        await this.scanner.scanFile(file);
-                    } catch (err) {
-                        alert("Gagal memindai file. Pastikan gambar QR code jelas.");
-                        this.isFileScanning = false;
-                        this.startScanner();
-                    }
-                },
-
-                openScanModal(mode = 'incoming') {
-                    this.scanMode = mode;
-                    this.isScanOpen = true;
-                },
-
-                closeScanModal() {
-                    this.isScanOpen = false;
-                }
-            }));
+            Alpine.data('staffDashboard', staffDashboard);
         });
     </script>
 @endsection

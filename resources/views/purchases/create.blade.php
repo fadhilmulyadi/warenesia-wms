@@ -10,7 +10,7 @@
 @endsection
 
 @section('content')
-    {{-- MOBILE VERSION --}}
+    {{-- MOBILE FORM --}}
     <x-mobile.form form-id="transaction-form-mobile" save-label="Simpan Pembelian" save-icon="save">
         <x-slot:fields>
             @if($errors->any())
@@ -27,14 +27,14 @@
             >
                 @csrf
                 
-                {{-- Informasi Transaksi --}}
+                {{-- SECTION: Transaction Info --}}
                 <x-card class="p-4 space-y-4">
                     <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
                         Informasi Transaksi
                     </h3>
 
                     <div class="space-y-4">
-                        {{-- Tanggal --}}
+                        {{-- Date --}}
                         <div>
                             <x-input-label for="transaction_date_mobile" value="Tanggal Transaksi" />
                             <input
@@ -71,7 +71,7 @@
                             <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
                         </div>
 
-                        {{-- Catatan --}}
+                        {{-- Notes --}}
                         <div>
                             <x-input-label for="notes_mobile" value="Catatan / Referensi" />
                             <textarea
@@ -86,7 +86,7 @@
                     </div>
                 </x-card>
 
-                {{-- Daftar Item --}}
+                {{-- SECTION: Items --}}
                 <x-card class="p-4 space-y-4">
                     <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
                         Daftar Item
@@ -106,8 +106,9 @@
         </x-slot:fields>
     </x-mobile.form>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-6">
+        {{-- TOOLBAR --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
             <x-breadcrumbs :items="['Pembelian' => route('purchases.index'), 'Buat Baru' => '#']" />
             <div class="flex flex-wrap gap-2 justify-end">
@@ -120,6 +121,7 @@
             </div>
         </div>
 
+        {{-- FORM --}}
         <form
             id="transaction-form"
             method="POST"

@@ -3,12 +3,12 @@
 @section('title', 'Detail Produk: ' . $product->name)
 
 @section('page-header')
-    {{-- DESKTOP HEADER --}}
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header title="Detail Produk" :description="'SKU: ' . $product->sku" />
     </div>
 
-    {{-- MOBILE HEADER --}}
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header title="Detail Produk" back="{{ route('products.index') }}" />
     </div>
@@ -27,7 +27,7 @@
 
     <div class="max-w-6xl mx-auto">
 
-        {{-- MOBILE LAYOUT --}}
+        {{-- MOBILE CONTENT --}}
         <div class="md:hidden space-y-3 pb-24">
             @php
                 $categoryName = $product->category?->name ?? 'Tidak ada kategori';
@@ -49,8 +49,9 @@
                 }
             @endphp
 
-            {{-- SUMMARY CARD --}}
+            {{-- SECTION: Summary Card --}}
             <x-mobile.card>
+                {{-- HEADER --}}
                 <div class="flex items-start justify-between gap-2">
                     <div class="space-y-1">
                         <div class="text-xs font-semibold uppercase text-slate-500">
@@ -75,6 +76,7 @@
                     @endif
                 </div>
 
+                {{-- INFO --}}
                 <div class="mt-4 grid grid-cols-2 gap-4 text-xs">
                     <div class="space-y-0.5">
                         <div class="text-xs text-slate-500">Stok Saat Ini</div>
@@ -91,6 +93,7 @@
                     </div>
                 </div>
 
+                {{-- ACTIONS --}}
                 <div class="mt-4 flex gap-3">
                     <a href="{{ route('products.edit', $product) }}"
                         class="flex-1 h-11 rounded-lg bg-slate-100 text-slate-800 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-slate-200 transition">
@@ -106,11 +109,13 @@
                 </div>
             </x-mobile.card>
 
-            {{-- HARGA & INFO LAIN --}}
+            {{-- SECTION: Price Info --}}
             <x-mobile.card>
+                {{-- HEADER --}}
                 <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Harga & Informasi
                 </h2>
+                {{-- CONTENT --}}
                 <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
                     <x-mobile.stat-row label="Harga Beli (HPP)" :value="number_format($product->purchase_price, 0, ',', '.')" prefix="Rp" />
                     <x-mobile.stat-row label="Harga Jual" :value="number_format($product->sale_price, 0, ',', '.')"
@@ -120,15 +125,18 @@
                 </div>
             </x-mobile.card>
 
-            {{-- QR CODE & LABEL --}}
+            {{-- SECTION: QR Code --}}
             <x-mobile.card>
+                {{-- HEADER --}}
                 <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     QR & Label
                 </h2>
+                {{-- CONTENT --}}
                 <div class="flex flex-col items-center gap-4">
                     <div class="bg-white p-3 rounded-xl border border-slate-200">
                         {!! QrCode::format('svg')->size(120)->margin(1)->generate($product->getBarcodePayload()) !!}
                     </div>
+                    {{-- ACTIONS --}}
                     <div class="flex gap-3 w-full">
                         <a href="{{ route('products.barcode', $product) }}"
                             class="flex-1 h-11 rounded-lg border border-slate-200 text-sm font-semibold text-slate-700 flex items-center justify-center gap-2 hover:bg-slate-50">
@@ -144,7 +152,7 @@
                 </div>
             </x-mobile.card>
 
-            {{-- DESKRIPSI --}}
+            {{-- SECTION: Description --}}
             @if($product->description)
                 <x-mobile.card>
                     <h2 class="text-sm font-semibold text-slate-900 mb-3">
@@ -156,11 +164,13 @@
                 </x-mobile.card>
             @endif
 
-            {{-- STATISTIK & RIWAYAT --}}
+            {{-- SECTION: Stats --}}
             <x-mobile.card>
+                {{-- HEADER --}}
                 <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Statistik Transaksi
                 </h2>
+                {{-- CONTENT --}}
                 <div class="grid grid-cols-2 gap-4">
                     <x-mobile.stat-row label="Total Transaksi" :value="number_format($totalTransactions, 0, ',', '.')" />
                     <x-mobile.stat-row label="Masuk" :value="number_format($totalIncoming, 0, ',', '.')" />
@@ -168,11 +178,14 @@
                 </div>
             </x-mobile.card>
 
+            {{-- SECTION: History --}}
             @if($recentTransactions->isNotEmpty())
                 <x-mobile.card>
+                    {{-- HEADER --}}
                     <h2 class="text-sm font-semibold text-slate-900 mb-4">
                         Riwayat Transaksi Terbaru
                     </h2>
+                    {{-- LIST --}}
                     <div class="space-y-4 divide-y divide-slate-100">
                         @foreach($recentTransactions->take(5) as $transaction)
                             @php
@@ -209,9 +222,10 @@
             @endif
         </div>
 
-        {{-- DESKTOP LAYOUT --}}
+        {{-- DESKTOP CONTENT --}}
         <div class="hidden md:block space-y-6 text-sm text-slate-700">
 
+            {{-- TOOLBAR --}}
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <x-breadcrumbs :items="[
             'Produk' => route('products.index'),
@@ -236,8 +250,10 @@
 
             <div class="grid gap-6 md:grid-cols-2">
 
+                {{-- LEFT COLUMN --}}
                 <x-card class="p-6 space-y-6 h-full">
 
+                    {{-- HEADER --}}
                     <p class="text-base font-semibold text-slate-900 mb-2">
                         Identitas Produk
                     </p>
@@ -254,6 +270,7 @@
                                 @endif
                             </div>
 
+                            {{-- DETAILS --}}
                             <div class="grid gap-4 sm:grid-cols-2 text-sm">
                                 <div class="text-slate-500">Nama Produk</div>
                                 <div class="font-medium text-slate-900">{{ $product->name }}</div>
@@ -278,10 +295,10 @@
                         </div>
 
                     </div>
-                    {{-- DIVIDER --}}
+
                     <div class="border-t border-slate-200"></div>
 
-                    {{-- QR CODE SECTION --}}
+                    {{-- QR SECTION --}}
                     <div class="space-y-3">
                         <div class="flex items-center gap-2 text-slate-600">
                             <x-lucide-qr-code class="h-4 w-4" />
@@ -289,13 +306,11 @@
                         </div>
 
                         <div class="flex items-start gap-4">
-                            {{-- QR SVG --}}
                             <div
                                 class="rounded-lg border border-slate-200 bg-white p-3 flex items-center justify-center w-28 h-28">
                                 {!! QrCode::format('svg')->size(120)->margin(1)->generate($product->getBarcodePayload()) !!}
                             </div>
 
-                            {{-- Buttons --}}
                             <div class="flex flex-col gap-2">
                                 <x-action-button href="{{ route('products.barcode', $product) }}" variant="secondary"
                                     icon="download">
@@ -311,13 +326,14 @@
                     </div>
                 </x-card>
 
+                {{-- RIGHT COLUMN --}}
                 <x-card class="p-6 space-y-6 h-full">
 
+                    {{-- HEADER --}}
                     <p class="text-base font-semibold text-slate-900 mb-1">
                         Data Operasional Produk
                     </p>
 
-                    {{-- Harga & Stok --}}
                     <div class="space-y-4">
 
                         <div class="grid gap-3 sm:grid-cols-2">
@@ -344,10 +360,9 @@
                             </div>
                         </div>
 
-                        {{-- DIVIDER --}}
                         <div class="border-t border-slate-200"></div>
 
-                        {{-- Deskripsi --}}
+                        {{-- DESCRIPTION --}}
                         <div class="space-y-2">
                             <p class="text-sm font-semibold text-slate-900">Deskripsi Produk</p>
                             <p class="text-slate-700 leading-relaxed">
@@ -359,14 +374,13 @@
                 </x-card>
             </div>
 
+            {{-- STATS CARDS --}}
             <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 <x-card class="p-4 flex items-center gap-3">
-                    {{-- Icon --}}
                     <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
                         <x-lucide-bar-chart-3 class="h-5 w-5" />
                     </span>
 
-                    {{-- Text --}}
                     <div>
                         <p class="text-sm text-slate-500">Total Transaksi</p>
                         <p class="text-2xl font-bold text-slate-900">
@@ -402,7 +416,9 @@
                 </x-card>
             </div>
 
+            {{-- HISTORY --}}
             <x-card class="p-6 space-y-4">
+                {{-- HEADER --}}
                 <div class="flex items-center justify-between">
                     <p class="text-base font-semibold text-slate-900">RIWAYAT TRANSAKSI TERBARU</p>
                 </div>

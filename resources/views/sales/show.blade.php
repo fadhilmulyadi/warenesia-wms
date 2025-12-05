@@ -3,10 +3,12 @@
 @section('title', 'Detail Barang Keluar')
 
 @section('page-header')
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header title="Detail Barang Keluar" :description="'Transaksi #' . $sale->transaction_number" />
     </div>
 
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header title="Detail Barang Keluar" back="{{ route('transactions.index', ['tab' => 'outgoing']) }}" />
     </div>
@@ -14,7 +16,7 @@
 
 @section('content')
     <div class="max-w-6xl mx-auto">
-        {{-- MOBILE --}}
+        {{-- MOBILE CONTENT --}}
         <div class="md:hidden space-y-3 pb-24">
             @php
                 $statusLabel = match (true) {
@@ -36,7 +38,7 @@
                 $totalValue = $sale->total_amount;
             @endphp
 
-            {{-- SUMMARY --}}
+            {{-- SECTION: Summary --}}
             <x-mobile.card>
                 <div class="flex items-start justify-between gap-2">
                     <div>
@@ -60,19 +62,19 @@
                 </div>
             </x-mobile.card>
 
-            {{-- ACTION CARD --}}
+            {{-- MOBILE ACTIONS --}}
             @canany(['approve', 'ship'], $sale)
                 <x-mobile.card>
                     <div class="space-y-3">
                         @can('approve', $sale)
                             <button type="button" x-data @click="$dispatch('open-confirm-modal', {
-                                                                        action: '{{ route('sales.approve', $sale) }}',
-                                                                        method: 'PATCH',
-                                                                        title: 'Approve Transaksi?',
-                                                                        message: 'Apakah Anda yakin ingin menyetujui transaksi ini? Stok akan dikurangi secara otomatis.',
-                                                                        btnText: 'Ya, Approve',
-                                                                        type: 'success'
-                                                                    })"
+                                                                                    action: '{{ route('sales.approve', $sale) }}',
+                                                                                    method: 'PATCH',
+                                                                                    title: 'Approve Transaksi?',
+                                                                                    message: 'Apakah Anda yakin ingin menyetujui transaksi ini? Stok akan dikurangi secara otomatis.',
+                                                                                    btnText: 'Ya, Approve',
+                                                                                    type: 'success'
+                                                                                })"
                                 class="w-full h-11 rounded-lg bg-teal-600 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-teal-700">
                                 <x-lucide-check class="w-5 h-5" />
                                 Approve & Kurangi Stok
@@ -81,13 +83,13 @@
 
                         @can('ship', $sale)
                             <button type="button" x-data @click="$dispatch('open-confirm-modal', {
-                                                                        action: '{{ route('sales.ship', $sale) }}',
-                                                                        method: 'PATCH',
-                                                                        title: 'Tandai Terkirim?',
-                                                                        message: 'Apakah Anda yakin ingin menandai transaksi ini sebagai terkirim?',
-                                                                        btnText: 'Ya, Tandai Terkirim',
-                                                                        type: 'info'
-                                                                    })"
+                                                                                    action: '{{ route('sales.ship', $sale) }}',
+                                                                                    method: 'PATCH',
+                                                                                    title: 'Tandai Terkirim?',
+                                                                                    message: 'Apakah Anda yakin ingin menandai transaksi ini sebagai terkirim?',
+                                                                                    btnText: 'Ya, Tandai Terkirim',
+                                                                                    type: 'info'
+                                                                                })"
                                 class="w-full h-11 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-black">
                                 <x-lucide-send class="w-5 h-5" />
                                 Tandai Terkirim
@@ -97,7 +99,7 @@
                 </x-mobile.card>
             @endcanany
 
-            {{-- INFO DETAIL --}}
+            {{-- SECTION: Info Detail --}}
             <x-mobile.card>
                 <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Informasi Transaksi
@@ -117,7 +119,7 @@
                 </div>
             </x-mobile.card>
 
-            {{-- DAFTAR ITEM --}}
+            {{-- MOBILE LIST --}}
             <x-mobile.card>
                 <h2 class="text-sm font-semibold text-slate-900 mb-4">
                     Detail Produk
@@ -146,14 +148,13 @@
                             Tidak ada produk.
                         </div>
                     @endforelse
-
-
                 </div>
             </x-mobile.card>
         </div>
 
-        {{-- DESKTOP --}}
+        {{-- DESKTOP CONTENT --}}
         <div class="hidden md:block space-y-6 text-sm text-slate-700">
+            {{-- TOOLBAR --}}
             <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <x-breadcrumbs :items="[
             'Transaksi' => route('transactions.index', ['tab' => 'outgoing']),
@@ -174,6 +175,7 @@
                 </div>
             </div>
 
+            {{-- ACTIONS --}}
             @canany(['approve', 'ship'], $sale)
                 <x-card class="p-4">
                     <div class="flex flex-wrap items-center justify-between gap-3">
@@ -182,26 +184,26 @@
                         <div class="flex flex-wrap items-center gap-2">
                             @can('approve', $sale)
                                 <x-action-button type="button" variant="primary" icon="check" x-data @click="$dispatch('open-confirm-modal', {
-                                                                            action: '{{ route('sales.approve', $sale) }}',
-                                                                            method: 'PATCH',
-                                                                            title: 'Approve Transaksi?',
-                                                                            message: 'Apakah Anda yakin ingin menyetujui transaksi ini? Stok akan dikurangi secara otomatis.',
-                                                                            btnText: 'Ya, Approve',
-                                                                            type: 'success'
-                                                                        })">
+                                                                                        action: '{{ route('sales.approve', $sale) }}',
+                                                                                        method: 'PATCH',
+                                                                                        title: 'Approve Transaksi?',
+                                                                                        message: 'Apakah Anda yakin ingin menyetujui transaksi ini? Stok akan dikurangi secara otomatis.',
+                                                                                        btnText: 'Ya, Approve',
+                                                                                        type: 'success'
+                                                                                    })">
                                     Approve & kurangi stok
                                 </x-action-button>
                             @endcan
 
                             @can('ship', $sale)
                                 <x-action-button type="button" variant="secondary" icon="send" x-data @click="$dispatch('open-confirm-modal', {
-                                                                            action: '{{ route('sales.ship', $sale) }}',
-                                                                            method: 'PATCH',
-                                                                            title: 'Tandai Terkirim?',
-                                                                            message: 'Apakah Anda yakin ingin menandai transaksi ini sebagai terkirim?',
-                                                                            btnText: 'Ya, Tandai Terkirim',
-                                                                            type: 'info'
-                                                                        })">
+                                                                                        action: '{{ route('sales.ship', $sale) }}',
+                                                                                        method: 'PATCH',
+                                                                                        title: 'Tandai Terkirim?',
+                                                                                        message: 'Apakah Anda yakin ingin menandai transaksi ini sebagai terkirim?',
+                                                                                        btnText: 'Ya, Tandai Terkirim',
+                                                                                        type: 'info'
+                                                                                    })">
                                     Tandai terkirim
                                 </x-action-button>
                             @endcan
@@ -211,6 +213,7 @@
             @endcanany
 
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {{-- SECTION: Info --}}
                 <x-card class="p-6 space-y-6 lg:col-span-2">
                     <div class="space-y-3">
                         <p class="text-base font-semibold text-slate-900">Informasi Customer</p>
@@ -249,6 +252,7 @@
                     </div>
                 </x-card>
 
+                {{-- STATS CARDS --}}
                 <div class="space-y-3">
                     <x-card class="p-4">
                         <div class="flex items-center gap-3">
@@ -278,8 +282,6 @@
                         </div>
                     </x-card>
 
-
-
                     <x-card class="p-4">
                         <div class="flex items-center gap-3">
                             <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
@@ -308,6 +310,7 @@
                 </div>
             </div>
 
+            {{-- SECTION: Products --}}
             <x-card class="p-6 space-y-4">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <p class="text-base font-semibold text-slate-900">Produk</p>
@@ -346,8 +349,6 @@
                                 </x-table.td>
                             </x-table.tr>
                         @endforelse
-
-
                     </x-table.tbody>
                 </x-table>
             </x-card>

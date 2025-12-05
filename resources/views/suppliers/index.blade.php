@@ -11,14 +11,15 @@
         $mobileIndexConfig = \App\Support\MobileIndexConfig::suppliers();
     @endphp
 
-    {{-- MOBILE VERSION --}}
+    {{-- MOBILE LIST --}}
     <div class="md:hidden">
         <x-mobile.index :items="$suppliers" :config="$mobileIndexConfig" card-view="mobile.suppliers.card" />
     </div>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-4">
 
+        {{-- TOOLBAR --}}
         <x-toolbar>
             <form method="GET" action="{{ route('suppliers.index') }}" class="flex-1 max-w-sm">
                 <x-search-bar :value="$search" placeholder="Cari nama supplier..." />
@@ -32,16 +33,15 @@
                     </x-action-button>
                 @endcan
 
-                {{--
                 @can('create', \App\Models\Supplier::class)
-                <x-action-button href="{{ route('suppliers.create') }}" variant="primary" icon="plus">
-                    Tambah Pemasok
-                </x-action-button>
+                    <x-action-button href="{{ route('suppliers.create') }}" variant="primary" icon="plus">
+                        Tambah Supplier
+                    </x-action-button>
                 @endcan
-                --}}
             </div>
         </x-toolbar>
 
+        {{-- TABLE --}}
         <x-card class="p-0 overflow-hidden">
             <div class="w-full overflow-x-auto">
                 <x-table>
@@ -115,11 +115,11 @@
 
                                             @can('delete', $supplier)
                                                 <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
-                                                                                                                    title: 'Delete Supplier',
-                                                                                                                    message: 'Delete this supplier? This action cannot be undone.',
-                                                                                                                    itemName: '{{ $supplier->name }}'
-                                                                                                                })">
+                                                                                                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
+                                                                                                                                    title: 'Delete Supplier',
+                                                                                                                                    message: 'Delete this supplier? This action cannot be undone.',
+                                                                                                                                    itemName: '{{ $supplier->name }}'
+                                                                                                                                })">
                                                     Delete
                                                 </x-table.action-item>
                                             @endcan
@@ -139,6 +139,8 @@
             </div>
 
         </x-card>
+
+        {{-- PAGINATION --}}
         @if($suppliers->hasPages() || $suppliers->total() > 0)
             <x-advanced-pagination :paginator="$suppliers" />
         @endif

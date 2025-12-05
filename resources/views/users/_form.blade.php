@@ -10,6 +10,7 @@
     $defaultStatus = \App\Enums\UserStatus::ACTIVE->value;
 @endphp
 
+{{-- SECTION: General --}}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-2">
         <x-input-label for="name" value="Nama" />
@@ -76,40 +77,19 @@
     </div>
 </div>
 
+{{-- SECTION: Password --}}
+{{-- SECTION: Password --}}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-    <div class="space-y-2" x-data="{ generate() {
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
-        let pwd = '';
-        for (let i = 0; i < 10; i++) {
-            pwd += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        $refs.password.value = pwd;
-        if ($refs.password_confirmation) {
-            $refs.password_confirmation.value = pwd;
-        }
-    }}">
-        <div class="flex items-center justify-between">
-            <x-input-label for="password" :value="$isEdit ? 'Reset Password (opsional)' : 'Password'" />
-            <button type="button" @click="generate()" class="text-[11px] font-semibold text-teal-700 hover:text-teal-800">
-                Generate Password
-            </button>
-        </div>
-        <x-text-input
-            x-ref="password"
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="{{ $isEdit ? 'new-password' : 'password' }}"
-            class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-            @if(!$isEdit) required @endif
-        />
-        <x-input-error :messages="$errors->get('password')" />
-    </div>
+    <x-password-generator 
+        name="password" 
+        :label="$isEdit ? 'Reset Password (opsional)' : 'Password'" 
+        :required="!$isEdit" 
+        :placeholder="$isEdit ? 'Kosongkan jika tidak ingin mengubah' : ''"
+    />
 
     <div class="space-y-2">
         <x-input-label for="password_confirmation" :value="$isEdit ? 'Konfirmasi Password Baru' : 'Konfirmasi Password'" />
         <x-text-input
-            x-ref="password_confirmation"
             id="password_confirmation"
             name="password_confirmation"
             type="password"

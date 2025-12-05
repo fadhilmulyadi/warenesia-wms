@@ -115,13 +115,23 @@
                             </div>
 
                             {{-- Optional Input Field --}}
+                            {{-- Optional Input Field --}}
                             <template x-if="inputName">
                                 <div class="mt-4 text-left">
                                     <label x-show="inputLabel" class="block text-sm font-medium text-slate-700 mb-1"
                                         x-text="inputLabel"></label>
-                                    <input :type="inputType" :name="inputName" x-model="inputValue"
-                                        class="w-full rounded-lg border-slate-300 text-sm focus:border-slate-900 focus:ring-slate-900"
-                                        :placeholder="inputPlaceholder" required>
+
+                                    <template x-if="inputType === 'textarea'">
+                                        <textarea :name="inputName" x-model="inputValue"
+                                            class="w-full rounded-lg border-slate-300 text-sm focus:border-slate-900 focus:ring-slate-900"
+                                            :placeholder="inputPlaceholder" rows="3" required></textarea>
+                                    </template>
+
+                                    <template x-if="inputType !== 'textarea'">
+                                        <input :type="inputType" :name="inputName" x-model="inputValue"
+                                            class="w-full rounded-lg border-slate-300 text-sm focus:border-slate-900 focus:ring-slate-900"
+                                            :placeholder="inputPlaceholder" required>
+                                    </template>
                                 </div>
                             </template>
                         </div>

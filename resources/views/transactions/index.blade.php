@@ -54,7 +54,7 @@
         />
     </div>
 
-    {{-- MOBILE VERSION --}}
+    {{-- MOBILE LIST --}}
     <div class="md:hidden">
         <x-mobile.index
             :items="$transactions"
@@ -63,8 +63,9 @@
         />
     </div>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-4">
+        {{-- TOOLBAR --}}
         <x-toolbar>
             
             {{-- FILTER BAR (LEFT) --}}
@@ -175,6 +176,7 @@
 
         </x-toolbar>
 
+        {{-- TABLE: Using Component --}}
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <x-transactions.table 
                 :transactions="$currentPaginator"

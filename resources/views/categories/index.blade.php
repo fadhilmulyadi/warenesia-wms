@@ -13,15 +13,15 @@
         $mobileIndexConfig = \App\Support\MobileIndexConfig::categories();
     @endphp
 
-    {{-- MOBILE VERSION --}}
+    {{-- MOBILE LIST --}}
     <div class="md:hidden">
         <x-mobile.index :items="$categories" :config="$mobileIndexConfig" card-view="mobile.categories.card" />
     </div>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-4">
 
-        {{-- Toolbar --}}
+        {{-- TOOLBAR --}}
         <x-toolbar>
             @php
                 $filters = $showNameFilter ? ['name' => 'Nama Kategori'] : [];
@@ -53,7 +53,7 @@
             </div>
         </x-toolbar>
 
-        {{-- Tabel utama --}}
+        {{-- TABLE --}}
         <x-table>
             <x-table.thead>
                 <x-table.th align="left">Gambar</x-table.th>
@@ -66,13 +66,11 @@
             <x-table.tbody>
                 @forelse($categories as $category)
                     <x-table.tr>
-                        {{-- Gambar --}}
                         <x-table.td class="align-top">
                             <x-thumbnail :src="$category->image_path ? Storage::url($category->image_path) : null"
                                 :alt="$category->name" />
                         </x-table.td>
 
-                        {{-- Nama --}}
                         <x-table.td class="align-top">
                             <span class="font-medium text-slate-900">
                                 {{ $category->name }}
@@ -80,7 +78,6 @@
                             <p class="text-xs text-slate-500 mt-1">{{ $category->description ?: 'Tidak ada deskripsi' }}</p>
                         </x-table.td>
 
-                        {{-- Prefix --}}
                         <x-table.td class="align-top text-center">
                             <span
                                 class="px-3 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 text-slate-700 tracking-[0.2em]">
@@ -88,24 +85,20 @@
                             </span>
                         </x-table.td>
 
-                        {{-- Jumlah produk --}}
                         <x-table.td align="right" class="align-top tabular-nums">
                             {{ $category->products_count }}
                         </x-table.td>
 
-                        {{-- Aksi --}}
                         <x-table.td align="right" class="align-top">
                             @canany(['update', 'delete'], $category)
                                 <x-table.actions>
 
-                                    {{-- Edit --}}
                                     @can('update', $category)
                                         <x-table.action-item icon="pencil" href="{{ route('categories.edit', $category) }}">
                                             Edit Kategori
                                         </x-table.action-item>
                                     @endcan
 
-                                    {{-- Hapus --}}
                                     @can('delete', $category)
                                         @if($category->products_count == 0)
                                             <x-table.action-item
@@ -150,7 +143,7 @@
             </x-table.tbody>
         </x-table>
 
-        {{-- Pagination --}}
+        {{-- PAGINATION --}}
         @if($categories->hasPages() || $categories->total() > 0)
             <x-advanced-pagination :paginator="$categories" />
         @endif

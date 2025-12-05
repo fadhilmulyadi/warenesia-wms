@@ -15,7 +15,7 @@
 
 <div class="space-y-6">
 
-    {{-- SECTION 1: Informasi Supplier --}}
+    {{-- SECTION: Information --}}
     <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm">
         <div class="mb-4">
             <h2 class="text-sm font-semibold text-slate-900">Informasi Supplier</h2>
@@ -91,7 +91,7 @@
         </div>
     </div>
 
-    {{-- SECTION 2: Alamat & Catatan --}}
+    {{-- SECTION: Address & Notes --}}
     <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm">
         <div class="mb-4">
             <h2 class="text-sm font-semibold text-slate-900">Alamat & Catatan</h2>

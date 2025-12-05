@@ -3,6 +3,7 @@
 @section('title', 'Pesanan Saya')
 
 @section('page-header')
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header
             title="Pesanan Saya"
@@ -10,6 +11,7 @@
         />
     </div>
 
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header
             title="Pesanan Saya"
@@ -22,7 +24,7 @@
         $mobileIndexConfig = \App\Support\MobileIndexConfig::supplierRestocks($statusOptions);
     @endphp
 
-    {{-- MOBILE VERSION --}}
+    {{-- MOBILE LIST --}}
     <div class="md:hidden">
         <x-mobile.index
             :items="$restockOrders"
@@ -31,13 +33,10 @@
         />
     </div>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-4 text-xs max-w-6xl mx-auto">
 
-        {{-- 
-            1. TOOLBAR + FILTER BAR 
-            Sama persis seperti Admin Restocks Index
-        --}}
+        {{-- TOOLBAR --}}
         <x-toolbar>
             @php
                 $filters = [
@@ -47,7 +46,6 @@
                 $resetKeys = ['status', 'date_from', 'date_to', 'date_range'];
             @endphp
 
-            {{-- FILTER BAR --}}
             <x-filter-bar
                 :action="route('supplier.restocks.index')"
                 :search="$search"
@@ -57,7 +55,6 @@
                 :resetKeys="$resetKeys"
                 placeholder="Cari Nomor PO..."
             >
-                {{-- STATUS CHECKBOX FILTER --}}
                 <x-slot:filter_status>
                     <x-filter.checkbox-list
                         name="status"
@@ -66,7 +63,6 @@
                     />
                 </x-slot:filter_status>
 
-                {{-- DATE RANGE FILTER --}}
                 <x-slot:filter_date_range>
                     <div
                         x-data="{
@@ -116,16 +112,10 @@
                     </div>
                 </x-slot:filter_date_range>
             </x-filter-bar>
-
-            {{-- Tidak ada tombol Export / Tambah Pesanan untuk Supplier --}}
         </x-toolbar>
 
 
-        {{-- 
-            2. TABEL 
-            100% sama seperti tabel Restocks Admin
-            Tetapi kolom Supplier dihapus (karena supplier tidak perlu melihat dirinya sendiri)
-        --}}
+        {{-- TABLE --}}
         <x-table>
             <x-table.thead>
                 <x-table.th class="w-24" sortable name="po_number">Nomor PO</x-table.th>
@@ -134,12 +124,10 @@
                 <x-table.th class="text-center w-28">Status</x-table.th>
                 <x-table.th align="right" class="w-24">Kuantitas</x-table.th>
                 <x-table.th align="right" class="w-32">Total (Rp)</x-table.th>
-                {{-- Tidak ada kolom aksi --}}
             </x-table.thead>
 
             <x-table.tbody>
                 @forelse($restockOrders as $restockOrder)
-                    {{-- ROW CLICKABLE --}}
                     <x-table.tr :href="route('supplier.restocks.show', $restockOrder)">
 
                         <x-table.td class="font-mono whitespace-nowrap">
@@ -191,7 +179,7 @@
             </x-table.tbody>
         </x-table>
 
-        {{-- pagination --}}
+        {{-- PAGINATION --}}
         @if($restockOrders->hasPages() || $restockOrders->total() > 0)
             <x-advanced-pagination :paginator="$restockOrders" />
         @endif

@@ -3,35 +3,22 @@
 @section('title', 'Edit User')
 
 @section('page-header')
-
-    {{-- DESKTOP HEADER (TETAP) --}}
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header
-            title="Edit User"
-            description="Perbarui profil dan status akun pengguna."
-        />
+        <x-page-header title="Edit User" description="Perbarui profil dan status akun pengguna." />
     </div>
 
-    {{-- MOBILE HEADER --}}
-    <x-mobile-header
-        class="md:hidden"
-        title="Edit User"
-        back="{{ route('users.index') }}"
-    />
+    {{-- PAGE HEADER: Mobile --}}
+    <x-mobile-header class="md:hidden" title="Edit User" back="{{ route('users.index') }}" />
 @endsection
 
 
 @section('content')
-    {{-- MOBILE VERSION --}}
-    <x-mobile.form
-        form-id="user-form-mobile"
-        save-label="Simpan Perubahan"
-        save-icon="save"
+    {{-- MOBILE FORM --}}
+    <x-mobile.form form-id="user-form-mobile" save-label="Simpan Perubahan" save-icon="save"
         :show-delete="!$deletionReason && auth()->user()->can('delete', $user)"
-        delete-action="{{ route('users.destroy', $user) }}"
-        delete-label="Hapus User"
-        delete-confirm="Hapus user ini? Data akan disoft delete."
-    >
+        delete-action="{{ route('users.destroy', $user) }}" delete-label="Hapus User"
+        delete-confirm="Hapus user ini? Data akan disoft delete.">
         <x-slot:fields>
             @if(session('success'))
                 <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
@@ -49,122 +36,11 @@
                 @csrf
                 @method('PUT')
 
-                {{-- Profil & Identitas --}}
                 <x-card>
                     <div class="p-4 space-y-4">
-                        <div class="flex flex-col gap-1">
-                            <h2 class="text-base font-semibold text-slate-900">INFORMASI PENGGUNA</h2>
-                            <p class="text-xs text-slate-500">Nama, email, dan role.</p>
-                        </div>
+                        @include('users.form', ['user' => $user, 'roles' => $roles, 'statuses' => $statuses])
 
-                        <div class="space-y-4">
-                            <div class="space-y-2">
-                                <x-input-label for="name_mobile" value="Nama" />
-                                <x-text-input
-                                    id="name_mobile"
-                                    name="name"
-                                    type="text"
-                                    value="{{ old('name', $user->name) }}"
-                                    required
-                                    class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                                />
-                                <x-input-error :messages="$errors->get('name')" />
-                            </div>
-
-                            <div class="space-y-2">
-                                <x-input-label for="email_mobile" value="Email" />
-                                <x-text-input
-                                    id="email_mobile"
-                                    name="email"
-                                    type="email"
-                                    value="{{ old('email', $user->email) }}"
-                                    required
-                                    class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                                />
-                                <x-input-error :messages="$errors->get('email')" />
-                            </div>
-
-                            <div class="space-y-2">
-                                <x-input-label for="role_mobile" value="Role" />
-                                <x-custom-select
-                                    name="role"
-                                    id="role_mobile"
-                                    :options="$roles"
-                                    :value="old('role', $user->role)"
-                                    placeholder="Pilih role"
-                                    width="w-full"
-                                    :searchable="false"
-                                />
-                                <x-input-error :messages="$errors->get('role')" />
-                            </div>
-                        </div>
-                    </div>
-                </x-card>
-
-                {{-- Status & Keamanan --}}
-                <x-card>
-                    <div class="p-4 space-y-4">
-                        <div class="flex flex-col gap-1">
-                            <h2 class="text-base font-semibold text-slate-900">STATUS DAN KEAMANAN</h2>
-                            <p class="text-xs text-slate-500">Kelola status akun dan reset password.</p>
-                        </div>
-
-                        <div class="space-y-2">
-                            <x-input-label for="status_mobile" value="Status" />
-                            <x-custom-select
-                                name="status"
-                                id="status_mobile"
-                                :options="$statuses"
-                                :value="old('status', $user->status)"
-                                placeholder="Pilih status"
-                                width="w-full"
-                                :searchable="false"
-                            />
-                            <x-input-error :messages="$errors->get('status')" />
-                        </div>
-
-                        <div class="space-y-2" x-data="{ generate() {
-                            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
-                            let pwd = '';
-                            for (let i = 0; i < 10; i++) {
-                                pwd += chars.charAt(Math.floor(Math.random() * chars.length));
-                            }
-                            $refs.password.value = pwd;
-                            if ($refs.password_confirmation) {
-                                $refs.password_confirmation.value = pwd;
-                            }
-                        }}">
-                            <div class="flex items-center justify-between">
-                                <x-input-label for="password_mobile" value="Reset Password (opsional)" />
-                                <button type="button" @click="generate()" class="text-[11px] font-semibold text-teal-700 hover:text-teal-800">
-                                    Generate
-                                </button>
-                            </div>
-                            <x-text-input
-                                x-ref="password"
-                                id="password_mobile"
-                                name="password"
-                                type="password"
-                                autocomplete="new-password"
-                                class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                            />
-                            <x-input-error :messages="$errors->get('password')" />
-                        </div>
-
-                        <div class="space-y-2">
-                            <x-input-label for="password_confirmation_mobile" value="Konfirmasi Password Baru" />
-                            <x-text-input
-                                x-ref="password_confirmation"
-                                id="password_confirmation_mobile"
-                                name="password_confirmation"
-                                type="password"
-                                autocomplete="new-password"
-                                class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                            />
-                            <x-input-error :messages="$errors->get('password_confirmation')" />
-                        </div>
-
-                        <div class="border-t border-slate-100 pt-3 text-xs text-slate-500 space-y-1">
+                        <div class="border-t border-slate-100 pt-3 text-xs text-slate-500 space-y-1 mt-4">
                             <div class="flex items-center gap-2">
                                 <span class="font-semibold text-slate-700">Dibuat:</span>
                                 <span>{{ optional($user->created_at)->format('d M Y, H:i') }}</span>
@@ -186,18 +62,14 @@
         </x-slot:fields>
     </x-mobile.form>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-4 max-w-6xl mx-auto pb-24">
-        {{-- DESKTOP TOP BAR (TIDAK DIUBAH SAMA SEKALI) --}}
+        {{-- TOOLBAR --}}
         <div class="flex items-center justify-between flex-wrap gap-3">
             <x-breadcrumbs :items="['Users' => route('users.index'), $user->name => '#']" />
 
             <div class="flex flex-wrap gap-2">
-                <x-action-button
-                    href="{{ route('users.index') }}"
-                    variant="secondary"
-                    icon="arrow-left"
-                >
+                <x-action-button href="{{ route('users.index') }}" variant="secondary" icon="arrow-left">
                     Kembali
                 </x-action-button>
 
@@ -206,11 +78,7 @@
                         <form method="POST" action="{{ route('users.approve', $user) }}">
                             @csrf
                             @method('PATCH')
-                            <x-action-button
-                                type="submit"
-                                variant="primary"
-                                icon="check"
-                            >
+                            <x-action-button type="submit" variant="primary" icon="check">
                                 Approve Supplier
                             </x-action-button>
                         </form>
@@ -218,34 +86,21 @@
                 @endcan
 
                 @if(!$deletionReason && auth()->user()->can('delete', $user))
-                    <form method="POST" action="{{ route('users.destroy', $user) }}" onsubmit="return confirm('Hapus user ini? Data akan disoft delete.');">
+                    <form method="POST" action="{{ route('users.destroy', $user) }}"
+                        onsubmit="return confirm('Hapus user ini? Data akan disoft delete.');">
                         @csrf
                         @method('DELETE')
-                        <x-action-button
-                            type="submit"
-                            variant="outline-danger"
-                            icon="trash-2"
-                        >
+                        <x-action-button type="submit" variant="outline-danger" icon="trash-2">
                             Hapus
                         </x-action-button>
                     </form>
                 @else
-                    <x-action-button
-                        variant="ghost"
-                        icon="ban"
-                        disabled
-                        title="{{ $deletionReason ?? 'Tidak diizinkan' }}"
-                    >
+                    <x-action-button variant="ghost" icon="ban" disabled title="{{ $deletionReason ?? 'Tidak diizinkan' }}">
                         Hapus
                     </x-action-button>
                 @endif
 
-                <x-action-button
-                    type="submit"
-                    form="user-form"
-                    variant="primary"
-                    icon="save"
-                >
+                <x-action-button type="submit" form="user-form" variant="primary" icon="save">
                     Simpan Perubahan
                 </x-action-button>
             </div>
@@ -265,124 +120,18 @@
         @endif
 
         {{-- FORM --}}
-        <form id="user-form" method="POST" action="{{ route('users.update', $user) }}" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <form id="user-form" method="POST" action="{{ route('users.update', $user) }}" class="space-y-4">
             @csrf
             @method('PUT')
 
-            {{-- Profil & Identitas --}}
-            <x-card class="lg:col-span-2">
-                <div class="p-4 sm:p-6 space-y-4">
+            <x-card>
+                <div class="p-4 sm:p-6 space-y-6">
                     <div class="flex flex-col gap-1">
                         <h2 class="text-base font-semibold text-slate-900">INFORMASI PENGGUNA</h2>
-                        <p class="text-xs text-slate-500">Nama, email, dan role.</p>
+                        <p class="text-xs text-slate-500">Perbarui profil, role, status, dan password jika diperlukan.</p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <x-input-label for="name" value="Nama" />
-                            <x-text-input
-                                id="name"
-                                name="name"
-                                type="text"
-                                value="{{ old('name', $user->name) }}"
-                                required
-                                class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                            />
-                            <x-input-error :messages="$errors->get('name')" />
-                        </div>
-
-                        <div class="space-y-2">
-                            <x-input-label for="email" value="Email" />
-                            <x-text-input
-                                id="email"
-                                name="email"
-                                type="email"
-                                value="{{ old('email', $user->email) }}"
-                                required
-                                class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                            />
-                            <x-input-error :messages="$errors->get('email')" />
-                        </div>
-
-                        <div class="space-y-2">
-                            <x-input-label for="role" value="Role" />
-                            <x-custom-select
-                                name="role"
-                                id="role"
-                                :options="$roles"
-                                :value="old('role', $user->role)"
-                                placeholder="Pilih role"
-                                width="w-full"
-                                :searchable="false"
-                            />
-                            <x-input-error :messages="$errors->get('role')" />
-                        </div>
-                    </div>
-                </div>
-            </x-card>
-
-            {{-- Status & Keamanan --}}
-            <x-card class="lg:col-span-1">
-                <div class="p-4 sm:p-6 space-y-4">
-                    <div class="flex flex-col gap-1">
-                        <h2 class="text-base font-semibold text-slate-900">STATUS DAN KEAMANAN</h2>
-                        <p class="text-xs text-slate-500">Kelola status akun dan reset password.</p>
-                    </div>
-
-                    <div class="space-y-2">
-                        <x-input-label for="status" value="Status" />
-                        <x-custom-select
-                            name="status"
-                            id="status"
-                            :options="$statuses"
-                            :value="old('status', $user->status)"
-                            placeholder="Pilih status"
-                            width="w-full"
-                            :searchable="false"
-                        />
-                        <x-input-error :messages="$errors->get('status')" />
-                    </div>
-
-                    <div class="space-y-2" x-data="{ generate() {
-                        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
-                        let pwd = '';
-                        for (let i = 0; i < 10; i++) {
-                            pwd += chars.charAt(Math.floor(Math.random() * chars.length));
-                        }
-                        $refs.password.value = pwd;
-                        if ($refs.password_confirmation) {
-                            $refs.password_confirmation.value = pwd;
-                        }
-                    }}">
-                        <div class="flex items-center justify-between">
-                            <x-input-label for="password" value="Reset Password (opsional)" />
-                            <button type="button" @click="generate()" class="text-[11px] font-semibold text-teal-700 hover:text-teal-800">
-                                Generate
-                            </button>
-                        </div>
-                        <x-text-input
-                            x-ref="password"
-                            id="password"
-                            name="password"
-                            type="password"
-                            autocomplete="new-password"
-                            class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                        />
-                        <x-input-error :messages="$errors->get('password')" />
-                    </div>
-
-                    <div class="space-y-2">
-                        <x-input-label for="password_confirmation" value="Konfirmasi Password Baru" />
-                        <x-text-input
-                            x-ref="password_confirmation"
-                            id="password_confirmation"
-                            name="password_confirmation"
-                            type="password"
-                            autocomplete="new-password"
-                            class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                        />
-                        <x-input-error :messages="$errors->get('password_confirmation')" />
-                    </div>
+                    @include('users.form', ['user' => $user, 'roles' => $roles, 'statuses' => $statuses])
 
                     <div class="border-t border-slate-100 pt-3 text-xs text-slate-500 space-y-1">
                         <div class="flex items-center gap-2">

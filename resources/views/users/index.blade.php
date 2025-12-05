@@ -16,27 +16,23 @@
             ];
         @endphp
 
-        {{-- MOBILE --}}
+        {{-- MOBILE LIST --}}
         <div class="md:hidden">
             @php
                 $mobileIndexConfig = \App\Support\MobileIndexConfig::users($roles, $statuses);
             @endphp
 
             <x-mobile.index :items="$users" :config="$mobileIndexConfig" card-view="mobile.users.card" :extra-data="[
-                                            'roles' => $roles,
-                                            'statuses' => $statuses,
-                                            'statusVariants' => $statusVariants ?? [],
-                                            'deletionGuards' => $deletionGuards ?? []
-                                        ]" />
+                        'roles' => $roles,
+                        'statuses' => $statuses,
+                        'statusVariants' => $statusVariants ?? [],
+                        'deletionGuards' => $deletionGuards ?? []
+                    ]" />
         </div>
 
+        {{-- PAGE CONTENT --}}
         <div class="hidden md:block space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <x-breadcrumbs :items="[
-            'Users' => route('users.index')
-        ]" />
-            </div>
-
+            {{-- TOOLBAR --}}
             <x-toolbar>
                 @php
                     $filters = [
@@ -65,6 +61,7 @@
                 </div>
             </x-toolbar>
 
+            {{-- TABLE --}}
             <x-card class="p-0 overflow-hidden">
                 <div class="w-full overflow-x-auto">
                     <x-table>
@@ -133,13 +130,12 @@
                                             @endcan
 
                                             @if(auth()->user()->can('delete', $user) && !$guardReason)
-                                                <x-table.action-item icon="trash-2" danger="true"
-                                                    x-on:click="$dispatch('open-delete-modal', { 
-                                                                                                                                                        action: '{{ route('users.destroy', $user) }}',
-                                                                                                                                                        title: 'Hapus User',
-                                                                                                                                                        message: 'Yakin ingin menghapus user ini?',
-                                                                                                                                                        itemName: '{{ addslashes($user->name) }}'
-                                                                                                                                                    })">
+                                                <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
+                                                                    action: '{{ route('users.destroy', $user) }}',
+                                                                    title: 'Hapus User',
+                                                                    message: 'Yakin ingin menghapus user ini?',
+                                                                    itemName: '{{ addslashes($user->name) }}'
+                                                                })">
                                                     Hapus
                                                 </x-table.action-item>
                                             @else

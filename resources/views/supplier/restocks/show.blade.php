@@ -3,6 +3,7 @@
 @section('title', 'Restock #' . $restock->po_number)
 
 @section('page-header')
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header
             :title="'Restock #' . $restock->po_number"
@@ -10,6 +11,7 @@
         />
     </div>
 
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header
             title="Restock #{{ $restock->po_number }}"
@@ -20,7 +22,7 @@
 
 @section('content')
     <div class="max-w-6xl mx-auto">
-        {{-- MOBILE --}}
+        {{-- MOBILE CONTENT --}}
         <div class="md:hidden space-y-3 pb-24">
             @php
                 $statusLabel = $restock->status_label ?? ucfirst($restock->status);
@@ -39,7 +41,7 @@
                 $totalValue = $restock->items->sum('line_total');
             @endphp
 
-            {{-- SUMMARY --}}
+            {{-- SECTION: Summary --}}
             <x-mobile.card>
                 <div class="flex items-start justify-between gap-2">
                     <div>
@@ -81,7 +83,7 @@
                 </div>
             </x-mobile.card>
 
-            {{-- ACTION CARD --}}
+            {{-- SECTION: Actions --}}
             @canany(['confirmSupplierRestock', 'rejectSupplierRestock'], $restock)
             <x-mobile.card>
                 <div class="space-y-3">
@@ -108,7 +110,19 @@
                         <button 
                             type="button"
                             x-data
-                            @click="$dispatch('open-reject-modal')"
+                            @click="$dispatch('open-confirm-modal', {
+                                action: '{{ route('supplier.restocks.reject', $restock) }}',
+                                method: 'PATCH',
+                                title: 'Tolak Pesanan?',
+                                message: 'Apakah Anda yakin ingin menolak pesanan ini? Silakan berikan alasan penolakan.',
+                                btnText: 'Tolak Pesanan',
+                                btnClass: 'bg-red-600 hover:bg-red-500 text-white',
+                                type: 'danger',
+                                inputName: 'reject_reason',
+                                inputLabel: 'Alasan Penolakan (Opsional)',
+                                inputPlaceholder: 'Contoh: Stok barang kosong, harga berubah, dll.',
+                                inputType: 'textarea'
+                            })"
                             class="w-full h-11 rounded-lg bg-rose-100 text-rose-700 font-semibold flex items-center justify-center gap-2 hover:bg-rose-200 text-sm"
                         >
                             <x-lucide-x-circle class="w-5 h-5" />
@@ -119,7 +133,7 @@
             </x-mobile.card>
             @endcanany
 
-            {{-- TIMELINE STATUS --}}
+            {{-- SECTION: Timeline --}}
             <x-mobile.card>
                 <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Status Restock
@@ -127,7 +141,7 @@
                 @include('components.restocks-status-timeline', ['status' => $restock->status])
             </x-mobile.card>
 
-            {{-- INFO PESANAN --}}
+            {{-- SECTION: Info Detail --}}
             <x-mobile.card>
                 <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Informasi Pesanan
@@ -152,7 +166,7 @@
                 </div>
             </x-mobile.card>
 
-            {{-- DAFTAR ITEM (STACKED LIST) --}}
+            {{-- MOBILE LIST --}}
             <x-mobile.card>
                 <h2 class="text-sm font-semibold text-slate-900 mb-4">
                     Daftar Item
@@ -160,19 +174,19 @@
                 <div class="space-y-4 divide-y divide-slate-100">
                     @forelse($restock->items as $item)
                         <div class="{{ $loop->first ? '' : 'pt-4' }}">
-                            {{-- Baris 1: Nama Produk --}}
+                            {{-- Row 1: Product Name --}}
                             <div class="font-medium text-slate-900 text-sm mb-1">
                                 {{ $item->product->name ?? 'Unknown product' }}
                             </div>
                             
                             <div class="flex justify-between items-start">
-                                {{-- Baris 2: SKU & Harga Satuan --}}
+                                {{-- Row 2: SKU & Unit Cost --}}
                                 <div class="text-xs text-slate-500 space-y-0.5">
                                     <div>SKU: {{ $item->product->sku ?? 'N/A' }}</div>
                                     <div>@ {{ number_format((float) $item->unit_cost, 2, ',', '.') }}</div>
                                 </div>
 
-                                {{-- Baris 3: Total Harga & Qty --}}
+                                {{-- Row 3: Total & Qty --}}
                                 <div class="text-right">
                                     <div class="font-bold text-slate-900 text-sm">
                                         Rp {{ number_format((float) $item->line_total, 2, ',', '.') }}
@@ -230,8 +244,9 @@
             @endif
         </div>
 
-        {{-- DESKTOP --}}
+        {{-- DESKTOP CONTENT --}}
         <div class="hidden md:block space-y-6 text-sm text-slate-700">
+            {{-- TOOLBAR --}}
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <x-breadcrumbs :items="[
                     'Restocks' => route('supplier.restocks.index'),
@@ -249,7 +264,19 @@
                             variant="outline-danger" 
                             icon="x-circle"
                             x-data
-                            @click="$dispatch('open-reject-modal')"
+                            @click="$dispatch('open-confirm-modal', {
+                                action: '{{ route('supplier.restocks.reject', $restock) }}',
+                                method: 'PATCH',
+                                title: 'Tolak Pesanan?',
+                                message: 'Apakah Anda yakin ingin menolak pesanan ini? Silakan berikan alasan penolakan.',
+                                btnText: 'Tolak Pesanan',
+                                btnClass: 'bg-red-600 hover:bg-red-500 text-white',
+                                type: 'danger',
+                                inputName: 'reject_reason',
+                                inputLabel: 'Alasan Penolakan (Opsional)',
+                                inputPlaceholder: 'Contoh: Stok barang kosong, harga berubah, dll.',
+                                inputType: 'textarea'
+                            })"
                         >
                             Tolak Pesanan
                         </x-action-button>
@@ -287,11 +314,13 @@
                 </x-card>
             @endif
 
+            {{-- SECTION: Timeline --}}
             <x-card class="p-6 space-y-4">
                 <p class="text-base font-semibold text-slate-900">Status Restock</p>
                 @include('components.restocks-status-timeline', ['status' => $restock->status])
             </x-card>
 
+            {{-- SECTION: Info Detail --}}
             <x-card class="p-6 space-y-4">
                 <p class="text-base font-semibold text-slate-900">Informasi Pesanan</p>
                 
@@ -357,6 +386,7 @@
                 @endif
             </x-card>
 
+            {{-- TABLE --}}
             <x-card class="p-6 space-y-4">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <p class="text-base font-semibold text-slate-900">Daftar Item</p>
@@ -439,84 +469,9 @@
         </div>
     </div>
 
-    {{-- CONFIRM MODAL --}}
+    {{-- MODAL --}}
     <x-confirm-modal />
 
-    {{-- REJECT MODAL --}}
-    <div x-data="{
-        show: false,
-        open() {
-            this.show = true;
-            document.body.classList.add('overflow-y-hidden');
-        },
-        close() {
-            this.show = false;
-            document.body.classList.remove('overflow-y-hidden');
-        }
-    }" 
-    x-on:open-reject-modal.window="open()" 
-    x-on:keydown.escape.window="close()"
-    x-show="show" 
-    class="relative z-50" 
-    style="display: none;">
-        
-        {{-- Backdrop --}}
-        <div x-show="show" x-transition.opacity class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm" @click="close()"></div>
+    {{-- MODAL --}}
 
-        {{-- Modal Center Wrapper --}}
-        <div class="fixed inset-0 overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center">
-                
-                {{-- Modal Panel --}}
-                <div x-show="show" x-transition
-                    class="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all">
-                    
-                    <div class="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-rose-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <x-lucide-alert-triangle class="h-6 w-6 text-rose-600" />
-                            </div>
-                            <div class="mt-3 sm:ml-4 sm:mt-0 w-full">
-                                <h3 class="text-base font-semibold leading-6 text-slate-900">Tolak Pesanan?</h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-slate-600">
-                                        Apakah Anda yakin ingin menolak pesanan ini? Silakan berikan alasan penolakan.
-                                    </p>
-                                    
-                                    <form id="reject-form" method="POST" action="{{ route('supplier.restocks.reject', $restock) }}" class="mt-4">
-                                        @csrf
-                                        @method('PATCH')
-                                        
-                                        <div class="space-y-2">
-                                            <label for="reject_reason" class="block text-sm font-medium text-slate-700">Alasan Penolakan (Opsional)</label>
-                                            <textarea 
-                                                id="reject_reason" 
-                                                name="reject_reason" 
-                                                rows="3" 
-                                                class="w-full rounded-lg border-slate-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm"
-                                                placeholder="Contoh: Stok barang kosong, harga berubah, dll."
-                                            ></textarea>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Actions --}}
-                    <div class="bg-slate-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button type="submit" form="reject-form"
-                            class="inline-flex w-full justify-center rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 sm:ml-3 sm:w-auto">
-                            Tolak Pesanan
-                        </button>
-                        <button type="button"
-                            class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:mt-0 sm:w-auto"
-                            @click="close()">
-                            Batal
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 @endsection

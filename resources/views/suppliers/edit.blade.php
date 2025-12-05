@@ -3,12 +3,12 @@
 @section('title', 'Edit Supplier')
 
 @section('page-header')
-    {{-- DESKTOP HEADER --}}
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header title="Edit Supplier" description="Perbarui informasi dan status supplier." />
     </div>
 
-    {{-- MOBILE HEADER --}}
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header title="Edit Supplier" back="{{ route('suppliers.index') }}" />
     </div>
@@ -17,7 +17,7 @@
 @section('content')
     <div class="max-w-6xl mx-auto">
 
-        {{-- MOBILE FORM (x-mobile.form) --}}
+        {{-- MOBILE FORM --}}
         <div class="md:hidden">
             <x-mobile.form form-id="supplier-form" action="{{ route('suppliers.update', $supplier) }}" method="PUT"
                 submit-label="Simpan Perubahan" :show-delete="true"
@@ -39,14 +39,15 @@
                     <form id="supplier-form" method="POST" action="{{ route('suppliers.update', $supplier) }}">
                         @csrf
                         @method('PUT')
-                        @include('suppliers._form', compact('supplier'))
+                        @include('suppliers.form', compact('supplier'))
                     </form>
                 </x-slot:fields>
             </x-mobile.form>
         </div>
 
-        {{-- DESKTOP FORM --}}
+        {{-- PAGE CONTENT --}}
         <div class="hidden md:block space-y-4">
+            {{-- TOOLBAR --}}
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <x-breadcrumbs :items="[
             'Suppliers' => route('suppliers.index'),
@@ -60,11 +61,11 @@
 
                     @can('delete', $supplier)
                         <x-action-button type="button" variant="outline-danger" icon="trash-2" x-on:click="$dispatch('open-delete-modal', { 
-                                        action: '{{ route('suppliers.destroy', $supplier) }}',
-                                        title: 'Hapus Supplier',
-                                        message: 'Apakah Anda yakin ingin menghapus supplier ini?',
-                                        itemName: '{{ addslashes($supplier->name) }}'
-                                    })">
+                                                action: '{{ route('suppliers.destroy', $supplier) }}',
+                                                title: 'Hapus Supplier',
+                                                message: 'Apakah Anda yakin ingin menghapus supplier ini?',
+                                                itemName: '{{ addslashes($supplier->name) }}'
+                                            })">
                             Hapus
                         </x-action-button>
                     @endcan
@@ -86,10 +87,11 @@
                 </div>
             @endif
 
+            {{-- FORM --}}
             <form id="supplier-form-desktop" method="POST" action="{{ route('suppliers.update', $supplier) }}">
                 @csrf
                 @method('PUT')
-                @include('suppliers._form', compact('supplier'))
+                @include('suppliers.form', compact('supplier'))
             </form>
         </div>
     </div>

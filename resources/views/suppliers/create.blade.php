@@ -3,12 +3,12 @@
 @section('title', 'Add Supplier')
 
 @section('page-header')
-    {{-- DESKTOP HEADER --}}
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header title="Add Supplier" description="Register a new supplier for Warenesia warehouse operations." />
     </div>
 
-    {{-- MOBILE HEADER --}}
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header title="Add Supplier" back="{{ route('suppliers.index') }}" />
     </div>
@@ -17,7 +17,7 @@
 @section('content')
     <div class="max-w-6xl mx-auto">
 
-        {{-- MOBILE FORM (x-mobile.form) --}}
+        {{-- MOBILE FORM --}}
         <div class="md:hidden">
             <x-mobile.form form-id="supplier-form" action="{{ route('suppliers.store') }}" method="POST"
                 submit-label="Simpan Supplier">
@@ -35,14 +35,15 @@
 
                     <form id="supplier-form" method="POST" action="{{ route('suppliers.store') }}">
                         @csrf
-                        @include('suppliers._form', ['supplier' => null])
+                        @include('suppliers.form', ['supplier' => null])
                     </form>
                 </x-slot:fields>
             </x-mobile.form>
         </div>
 
-        {{-- DESKTOP FORM --}}
+        {{-- PAGE CONTENT --}}
         <div class="hidden md:block space-y-4">
+            {{-- TOOLBAR --}}
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <x-breadcrumbs :items="[
             'Suppliers' => route('suppliers.index'),
@@ -71,9 +72,10 @@
                 </div>
             @endif
 
+            {{-- FORM --}}
             <form id="supplier-form-desktop" method="POST" action="{{ route('suppliers.store') }}">
                 @csrf
-                @include('suppliers._form', ['supplier' => null])
+                @include('suppliers.form', ['supplier' => null])
             </form>
         </div>
     </div>

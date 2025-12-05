@@ -11,14 +11,15 @@
         $mobileIndexConfig = \App\Support\MobileIndexConfig::products($categories);
     @endphp
 
-    {{-- MOBILE VERSION --}}
+    {{-- MOBILE LIST --}}
     <div class="md:hidden">
         <x-mobile.index :items="$products" :config="$mobileIndexConfig" card-view="mobile.products.card" />
     </div>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-4">
 
+        {{-- TOOLBAR --}}
         <x-toolbar>
             @php
                 $filters = [
@@ -120,11 +121,11 @@
 
                                     @can('delete', $product)
                                         <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                                                                action: '{{ route('products.destroy', $product) }}',
-                                                                                                                title: 'Hapus Produk',
-                                                                                                                itemName: '{{ $product->name }}',
-                                                                                                                message: {{ $product->current_stock > 0 ? '\'Produk ini masih memiliki stok sebanyak <b>' . $product->current_stock . '</b>. Menghapus produk ini akan menghilangkan data stok secara permanen. Lanjutkan?\'' : 'null' }}
-                                                                                                            })">
+                                                                                                                                action: '{{ route('products.destroy', $product) }}',
+                                                                                                                                title: 'Hapus Produk',
+                                                                                                                                itemName: '{{ $product->name }}',
+                                                                                                                                message: {{ $product->current_stock > 0 ? '\'Produk ini masih memiliki stok sebanyak <b>' . $product->current_stock . '</b>. Menghapus produk ini akan menghilangkan data stok secara permanen. Lanjutkan?\'' : 'null' }}
+                                                                                                                            })">
                                             Hapus
                                         </x-table.action-item>
                                     @endcan

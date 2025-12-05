@@ -3,12 +3,14 @@
 @section('title', 'Tambah Produk')
 
 @section('page-header')
+    {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header
             title="Tambah Produk"
             description="Tambahkan produk baru ke inventaris gudang."
         />
     </div>
+    {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header
             title="Tambah Produk"
@@ -18,6 +20,7 @@
 @endsection
 
 @section('content')
+    {{-- MOBILE FORM --}}
     <x-mobile.form form-id="product-form-mobile" save-label="Simpan Produk" save-icon="save">
         <x-slot:fields>
             <form
@@ -38,8 +41,9 @@
         </x-slot:fields>
     </x-mobile.form>
 
-    {{-- DESKTOP VERSION --}}
+    {{-- PAGE CONTENT --}}
     <div class="hidden md:block space-y-6">
+        {{-- TOOLBAR --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
             <x-breadcrumbs :items="['Produk' => route('products.index'), 'Tambah' => '#']" />
             <div class="flex flex-wrap gap-2 justify-end">
@@ -51,6 +55,8 @@
                 </x-action-button>
             </div>
         </div>
+
+        {{-- FORM --}}
         <form
             id="product-form"
             method="POST"
