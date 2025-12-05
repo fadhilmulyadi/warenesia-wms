@@ -17,7 +17,7 @@
                 @endif
             </span>
             <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-semibold text-slate-900">
+                <p class="truncate text-base md:text-sm font-semibold text-slate-900">
                     {{ $item['title'] ?? '' }}
                 </p>
                 @if(!empty($item['description']))

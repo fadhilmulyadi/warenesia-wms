@@ -8,7 +8,7 @@
 <div class="flex items-start justify-between gap-3">
     <div class="space-y-1">
         <p class="text-sm font-medium text-slate-500">{{ $title }}</p>
-        <p class="text-2xl font-semibold text-slate-900 leading-tight">{{ $value }}</p>
+        <p class="text-2xl md:text-3xl font-semibold text-slate-900 leading-tight">{{ $value }}</p>
         @if($subtitle)
             <p class="text-xs text-slate-500">{{ $subtitle }}</p>
         @endif

@@ -62,8 +62,8 @@
                         :value="$restock->order_date?->format('d M Y') ?? '-'"
                     />
                     <x-mobile.stat-row 
-                        label="Perkiraan Tiba"
-                        :value="$restock->expected_delivery_date?->format('d M Y') ?? '-'"
+                        :label="$restock->status === 'received' ? 'Tanggal Diterima' : 'Perkiraan Tiba'"
+                        :value="$restock->status === 'received' ? ($restock->incomingTransaction?->transaction_date?->format('d M Y') ?? $restock->updated_at->format('d M Y')) : ($restock->expected_delivery_date?->format('d M Y') ?? '-')"
                     />
                     <x-mobile.stat-row 
                         label="Total Item"
@@ -178,7 +178,7 @@
                                         Rp {{ number_format((float) $item->line_total, 2, ',', '.') }}
                                     </div>
                                     <div class="text-xs text-slate-500 mt-0.5">
-                                        x{{ number_format((int) $item->quantity) }}
+                                        x{{ number_format((int) $item->quantity, 0, ',', '.') }}
                                     </div>
                                 </div>
                             </div>
@@ -307,9 +307,12 @@
                         </p>
                     </div>
                     <div class="space-y-1">
-                        <p class="text-sm text-slate-500">Perkiraan Tiba</p>
+                        <p class="text-sm text-slate-500">{{ $restock->status === 'received' ? 'Tanggal Diterima' : 'Perkiraan Tiba' }}</p>
                         <p class="text-sm text-slate-900">
-                            {{ optional($restock->expected_delivery_date)->format('d M Y') ?? '-' }}
+                            {{ $restock->status === 'received' 
+                                ? ($restock->incomingTransaction?->transaction_date?->format('d M Y') ?? $restock->updated_at->format('d M Y'))
+                                : ($restock->expected_delivery_date?->format('d M Y') ?? '-') 
+                            }}
                         </p>
                     </div>
                     <div class="space-y-1">
@@ -327,7 +330,7 @@
                     <div class="space-y-1">
                         <p class="text-sm text-slate-500">Total Kuantitas</p>
                         <p class="text-sm font-semibold text-slate-900">
-                            {{ number_format((int) $restock->total_quantity) }}
+                            {{ number_format((int) $restock->total_quantity, 0, ',', '.') }}
                         </p>
                     </div>
                     <div class="space-y-1">
@@ -381,7 +384,7 @@
                                     </div>
                                 </x-table.td>
                                 <x-table.td align="right" class="font-semibold text-slate-900">
-                                    {{ number_format((int) $item->quantity) }}
+                                    {{ number_format((int) $item->quantity, 0, ',', '.') }}
                                 </x-table.td>
                                 <x-table.td align="right">
                                     {{ number_format((float) $item->unit_cost, 2, ',', '.') }}

@@ -108,12 +108,16 @@
                                     {{-- Hapus --}}
                                     @can('delete', $category)
                                         @if($category->products_count == 0)
-                                            <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                        action: '{{ route('categories.destroy', $category) }}',
-                                                                        title: 'Hapus Kategori',
-                                                                        message: 'Yakin ingin menghapus kategori ini?',
-                                                                        itemName: '{{ $category->name }}'
-                                                                    })">
+                                            <x-table.action-item
+                                                icon="trash-2"
+                                                danger="true"
+                                                x-on:click="$dispatch('open-delete-modal', { 
+                                                    action: '{{ route('categories.destroy', $category) }}',
+                                                    title: 'Hapus Kategori',
+                                                    message: 'Yakin ingin menghapus kategori ini?',
+                                                    itemName: '{{ $category->name }}'
+                                                })"
+                                            >
                                                 Hapus
                                             </x-table.action-item>
                                         @else
@@ -151,6 +155,7 @@
             <x-advanced-pagination :paginator="$categories" />
         @endif
 
-        <x-confirm-delete-modal />
     </div>
+
+    <x-confirm-delete-modal />
 @endsection

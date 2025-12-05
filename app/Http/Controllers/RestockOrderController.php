@@ -124,7 +124,7 @@ class RestockOrderController extends Controller
     {
         $this->authorize('view', $restock);
 
-        $restock->load(['supplier', 'createdBy', 'confirmedBy', 'ratingGivenBy', 'items.product']);
+        $restock->load(['supplier', 'createdBy', 'confirmedBy', 'ratingGivenBy', 'items.product', 'incomingTransaction']);
         $statusOptions = RestockOrder::statusOptions();
 
         return view('restocks.show', compact('restock', 'statusOptions'));
@@ -312,7 +312,7 @@ class RestockOrderController extends Controller
 
         $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
 
-        $restock->load(['supplier', 'createdBy', 'confirmedBy', 'items.product']);
+        $restock->load(['supplier', 'createdBy', 'confirmedBy', 'items.product', 'incomingTransaction']);
         $statusOptions = RestockOrder::statusOptions();
 
         return view('supplier.restocks.show', compact('restock', 'statusOptions'));
@@ -364,7 +364,7 @@ class RestockOrderController extends Controller
         $search = (string) $request->query('q', '');
 
         $query = RestockOrder::query()
-            ->with(['supplier', 'createdBy', 'confirmedBy', 'ratingGivenBy']);
+            ->with(['supplier', 'createdBy', 'confirmedBy', 'ratingGivenBy', 'incomingTransaction']);
 
         if ($request->routeIs('supplier.restocks.*') && $request->user() !== null) {
             $query->where('supplier_id', $request->user()->id);
@@ -413,7 +413,7 @@ class RestockOrderController extends Controller
 
     private function abortIfSupplierDoesNotOwn(RestockOrder $restock, int $supplierId): void
     {
-        if ($restock->supplier_id !== $supplierId) {
+        if ((int) $restock->supplier_id !== $supplierId) {
             abort(403);
         }
     }

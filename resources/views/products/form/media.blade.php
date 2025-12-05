@@ -8,8 +8,8 @@
     ])>
 
         @unless($readonly)
-            <input type="file" name="image" accept="image/*" required
-                class="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer" @change="handleImage">
+            <input type="file" name="image" accept="image/*" @if(empty($product->image_path)) required @endif
+                class="absolute inset-0 w-full h-full opacity-0 z-50 cursor-pointer" @change="handleImage">
         @endunless
 
         <div x-show="!imagePreview" class="p-4">

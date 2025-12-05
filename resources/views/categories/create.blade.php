@@ -13,7 +13,6 @@
 
 @section('content')
     {{-- MOBILE VERSION --}}
-    {{-- MOBILE VERSION --}}
     <x-mobile.form form-id="category-form-mobile" save-label="Simpan Kategori" save-icon="save">
         <x-slot:fields>
             @if($errors->any())

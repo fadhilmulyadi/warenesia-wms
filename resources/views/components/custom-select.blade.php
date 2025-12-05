@@ -111,7 +111,11 @@
 
             if (!this.searchable) return normalized;
             if (this.search === '') return normalized;
-            if (this.value && this.optionLabel(normalized[this.value]) === this.search) return normalized;
+            
+            // Fix: Check if search matches the current value's label (handling empty string as valid value)
+            if (this.value !== null && normalized[this.value] && this.optionLabel(normalized[this.value]) === this.search) {
+                return normalized;
+            }
 
             const term = this.search.toLowerCase();
             const result = {};
@@ -128,13 +132,23 @@
 
         calculatePosition() {
             let rect = this.$el.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            const spaceBelow = windowHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            const dropdownHeight = 250; // Estimated max height
+
+            // Auto-detect direction if not explicitly set
+            let shouldDropUp = this.dropUp;
+            if (!this.dropUp && spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+                shouldDropUp = true;
+            }
             
             this.dropdownStyle.width = rect.width + 'px';
             this.dropdownStyle.left = rect.left + 'px';
 
-            if (this.dropUp) {
+            if (shouldDropUp) {
                 this.dropdownStyle.top = 'auto';
-                this.dropdownStyle.bottom = (window.innerHeight - rect.top + 4) + 'px'; 
+                this.dropdownStyle.bottom = (windowHeight - rect.top + 4) + 'px'; 
             } else {
                 this.dropdownStyle.bottom = 'auto';
                 this.dropdownStyle.top = (rect.bottom + 4) + 'px';
@@ -187,7 +201,9 @@
     wire:ignore.self
 >
     <input 
-        type="hidden" 
+        type="text" 
+        class="absolute inset-0 w-full h-full opacity-0 pointer-events-none -z-10"
+        tabindex="-1"
         name="{{ $inputName }}"
         x-bind:name="inputName"
         x-model="value"

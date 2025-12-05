@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Supplier Dashboard')
+@section('title', 'Dashboard Supplier')
 
 @section('page-header')
-    <div class="space-y-1">
-        <h1 class="text-xl font-semibold text-slate-900">Supplier Dashboard</h1>
-        <p class="hidden md:block text-sm text-slate-500">Restock confirmations and delivery status</p>
-    </div>
+    <x-page-header
+        title="Dashboard Supplier"
+        description="Konfirmasi restock dan status pengiriman"
+    />
 @endsection
 
 @section('content')

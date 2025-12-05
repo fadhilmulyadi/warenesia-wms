@@ -96,6 +96,8 @@
                         <x-transactions.items-table 
                             :products="$products" 
                             :initial-items="$initialItems ?? []" 
+                            priceField="unit_cost"
+                            priceLabel="Harga Beli"
                             :hide-price="auth()->user()->role === 'staff'"
                         />
                     </div>
@@ -151,6 +153,8 @@
                     <x-transactions.items-table 
                         :products="$products" 
                         :initial-items="$initialItems ?? []" 
+                        priceField="unit_cost"
+                        priceLabel="Harga Beli"
                         :hide-price="auth()->user()->role === 'staff'"
                     />
                 </div>

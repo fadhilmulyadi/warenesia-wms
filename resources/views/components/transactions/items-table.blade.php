@@ -9,11 +9,22 @@
 
 @php
     $stockData = $products->pluck('current_stock', 'id')->map(fn ($stock) => (int) $stock);
+    $purchasePrices = $products->pluck('purchase_price', 'id')->map(fn ($price) => (float) $price);
+    $salePrices = $products->pluck('sale_price', 'id')->map(fn ($price) => (float) $price);
     $skusData = $products->pluck('sku', 'id');
+    
+
     
     $productOptions = $products->mapWithKeys(function($product) {
         return [$product->id => "{$product->name}"];
     })->toArray();
+
+    $priceErrorMap = collect($errors?->getMessages() ?? [])
+        ->filter(fn ($messages, $key) => preg_match('/^items\.(\d+)\.' . $priceField . '$/', $key))
+        ->mapWithKeys(function ($messages, $key) use ($priceField) {
+            preg_match('/^items\.(\d+)\.' . $priceField . '$/', $key, $matches);
+            return [$matches[1] => $messages[0] ?? null];
+        });
 
     $quantityErrorMap = collect($errors?->getMessages() ?? [])
         ->filter(fn ($messages, $key) => preg_match('/^items\.(\d+)\.quantity$/', $key))
@@ -44,132 +55,161 @@ if (! window.submitFormWithValidation) {
     };
 }
 
-function itemsTable(config) {
-    const {
-        initialItems = [],
-        productStocks = {},
-        productSkus = {},
-        quantityErrors = {},
-        shouldCheckStock = false
-    } = config;
+if (! window.itemsTable) {
+    window.itemsTable = function(config) {
+        const {
+            initialItems = [],
+            productStocks = {},
+            productSkus = {},
+            purchasePrices = {},
+            salePrices = {},
+            quantityErrors = {},
+            shouldCheckStock = false
+        } = config;
 
-    return {
-        items: initialItems.length > 0 ? initialItems : [{ 
-            product_id: '',
-            quantity: 1,
-        }],
-        productStocks,
-        productSkus,
-        quantityErrors,
-        shouldCheckStock,
-        currentIndex: null,
-
-        init() {
-            const parentForm = this.$el.closest('form');
-            if (parentForm) {
-                parentForm.addEventListener('submit', (event) => this.validateBeforeSubmit(event));
-            }
-
-            window.addEventListener('custom-select-opened', (event) => {
-                const inputName = event.detail;
-                
-                if (!inputName) {
-                    this.currentIndex = null;
-                    return;
-                }
-
-                const match = String(inputName).match(/items\[(\d+)\]/);
-                this.currentIndex = match ? Number(match[1]) : null;
-            });
-
-            window.addEventListener('product-selected', (event) => {
-                if (this.currentIndex === null) return;
-                this.onProductChange(this.currentIndex, event.detail);
-            });
-        },
-
-        addItem() {
-            this.items.push({
+        return {
+            items: initialItems.length > 0 ? initialItems : [{ 
                 product_id: '',
                 quantity: 1,
-            });
-        },
-
-        removeItem(index) {
-            this.items.splice(index, 1);
-        },
-
-        onProductChange(index, productId) {
-            this.items[index].product_id = productId;
-        },
-
-        getProductStock(productId) {
-            if (!productId) return null;
-            return Number(this.productStocks[productId] ?? 0);
-        },
-
-        getStockClass(productId) {
-            const stock = this.getProductStock(productId);
-            if (stock === null) return 'text-slate-300 bg-slate-50 border-slate-200'; // Belum pilih
-            if (stock === 0) return 'text-rose-600 bg-rose-50 border-rose-100 font-bold'; // Habis
-            if (stock < 5) return 'text-amber-600 bg-amber-50 border-amber-100 font-bold'; // Sekarat
-            return 'text-slate-600 bg-slate-100 border-slate-200'; // Aman
-        },
-
-        isStockInsufficient(index) {
-            if (! this.shouldCheckStock) {
-                return false;
-            }
-
-            const item = this.items[index];
-
-            if (! item || ! item.product_id) {
-                return false;
-            }
-
-            const availableStock = this.getProductStock(item.product_id);
-            const requestedQty = Number(item.quantity ?? 0);
-
-            return Number.isFinite(requestedQty) && Number.isFinite(availableStock) && requestedQty > availableStock;
-        },
-
-        validateBeforeSubmit(event) {
-            if (! this.shouldCheckStock) {
-                return;
-            }
-
-            const hasShortage = this.items.some((_, idx) => this.isStockInsufficient(idx));
-
-            if (hasShortage) {
-                event.preventDefault();
-            }
-        },
-
-        stockError(index) {
-            const backendError = this.quantityErrors && Object.prototype.hasOwnProperty.call(this.quantityErrors, index)
-                ? this.quantityErrors[index]
-                : '';
-
-            if (! this.shouldCheckStock) {
-                return backendError;
-            }
-
-            const item = this.items[index];
-
-            if (! item || ! item.product_id) {
-                return backendError;
-            }
-
-            if (this.isStockInsufficient(index)) {
+                {{ $priceField }}: '',
+            }],
+            productStocks,
+            productSkus,
+            purchasePrices,
+            salePrices,
+    
+            quantityErrors,
+            priceErrors: {},
+            shouldCheckStock,
+            currentIndex: null,
+    
+            init() {
+                const parentForm = this.$el.closest('form');
+                if (parentForm) {
+                    parentForm.addEventListener('submit', (event) => this.validateBeforeSubmit(event));
+                }
+    
+                window.addEventListener('custom-select-opened', (event) => {
+                    const inputName = event.detail;
+                    
+                    if (!inputName) {
+                        this.currentIndex = null;
+                        return;
+                    }
+    
+                    const match = String(inputName).match(/items\[(\d+)\]/);
+                    this.currentIndex = match ? Number(match[1]) : null;
+                });
+    
+                window.addEventListener('product-selected', (event) => {
+                    if (this.currentIndex === null) return;
+                    this.onProductChange(this.currentIndex, event.detail);
+                });
+            },
+    
+            addItem() {
+                this.items.push({
+                    product_id: '',
+                    quantity: 1,
+                });
+            },
+    
+            removeItem(index) {
+                this.items.splice(index, 1);
+            },
+    
+            onProductChange(index, productId) {
+                this.items[index].product_id = productId;
+                
+                // Auto-fill Price
+                if (productId) {
+                    const isUnitCost = @js($priceField === 'unit_cost');
+                    const price = isUnitCost 
+                        ? (this.purchasePrices[productId] ?? 0) 
+                        : (this.salePrices[productId] ?? 0);
+                    
+                    this.items[index]['{{ $priceField }}'] = price;
+                }
+            },
+    
+            getProductStock(productId) {
+                if (!productId) return null;
+                return Number(this.productStocks[productId] ?? 0);
+            },
+    
+            getStockClass(productId) {
+                const stock = this.getProductStock(productId);
+                if (stock === null) return 'text-slate-300 bg-slate-50 border-slate-200'; // Belum pilih
+                if (stock === 0) return 'text-rose-600 bg-rose-50 border-rose-100 font-bold'; // Habis
+                if (stock < 5) return 'text-amber-600 bg-amber-50 border-amber-100 font-bold'; // Sekarat
+                return 'text-slate-600 bg-slate-100 border-slate-200'; // Aman
+            },
+    
+            isStockInsufficient(index) {
+                if (! this.shouldCheckStock) {
+                    return false;
+                }
+    
+                const item = this.items[index];
+    
+                if (! item || ! item.product_id) {
+                    return false;
+                }
+    
                 const availableStock = this.getProductStock(item.product_id);
-                return `Stok tidak mencukupi. Tersedia: ${availableStock}.`;
+                const requestedQty = Number(item.quantity ?? 0);
+    
+                return Number.isFinite(requestedQty) && Number.isFinite(availableStock) && requestedQty > availableStock;
+            },
+    
+            validateBeforeSubmit(event) {
+                if (! this.shouldCheckStock) {
+                    return;
+                }
+    
+                const hasShortage = this.items.some((_, idx) => this.isStockInsufficient(idx));
+    
+                if (hasShortage) {
+                    event.preventDefault();
+                }
+            },
+    
+            stockError(index) {
+                const backendError = this.quantityErrors && Object.prototype.hasOwnProperty.call(this.quantityErrors, index)
+                    ? this.quantityErrors[index]
+                    : '';
+    
+                if (! this.shouldCheckStock) {
+                    return backendError;
+                }
+    
+                const item = this.items[index];
+    
+                if (! item || ! item.product_id) {
+                    return backendError;
+                }
+    
+                if (this.isStockInsufficient(index)) {
+                    const availableStock = this.getProductStock(item.product_id);
+                    return `Stok tidak mencukupi. Tersedia: ${this.formatNumber(availableStock)}.`;
+                }
+    
+                return backendError;
+            },
+    
+            getProductSku(productId) {
+                return this.productSkus[productId] ?? '-';
+            },
+
+            priceError(index) {
+                return this.priceErrors && Object.prototype.hasOwnProperty.call(this.priceErrors, index)
+                    ? this.priceErrors[index]
+                    : '';
+            },
+    
+            formatNumber(number) {
+                return new Intl.NumberFormat('id-ID').format(number);
             }
-
-            return backendError;
-        },
-
-        getProductSku(productId) {
-            return this.productSkus[productId] ?? '-';
         }
     }
 }
@@ -181,7 +221,10 @@ function itemsTable(config) {
         initialItems: {{ \Illuminate\Support\Js::from($initialItems) }},
         productStocks: {{ \Illuminate\Support\Js::from($stockData) }},
         productSkus: {{ \Illuminate\Support\Js::from($skusData) }},
+        purchasePrices: {{ \Illuminate\Support\Js::from($purchasePrices) }},
+        salePrices: {{ \Illuminate\Support\Js::from($salePrices) }},
         quantityErrors: {{ \Illuminate\Support\Js::from($quantityErrorMap) }},
+        priceErrors: {{ \Illuminate\Support\Js::from($priceErrorMap) }},
         shouldCheckStock: @js($priceField === 'unit_price')
     })"
     x-init="
@@ -219,7 +262,7 @@ function itemsTable(config) {
                         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Item #<span x-text="index + 1"></span></div>
                         
                         @if(!$readonly)
-                            <button type="button" @click="removeItem(index)" 
+                            <button type="button" @click="removeItem(index)" x-show="items.length > 1"
                                 class="text-rose-400 hover:text-rose-600 p-1 -mr-1" title="Hapus Item">
                                 <x-lucide-x class="w-4 h-4" />
                             </button>
@@ -275,12 +318,39 @@ function itemsTable(config) {
                                 <input 
                                     type="text" 
                                     readonly
-                                    :value="getProductStock(item.product_id) !== null ? getProductStock(item.product_id) : '-'"
+                                    :value="getProductStock(item.product_id) !== null ? formatNumber(getProductStock(item.product_id)) : '-'"
                                     class="w-full px-2 py-1.5 rounded-xl border-slate-200 bg-slate-50 text-slate-500 shadow-sm text-xs text-center focus:ring-0"
                                     :class="getStockClass(item.product_id)"
                                 >
                             </div>
                         </div>
+
+                        {{-- Price Input (Conditional) --}}
+                        @if(!$hidePrice)
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-medium mb-1 block">{{ $priceLabel }}</label>
+                                <div class="relative">
+                                    <span class="absolute top-0 left-3 h-full flex items-center text-slate-400 text-xs">Rp</span>
+                                    <input 
+                                        type="number" 
+                                        :name="`items[${index}][{{ $priceField }}]`"
+                                        x-model="item.{{ $priceField }}"
+                                        class="w-full pl-8 pr-3 py-2 rounded-lg border-slate-200 text-sm font-semibold text-right focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
+                                        :class="{ 
+                                            'border-rose-300 ring-rose-200 bg-rose-50 text-rose-700': priceError(index),
+                                            'bg-slate-50 text-slate-500': @js($priceField === 'unit_cost')
+                                        }"
+                                        :readonly="@js($priceField === 'unit_cost')"
+                                        :disabled="@js($readonly)"
+                                        placeholder="0"
+                                    >
+                                </div>
+                                <div class="text-[10px] text-rose-500 mt-1 font-medium flex items-center gap-1" x-show="priceError(index)">
+                                    <x-lucide-alert-circle class="w-3 h-3" />
+                                    <span x-text="priceError(index)"></span>
+                                </div>
+                            </div>
+                        @endif
 
                         {{-- Qty Input --}}
                         <div>
@@ -338,6 +408,11 @@ function itemsTable(config) {
                     {{-- Stok --}}
                     <th scope="col" class="px-4 py-3 font-semibold w-32 text-center">Stok</th>
                     
+                    {{-- Price (Conditional) --}}
+                    @if(!$hidePrice)
+                        <th scope="col" class="px-4 py-3 font-semibold w-40 text-right">{{ $priceLabel }}</th>
+                    @endif
+                    
                     {{-- Qty --}}
                     <th scope="col" class="px-4 py-3 font-semibold w-40 text-center">Qty Input</th>
                     
@@ -392,11 +467,36 @@ function itemsTable(config) {
                             <input 
                                 type="text" 
                                 readonly
-                                :value="getProductStock(item.product_id) !== null ? getProductStock(item.product_id) : '-'"
+                                :value="getProductStock(item.product_id) !== null ? formatNumber(getProductStock(item.product_id)) : '-'"
                                 class="w-full text-center rounded-xl h-[42px] bg-slate-50 text-slate-500 border-slate-200 shadow-sm text-sm font-bold focus:ring-0"
                                 :class="getStockClass(item.product_id)"
                             >
                         </td>
+
+                        {{-- Price Input (Conditional) --}}
+                         @if(!$hidePrice)
+                            <td class="px-4 py-3 align-top">
+                                <div class="relative">
+                                    <span class="absolute top-1/2 -translate-y-1/2 left-3 text-slate-400 text-xs">Rp</span>
+                                    <input 
+                                        type="number" 
+                                        :name="`items[${index}][{{ $priceField }}]`"
+                                        x-model="item.{{ $priceField }}"
+                                        class="w-full pl-8 pr-3 h-[42px] rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 text-sm font-bold text-slate-700 text-right"
+                                        :class="{ 
+                                            'border-rose-300 ring-rose-200 bg-rose-50 text-rose-700': priceError(index),
+                                            'bg-slate-50 text-slate-500': @js($priceField === 'unit_cost')
+                                        }"
+                                        :readonly="@js($priceField === 'unit_cost')"
+                                        :disabled="@js($readonly) || !item.product_id"
+                                        placeholder="0"
+                                    >
+                                </div>
+                                <div class="text-[10px] text-rose-500 mt-1 absolute font-medium" x-show="priceError(index)">
+                                    <span x-text="priceError(index)"></span>
+                                </div>
+                            </td>
+                        @endif
 
                         {{-- Quantity Input --}}
                         <td class="px-4 py-3 align-top">
@@ -422,7 +522,7 @@ function itemsTable(config) {
                         {{-- Delete --}}
                         @if(!$readonly)
                             <td class="px-4 py-3 align-top pt-3 text-center">
-                                <button type="button" @click="removeItem(index)" 
+                                <button type="button" @click="removeItem(index)" x-show="items.length > 1"
                                     class="text-slate-400 hover:text-rose-600 transition-colors p-1">
                                     <x-lucide-trash-2 class="w-4 h-4" />
                                 </button>

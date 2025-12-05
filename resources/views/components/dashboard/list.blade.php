@@ -19,15 +19,15 @@
             </div>
 
             <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-semibold text-slate-900">{{ $item['title'] ?? '' }}</p>
+                <p class="truncate text-base md:text-sm font-semibold text-slate-900">{{ $item['title'] ?? '' }}</p>
 
                 @if(!empty($item['description']))
-                    <p class="truncate text-xs text-slate-500">{{ $item['description'] }}</p>
+                    <p class="truncate text-sm md:text-xs text-slate-500">{{ $item['description'] }}</p>
                 @endif
             </div>
 
             @if(!empty($item['meta']))
-                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold leading-none {{ $item['meta_color'] ?? 'border-slate-200 bg-slate-50 text-slate-600' }}">
+                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold leading-none {{ $item['meta_color'] ?? 'border-slate-200 bg-slate-50 text-slate-600' }}">
                     {{ $item['meta'] }}
                 </span>
             @endif

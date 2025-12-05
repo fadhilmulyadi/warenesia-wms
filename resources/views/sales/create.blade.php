@@ -74,7 +74,7 @@
     {{-- DESKTOP VERSION --}}
     <div class="hidden md:block space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <x-breadcrumbs :items="['Penjualan' => route('sales.index'), 'Buat Baru' => '#']" />
+            <x-breadcrumbs :items="['Data Transaksi' => route('sales.index'), 'Buat Baru' => '#']" />
             <div class="flex flex-wrap gap-2 justify-end">
                 <x-action-button href="{{ route('sales.index') }}" variant="secondary" icon="arrow-left">
                     Kembali

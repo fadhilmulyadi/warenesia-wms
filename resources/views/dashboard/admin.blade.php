@@ -3,7 +3,10 @@
 @section('title', 'Dashboard Admin')
 
 @section('page-header')
-    <x-page-header title="Dashboard Admin" description="Ringkasan stok, transaksi, dan notifikasi" />
+    <x-page-header
+        title="Dashboard Admin"
+        description="Ringkasan stok, transaksi, dan notifikasi"
+    />
 @endsection
 
 @section('content')

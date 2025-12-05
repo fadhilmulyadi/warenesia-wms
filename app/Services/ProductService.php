@@ -110,7 +110,7 @@ class ProductService
         };
 
         return $shouldRegenerateSku
-            ? $this->runWithSkuRetry(fn () => DB::transaction($updater))
+            ? $this->runWithSkuRetry(fn() => DB::transaction($updater))
             : DB::transaction($updater);
     }
 
@@ -229,7 +229,7 @@ class ProductService
 
     private function applyStockFilter(Builder $query, array $statuses): void
     {
-        $statuses = array_values(array_filter($statuses, static fn ($val) => $val !== null && $val !== ''));
+        $statuses = array_values(array_filter($statuses, static fn($val) => $val !== null && $val !== ''));
 
         if (empty($statuses)) {
             return;
@@ -343,5 +343,66 @@ class ProductService
         }
 
         return (float) $value;
+    }
+    public function getTransactionStats(Product $product): array
+    {
+        $incoming = IncomingTransactionItem::where('product_id', $product->id)
+            ->with(['incomingTransaction', 'incomingTransaction.createdBy'])
+            ->get();
+
+        $outgoing = OutgoingTransactionItem::where('product_id', $product->id)
+            ->with(['outgoingTransaction', 'outgoingTransaction.createdBy'])
+            ->get();
+
+        // Calculate totals
+        // For incoming, it contributes to total incoming count/quantity
+        // For outgoing, it contributes to total outgoing count/quantity
+        // Based on view labels "Total Transaksi" (Total Transactions), "Masuk" (Incoming), "Keluar" (Outgoing)
+        // And the fact that they use number_format, and typical WMS dashboards:
+        // Usually these are counts of transactions involving this product.
+
+        $totalIncoming = $incoming->count();
+        $totalOutgoing = $outgoing->count();
+        $totalTransactions = $totalIncoming + $totalOutgoing;
+
+        $recentTransactions = collect();
+
+        foreach ($incoming as $item) {
+            if (!$item->incomingTransaction)
+                continue;
+
+            $recentTransactions->push([
+                'type' => 'IN',
+                'date' => $item->incomingTransaction->transaction_date,
+                'transaction_number' => $item->incomingTransaction->transaction_number,
+                'quantity' => $item->quantity,
+                'created_by' => $item->incomingTransaction->createdBy->name ?? '-',
+                'original_timestamp' => $item->incomingTransaction->created_at,
+            ]);
+        }
+
+        foreach ($outgoing as $item) {
+            if (!$item->outgoingTransaction)
+                continue;
+
+            $recentTransactions->push([
+                'type' => 'OUT',
+                'date' => $item->outgoingTransaction->transaction_date,
+                'transaction_number' => $item->outgoingTransaction->transaction_number,
+                'quantity' => $item->quantity,
+                'created_by' => $item->outgoingTransaction->createdBy->name ?? '-',
+                'original_timestamp' => $item->outgoingTransaction->created_at,
+            ]);
+        }
+
+        // Sort by created_at descending (latest first)
+        $recentTransactions = $recentTransactions->sortByDesc('original_timestamp')->values();
+
+        return [
+            'total_transactions' => $totalTransactions,
+            'total_incoming' => $totalIncoming,
+            'total_outgoing' => $totalOutgoing,
+            'recent_transactions' => $recentTransactions,
+        ];
     }
 }

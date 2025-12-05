@@ -1,7 +1,7 @@
 @props([
     'title' => null,
     'subtitle' => null,
-    'padding' => 'p-6',
+    'padding' => 'p-4 md:p-6',
 ])
 
 @php
@@ -12,7 +12,7 @@
     @if($title || $subtitle)
         <div class="mb-4 space-y-1">
             @if($title)
-                <p class="text-sm font-semibold text-slate-900">{{ $title }}</p>
+                <p class="text-base md:text-sm font-semibold text-slate-900">{{ $title }}</p>
             @endif
             @if($subtitle)
                 <p class="text-sm text-slate-500">{{ $subtitle }}</p>

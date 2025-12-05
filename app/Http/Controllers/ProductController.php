@@ -80,8 +80,8 @@ class ProductController extends Controller
         $this->authorize('create', Product::class);
 
         $categories = Category::orderBy('name')->get();
-        $suppliers  = Supplier::orderBy('name')->get();
-        $units      = Unit::orderBy('name')->get();
+        $suppliers = Supplier::orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
 
         return view('products.create', compact('categories', 'suppliers', 'units'));
     }
@@ -115,11 +115,16 @@ class ProductController extends Controller
 
         $product->loadMissing(['category', 'supplier', 'unit']);
 
-        $categories = Category::orderBy('name')->get();
-        $suppliers  = Supplier::orderBy('name')->get();
-        $units      = Unit::orderBy('name')->get();
+        $stats = $this->products->getTransactionStats($product);
 
-        return view('products.show', compact('product', 'categories', 'suppliers', 'units'));
+        $categories = Category::orderBy('name')->get();
+        $suppliers = Supplier::orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
+
+        return view('products.show', array_merge(
+            compact('product', 'categories', 'suppliers', 'units'),
+            $stats
+        ));
     }
 
     /**
@@ -130,8 +135,8 @@ class ProductController extends Controller
         $this->authorize('update', $product);
 
         $categories = Category::orderBy('name')->get();
-        $suppliers  = Supplier::orderBy('name')->get();
-        $units      = Unit::orderBy('name')->get();
+        $suppliers = Supplier::orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
 
         return view('products.edit', compact('product', 'categories', 'suppliers', 'units'));
     }

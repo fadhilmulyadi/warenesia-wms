@@ -6,6 +6,9 @@
     'deleteAction' => null,
     'deleteLabel' => 'Hapus',
     'deleteConfirm' => 'Yakin ingin menghapus data ini?',
+    'useDeleteModal' => false,
+    'deleteTitle' => 'Hapus Data',
+    'itemName' => '',
 ])
 
 <div class="md:hidden pb-24">
@@ -16,19 +19,32 @@
 
     {{-- Delete button (opsional) --}}
     @if($showDelete && $deleteAction)
-        <form
-            method="POST"
-            action="{{ $deleteAction }}"
-            onsubmit="return confirm('{{ $deleteConfirm }}');"
-            class="mt-6 px-4"
-        >
-            @csrf
-            @method('DELETE')
+        @if($useDeleteModal)
+            <div class="mt-6 px-4">
+                <x-mobile-danger-button type="button" x-on:click="$dispatch('open-delete-modal', { 
+                        action: '{{ $deleteAction }}',
+                        title: '{{ $deleteTitle }}',
+                        message: '{{ $deleteConfirm }}',
+                        itemName: '{{ addslashes($itemName) }}'
+                    })">
+                    {{ $deleteLabel }}
+                </x-mobile-danger-button>
+            </div>
+        @else
+            <form
+                method="POST"
+                action="{{ $deleteAction }}"
+                onsubmit="return confirm('{{ $deleteConfirm }}');"
+                class="mt-6 px-4"
+            >
+                @csrf
+                @method('DELETE')
 
-            <x-mobile-danger-button type="submit">
-                {{ $deleteLabel }}
-            </x-mobile-danger-button>
-        </form>
+                <x-mobile-danger-button type="submit">
+                    {{ $deleteLabel }}
+                </x-mobile-danger-button>
+            </form>
+        @endif
     @endif
 
     {{-- Sticky Save --}}

@@ -3,7 +3,7 @@
 @section('title', 'Buat Restock')
 
 @section('page-header')
-    <x-page-header title="Buat Restock Baru" description="Input pembelian barang dari supplier." />
+    <x-page-header title="Buat Restock Baru" description="Input pembelian barang dari supplier" />
 @endsection
 
 @section('content')
@@ -56,9 +56,10 @@
 
                         {{-- Perkiraan Tiba --}}
                         <div>
-                            <x-input-label for="expected_delivery_date_mobile" value="Perkiraan Tiba (Opsional)" />
+                            <x-input-label for="expected_delivery_date_mobile" value="Perkiraan Tiba" />
                             <input type="date" id="expected_delivery_date_mobile" name="expected_delivery_date"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                required>
                             <x-input-error :messages="$errors->get('expected_delivery_date')" class="mt-2" />
                         </div>
 
@@ -66,7 +67,8 @@
                         <div>
                             <x-input-label for="notes_mobile" value="Catatan" />
                             <textarea id="notes_mobile" name="notes" rows="3"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"></textarea>
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                required></textarea>
                             <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                         </div>
                     </div>
@@ -89,7 +91,7 @@
 {{-- DESKTOP VERSION --}}
 <div class="hidden md:block space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <x-breadcrumbs :items="['Restock Orders' => route('restocks.index'), 'Buat Baru' => '#']" />
+        <x-breadcrumbs :items="['Data Restock' => route('restocks.index'), 'Buat Baru' => '#']" />
         <div class="flex flex-wrap gap-2 justify-end">
             <x-action-button href="{{ route('restocks.index') }}" variant="secondary" icon="arrow-left">
                 Kembali
@@ -114,66 +116,51 @@
     <form id="restock-form" method="POST" action="{{ route('restocks.store') }}" class="space-y-6">
         @csrf
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {{-- Informasi Pesanan --}}
-            <div class="lg:col-span-1">
-                <x-card class="p-5 h-full">
-                    <h3
-                        class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider border-b border-slate-100 pb-2">
-                        Informasi Pesanan
-                    </h3>
+        <x-card class="p-6">
+            {{-- Header Inputs --}}
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                {{-- Tanggal Order --}}
+                <div>
+                    <x-input-label for="order_date" value="Tanggal Order" class="mb-1" />
+                    <input type="date" id="order_date" name="order_date" value="{{ date('Y-m-d') }}"
+                        class="w-full rounded-xl h-[42px] border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
+                        required>
+                    <x-input-error :messages="$errors->get('order_date')" class="mt-2" />
+                </div>
 
-                    <div class="space-y-4">
-                        {{-- Supplier --}}
-                        <div>
-                            <x-input-label for="supplier_id" value="Supplier" />
-                            <x-custom-select id="supplier_id" name="supplier_id" :options="$suppliers->pluck('name', 'id')->toArray()"
-                                placeholder="Pilih Supplier" class="mt-1 block w-full" required />
-                            <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
-                        </div>
+                {{-- Perkiraan Tiba --}}
+                <div>
+                    <x-input-label for="expected_delivery_date" value="Perkiraan Tiba" class="mb-1" />
+                    <input type="date" id="expected_delivery_date" name="expected_delivery_date"
+                        class="w-full rounded-xl h-[42px] border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
+                        required>
+                    <x-input-error :messages="$errors->get('expected_delivery_date')" class="mt-2" />
+                </div>
 
-                        {{-- Tanggal Order --}}
-                        <div>
-                            <x-input-label for="order_date" value="Tanggal Order" />
-                            <input type="date" id="order_date" name="order_date" value="{{ date('Y-m-d') }}"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                required>
-                            <x-input-error :messages="$errors->get('order_date')" class="mt-2" />
-                        </div>
+                {{-- Supplier --}}
+                <div class="md:col-span-2">
+                    <x-input-label for="supplier_id" value="Supplier" class="mb-1" />
+                    <x-custom-select id="supplier_id" name="supplier_id" :options="$suppliers->pluck('name', 'id')->toArray()"
+                        placeholder="Pilih Supplier" class="block w-full" required />
+                    <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
+                </div>
 
-                        {{-- Perkiraan Tiba --}}
-                        <div>
-                            <x-input-label for="expected_delivery_date" value="Perkiraan Tiba (Opsional)" />
-                            <input type="date" id="expected_delivery_date" name="expected_delivery_date"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
-                            <x-input-error :messages="$errors->get('expected_delivery_date')" class="mt-2" />
-                        </div>
-
-                        {{-- Catatan --}}
-                        <div>
-                            <x-input-label for="notes" value="Catatan" />
-                            <textarea id="notes" name="notes" rows="3"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"></textarea>
-                            <x-input-error :messages="$errors->get('notes')" class="mt-2" />
-                        </div>
-                    </div>
-                </x-card>
+                {{-- Catatan --}}
+                <div class="md:col-span-4">
+                    <x-input-label for="notes" value="Catatan" class="mb-1" />
+                    <textarea id="notes" name="notes" rows="2"
+                        class="w-full rounded-xl border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
+                        placeholder="Contoh: Keterangan tambahan..." required></textarea>
+                    <x-input-error :messages="$errors->get('notes')" class="mt-2" />
+                </div>
             </div>
 
             {{-- Daftar Item --}}
-            <div class="lg:col-span-2">
-                <x-card class="p-5 h-full flex flex-col">
-                    <h3
-                        class="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider border-b border-slate-100 pb-2">
-                        Daftar Item
-                    </h3>
-
-                    <div class="flex-1">
-                        <x-transactions.items-table :products="$products" priceField="unit_cost" priceLabel="Harga Beli" />
-                    </div>
-                </x-card>
+            <div class="mt-8">
+                <h3 class="text-base font-semibold text-slate-900 mb-4">Daftar Item</h3>
+                <x-transactions.items-table :products="$products" priceField="unit_cost" priceLabel="Harga Beli" />
             </div>
-        </div>
+        </x-card>
     </form>
 </div>
 @endsection

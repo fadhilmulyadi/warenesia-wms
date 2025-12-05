@@ -64,7 +64,7 @@ class IncomingTransactionController extends Controller
         $restockOrder = null;
 
         if ($request->has('restock_order_id')) {
-            $restockOrder = \App\Models\RestockOrder::with('items.product')->find($request->query('restock_order_id'));
+            $restockOrder = \App\Models\RestockOrder::with('items.product')->find($request->input('restock_order_id'));
 
             if ($restockOrder) {
                 $prefilledSupplierId = $restockOrder->supplier_id;

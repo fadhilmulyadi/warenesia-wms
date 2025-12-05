@@ -13,7 +13,6 @@
 
 @section('content')
     {{-- MOBILE VERSION --}}
-    {{-- MOBILE VERSION --}}
     <x-mobile.form form-id="category-form-mobile" save-label="Simpan Perubahan" save-icon="save" :show-delete="true"
         delete-action="{{ route('categories.destroy', $category) }}" delete-label="Hapus Kategori"
         delete-confirm="Hapus kategori ini? Data akan disoft delete.">

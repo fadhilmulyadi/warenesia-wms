@@ -2,11 +2,9 @@
 
 @section('title', 'Dashboard Staff Gudang')
 
-
-
 @section('page-header')
     <x-page-header title="Dashboard Staff Gudang"
-        description="Input cepat transaksi gudang dan pantau aktivitas hari ini." />
+        description="Input cepat transaksi gudang dan pantau aktivitas hari ini" />
 @endsection
 
 @php
@@ -24,18 +22,16 @@
 @endphp
 
 @section('content')
-    {{-- Perhatikan x-data di sini memanggil fungsi staffDashboard yang kita buat di bawah --}}
     <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6" x-data="staffDashboard({
-                                skuMap: @js($productSkuMap), 
-                                products: @js($productOptions) 
-                             })">
+                                    skuMap: @js($productSkuMap), 
+                                    products: @js($productOptions) 
+                                 })">
 
-        {{-- LEFT SIDE: Tasks & Actions --}}
+        {{-- LEFT SIDE--}}
         <div class="space-y-6 lg:col-span-3">
 
-            {{-- 1. SECTION: PO SIAP DITERIMA (Revised) --}}
+            {{-- PO SIAP DITERIMA --}}
             <x-dashboard.card padding="p-0">
-                {{-- Manual Header to fix padding issue with p-0 --}}
                 <div class="px-4 pt-4 mb-4 space-y-1">
                     <h3 class="text-sm font-semibold text-slate-900">PO Siap Diterima</h3>
                     <p class="text-sm text-slate-500">Restock Order yang sudah sampai di lokasi.</p>
@@ -75,7 +71,7 @@
                         </div>
                     </div>
                 @else
-                    {{-- Empty State (UX Improvement) --}}
+                    {{-- Empty State --}}
                     <div class="flex flex-col items-center justify-center py-8 text-center px-4 border-t border-slate-100">
                         <div class="bg-slate-50 p-3 rounded-full mb-3">
                             <x-lucide-check-circle class="w-6 h-6 text-slate-300" />
@@ -86,7 +82,7 @@
                 @endif
             </x-dashboard.card>
 
-            {{-- 2. SECTION: QUICK ACTION & ENTRY --}}
+            {{-- QUICK ACTION & ENTRY --}}
             <div class="space-y-4">
                 {{-- Scan Action Header --}}
                 <div
@@ -101,7 +97,7 @@
                         </div>
                     </div>
 
-                    {{-- Scan Button (Standardized) --}}
+                    {{-- Scan Button --}}
                     <x-action-button type="button" variant="primary" icon="scan-line"
                         x-on:click="openScanModal('incoming')">
                         Mulai Scan
@@ -140,7 +136,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('staffDashboard', ({ skuMap, products }) => ({
                 isScanOpen: false,
-                scanMode: 'incoming', // 'incoming' (beli) atau 'outgoing' (jual)
+                scanMode: 'incoming',
                 scanner: null,
                 cameras: [],
                 selectedCamera: null,
@@ -169,7 +165,7 @@
                     if (this.cameras.length === 0) {
                         this.cameras = await this.scanner.getCameras();
                     }
-                    
+
                     if (this.cameras.length > 0) {
                         // Prefer back camera if available
                         const backCamera = this.cameras.find(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('belakang'));
@@ -194,10 +190,40 @@
                 },
 
                 handleScanSuccess(decodedText, decodedResult) {
-                    console.log(`Scan result: ${decodedText}`, decodedResult);
-                    alert(`Berhasil Scan: ${decodedText}`);
-                    // TODO: Implement logic to add item to list based on SKU
-                    this.closeScanModal();
+                    console.log(`Scan result: ${decodedText}`);
+
+                    const sku = decodedText.trim();
+                    // Access skuMap from closure scope
+                    const productId = skuMap[sku];
+
+                    if (productId) {
+                        // 1. Dispatch event to prefill Quick Entry form
+                        window.dispatchEvent(new CustomEvent('barcode-prefill', {
+                            detail: {
+                                mode: this.scanMode,
+                                product_id: productId
+                            }
+                        }));
+
+                        // 2. Show Success Toast
+                        window.dispatchEvent(new CustomEvent('notify', {
+                            detail: {
+                                message: 'Produk berhasil ditambahkan',
+                                type: 'success'
+                            }
+                        }));
+
+                        // 3. Close Modal
+                        this.closeScanModal();
+                    } else {
+                        // Product Not Found
+                        window.dispatchEvent(new CustomEvent('notify', {
+                            detail: {
+                                message: `Produk dengan SKU '${sku}' tidak ditemukan.`,
+                                type: 'error'
+                            }
+                        }));
+                    }
                 },
 
                 handleScanFailure(errorMessage) {
@@ -222,12 +248,12 @@
                 async scanFile(file) {
                     this.isFileScanning = true;
                     try {
-                        await this.stopScanner(); // Stop camera before file scan
+                        await this.stopScanner();
                         await this.scanner.scanFile(file);
                     } catch (err) {
                         alert("Gagal memindai file. Pastikan gambar QR code jelas.");
                         this.isFileScanning = false;
-                        this.startScanner(); // Restart camera
+                        this.startScanner();
                     }
                 },
 

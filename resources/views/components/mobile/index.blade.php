@@ -162,30 +162,32 @@
                                     @php
                                         $isChecked = in_array($value, (array) request($filter['param'], []));
                                     @endphp
-                                    <label class="inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium cursor-pointer transition-colors {{ $isChecked ? 'bg-teal-50 border-teal-200 text-teal-700' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300' }}">
+                                    <label
+                                        x-data="{ checked: {{ $isChecked ? 'true' : 'false' }} }"
+                                        :class="checked ? 'bg-teal-50 border-teal-500 text-teal-700 shadow-sm ring-1 ring-teal-500' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'"
+                                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium cursor-pointer transition-all duration-200"
+                                    >
                                         <input
                                             type="checkbox"
                                             name="{{ $filter['param'] }}[]"
                                             value="{{ $value }}"
                                             class="hidden"
                                             {{ $isChecked ? 'checked' : '' }}
+                                            @change="checked = $el.checked"
                                         >
+                                        <x-lucide-check x-show="checked" class="w-4 h-4" style="display: none;" />
                                         {{ $label }}
                                     </label>
                                 @endforeach
                             </div>
                         @elseif($filter['type'] === 'select')
-                            <select
-                                name="{{ $filter['param'] }}"
-                                class="block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                            >
-                                <option value="">Semua</option>
-                                @foreach($filter['options'] as $value => $label)
-                                    <option value="{{ $value }}" {{ request($filter['param']) == $value ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <x-custom-select
+                                :name="$filter['param']"
+                                :options="['' => 'Semua'] + $filter['options']"
+                                :value="request($filter['param'])"
+                                :placeholder="'Pilih ' . $filter['label']"
+                                :searchable="true"
+                            />
                         @elseif($filter['type'] === 'date-range')
                             <input type="hidden" name="date_range" value="1">
                             <div class="grid grid-cols-2 gap-4">

@@ -46,10 +46,10 @@
             <div class="w-full overflow-x-auto">
                 <x-table>
                     <x-table.thead>
-                        <x-table.th sortable name="name">Name</x-table.th>
-                        <x-table.th>Contact</x-table.th>
+                        <x-table.th sortable name="name">Nama</x-table.th>
+                        <x-table.th>Kontak</x-table.th>
                         <x-table.th>Email</x-table.th>
-                        <x-table.th>Phone</x-table.th>
+                        <x-table.th>No. Handphone</x-table.th>
                         <x-table.th sortable name="average_rating">Avg rating</x-table.th>
                         <x-table.th sortable name="rated_restock_count">Rated restocks</x-table.th>
                         <x-table.th class="text-center">Status</x-table.th>
@@ -115,11 +115,11 @@
 
                                             @can('delete', $supplier)
                                                 <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
-                                                                                    title: 'Delete Supplier',
-                                                                                    message: 'Delete this supplier? This action cannot be undone.',
-                                                                                    itemName: '{{ $supplier->name }}'
-                                                                                })">
+                                                                                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
+                                                                                                                    title: 'Delete Supplier',
+                                                                                                                    message: 'Delete this supplier? This action cannot be undone.',
+                                                                                                                    itemName: '{{ $supplier->name }}'
+                                                                                                                })">
                                                     Delete
                                                 </x-table.action-item>
                                             @endcan
@@ -143,5 +143,7 @@
             <x-advanced-pagination :paginator="$suppliers" />
         @endif
     </div>
+
+
     <x-confirm-delete-modal />
 @endsection

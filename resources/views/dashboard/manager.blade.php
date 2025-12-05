@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Manager Dashboard')
+@section('title', 'Dashboard Manajer')
 
 @section('page-header')
     <x-page-header

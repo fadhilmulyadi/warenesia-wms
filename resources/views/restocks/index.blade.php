@@ -4,7 +4,7 @@
 
 @section('page-header')
     <x-page-header
-        title="Data Restok"
+        title="Data Restock"
         description="Kelola siklus pengadaan barang ke supplier dan monitor status pengiriman pesanan."
     />
 @endsection
@@ -159,7 +159,16 @@
                         </x-table.td>
                         
                         <x-table.td>
-                            {{ $restockOrder->expected_delivery_date?->format('d M Y') ?? '-' }}
+                            @if($restockOrder->status === 'received')
+                                <div class="flex flex-col">
+                                    <span class="font-medium text-emerald-700">
+                                        {{ $restockOrder->incomingTransaction?->transaction_date?->format('d M Y') ?? $restockOrder->updated_at->format('d M Y') }}
+                                    </span>
+                                    <span class="text-[10px] text-emerald-600/75">Received</span>
+                                </div>
+                            @else
+                                {{ $restockOrder->expected_delivery_date?->format('d M Y') ?? '-' }}
+                            @endif
                         </x-table.td>
                         
                         <x-table.td align="center">
