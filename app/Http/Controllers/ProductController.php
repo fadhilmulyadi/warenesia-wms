@@ -52,6 +52,7 @@ class ProductController extends Controller
             'search' => (string) $request->query('q', ''),
             'category_id' => $request->query('category_id'),
             'stock_status' => (array) $request->query('stock_status', []),
+            'barcode' => $request->query('barcode'),
             'sort' => $sort,
             'direction' => $direction,
             'per_page' => $perPage,

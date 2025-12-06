@@ -3,10 +3,7 @@
 @section('title', 'Dashboard Manajer')
 
 @section('page-header')
-    <x-page-header
-        title="Dashboard Manajer"
-        description="Ringkasan persetujuan, restok, dan kondisi stok"
-    />
+    <x-page-header title="Dashboard Manajer" description="Ringkasan persetujuan, restok, dan kondisi stok" />
 @endsection
 
 @section('content')
@@ -14,12 +11,8 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($overview as $stat)
                 <x-dashboard.card>
-                    <x-dashboard.stat
-                        :title="$stat['title']"
-                        :value="$stat['value']"
-                        :subtitle="$stat['subtitle']"
-                        :icon="$stat['icon']"
-                    />
+                    <x-dashboard.stat :title="$stat['title']" :value="$stat['value']" :subtitle="$stat['subtitle']"
+                        :icon="$stat['icon']" />
                 </x-dashboard.card>
             @endforeach
         </div>
@@ -42,9 +35,10 @@
                             </div>
                             <div class="flex items-center gap-3">
                                 <div class="flex-1 h-3 rounded-full bg-slate-200 overflow-hidden">
-                                    <div class="h-full rounded-full bg-sky-500 transition-all duration-300" style="width: {{ $order['progress'] }}%"></div>
+                                    <div class="h-full rounded-full bg-sky-500 transition-all duration-300" @style(['width: ' . $order['progress'] . '%'])></div>
                                 </div>
-                                <span class="text-xs font-medium text-slate-600 whitespace-nowrap">{{ $order['progress'] }}%</span>
+                                <span
+                                    class="text-xs font-medium text-slate-600 whitespace-nowrap">{{ $order['progress'] }}%</span>
                                 @if(!empty($order['eta']))
                                     <span class="text-xs text-slate-500 whitespace-nowrap">ETA {{ $order['eta'] }}</span>
                                 @endif

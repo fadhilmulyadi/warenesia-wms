@@ -114,14 +114,14 @@
                                             @endcan
 
                                             @can('delete', $supplier)
-                                                <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
+                                                <x-table.action-itemicon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
                                                                                                                                     action: '{{ route('suppliers.destroy', $supplier) }}',
                                                                                                                                     title: 'Delete Supplier',
                                                                                                                                     message: 'Delete this supplier? This action cannot be undone.',
                                                                                                                                     itemName: '{{ $supplier->name }}'
                                                                                                                                 })">
                                                     Delete
-                                                </x-table.action-item>
+                                                </x-table.action-itemicon=>
                                             @endcan
                                         </x-table.actions>
                                     </x-table.td>

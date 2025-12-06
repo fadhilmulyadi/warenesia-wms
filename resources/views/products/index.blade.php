@@ -17,7 +17,8 @@
     </div>
 
     {{-- PAGE CONTENT --}}
-    <div class="hidden md:block space-y-4">
+    <div class="hidden md:block space-y-4" x-data="productIndexScanner"
+        @scan-success.window="handleScan($event.detail.code)">
 
         {{-- TOOLBAR --}}
         <x-toolbar>
@@ -31,6 +32,10 @@
 
             <x-filter-bar :action="route('products.index', ['per_page' => $perPage])" :search="$search" :sort="$sort"
                 :direction="$direction" :filters="$filters" :resetKeys="$resetKeys" placeholder="Cari produk atau SKU...">
+
+                {{-- Hidden Barcode Input --}}
+                <input type="hidden" name="barcode" x-model="scannedBarcode" />
+
                 <x-slot:filter_category_id>
                     <x-filter.checkbox-list name="category_id" :options="$categories->map(fn($cat) => ['value' => $cat->id, 'label' => $cat->name])" :selected="request()->query('category_id', [])" />
                 </x-slot:filter_category_id>
@@ -46,6 +51,11 @@
             </x-filter-bar>
 
             <div class="flex flex-wrap flex-none gap-2 justify-end">
+                {{-- SCAN BUTTON --}}
+                <x-action-button type="button" variant="secondary" icon="scan-line" @click="openScanModal('search')">
+                    Scan Barcode
+                </x-action-button>
+
                 @can('export', \App\Models\Product::class)
                     <x-action-button href="{{ route('products.export', request()->query()) }}" variant="secondary"
                         icon="download">
@@ -120,12 +130,13 @@
                                     @endcan
 
                                     @can('delete', $product)
-                                        <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                                                                                action: '{{ route('products.destroy', $product) }}',
-                                                                                                                                title: 'Hapus Produk',
-                                                                                                                                itemName: '{{ $product->name }}',
-                                                                                                                                message: {{ $product->current_stock > 0 ? '\'Produk ini masih memiliki stok sebanyak <b>' . $product->current_stock . '</b>. Menghapus produk ini akan menghilangkan data stok secara permanen. Lanjutkan?\'' : 'null' }}
-                                                                                                                            })">
+                                        <x-table.action-item icon="trash-2" danger="true"
+                                            x-on:click="$dispatch('open-delete-modal', { 
+                                                                                                                                                                                action: '{{ route('products.destroy', $product) }}',
+                                                                                                                                                                                title: 'Hapus Produk',
+                                                                                                                                                                                itemName: '{{ $product->name }}',
+                                                                                                                                                                                message: {{ $product->current_stock > 0 ? '\'Produk ini masih memiliki stok sebanyak <b>' . $product->current_stock . '</b>. Menghapus produk ini akan menghilangkan data stok secara permanen. Lanjutkan?\'' : 'null' }}
+                                                                                                                                                                            })">
                                             Hapus
                                         </x-table.action-item>
                                     @endcan
@@ -135,7 +146,29 @@
 
                     </x-table.tr>
                 @empty
-                    <x-product.empty-state />
+                    @if(request()->query('barcode'))
+                        <tr>
+                            <td colspan="100%">
+                                <div class="flex flex-col items-center justify-center py-12 text-center">
+                                    <div class="bg-amber-50 p-4 rounded-full mb-3 text-amber-500">
+                                        <x-lucide-scan-line class="w-8 h-8" />
+                                    </div>
+                                    <h3 class="text-base font-semibold text-slate-900">Produk tidak ditemukan</h3>
+                                    <p class="text-sm text-slate-500 mt-1 max-w-xs mx-auto">
+                                        Produk dengan barcode <span
+                                            class="font-mono font-bold">{{ request()->query('barcode') }}</span> tidak terdaftar di
+                                        sistem.
+                                    </p>
+                                    <x-action-button href="{{ route('products.index') }}" variant="secondary" size="sm"
+                                        class="mt-4">
+                                        Reset Filter
+                                    </x-action-button>
+                                </div>
+                            </td>
+                        </tr>
+                    @else
+                        <x-product.empty-state />
+                    @endif
                 @endforelse
             </x-table.tbody>
         </x-table>
@@ -145,7 +178,11 @@
             <x-advanced-pagination :paginator="$products" />
         @endif
 
+        {{-- SCAN MODAL --}}
+        <x-dashboard.scan-modal />
+
     </div>
 
     <x-confirm-delete-modal />
+
 @endsection

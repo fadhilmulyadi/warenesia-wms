@@ -60,6 +60,10 @@ class ProductService
             $this->applyStockFilter($query, $filters['stock_status']);
         }
 
+        if (!empty($filters['barcode'])) {
+            $query->where('sku', $filters['barcode']);
+        }
+
         $query->orderBy($filters['sort'], $filters['direction'])
             ->orderBy('id');
 
@@ -284,6 +288,7 @@ class ProductService
             'search' => trim((string) ($filters['search'] ?? '')),
             'category_id' => $filters['category_id'] ?? null,
             'stock_status' => (array) ($filters['stock_status'] ?? []),
+            'barcode' => trim((string) ($filters['barcode'] ?? '')),
             'sort' => $sort,
             'direction' => $direction,
         ];

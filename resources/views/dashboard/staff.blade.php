@@ -24,9 +24,9 @@
 @section('content')
     {{-- DASHBOARD INIT --}}
     <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6" x-data="staffDashboard({
-                                            skuMap: @js($productSkuMap), 
-                                            products: @js($productOptions) 
-                                         })">
+                                                    skuMap: @js($productSkuMap), 
+                                                    products: @js($productOptions) 
+                                                 })">
 
         {{-- LEFT SIDE --}}
         <div class="space-y-6 lg:col-span-3">
@@ -133,11 +133,5 @@
     </div>
 
     {{-- SCRIPTS --}}
-    <script type="module">
-        import staffDashboard from '/resources/js/modules/scanner/staffScanner.js';
 
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('staffDashboard', staffDashboard);
-        });
-    </script>
 @endsection

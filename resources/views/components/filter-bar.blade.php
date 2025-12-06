@@ -76,10 +76,8 @@
                 }
             });
 
-            // Redirect without filter params; keep hidden inputs (e.g., sort/direction) intact
             const params = new URLSearchParams();
             
-            // Always keep filters visible after clear all
             params.append('filters_visible', 'true');
 
             this.$el.querySelectorAll('input[type=hidden]').forEach(input => {
@@ -106,9 +104,7 @@
     }"
     @filter-chip-activity.window="updateActive($event.detail)"
 >
-    {{-- BARIS 1: Search & Hidden Inputs --}}
     <div class="flex items-center justify-between gap-4">
-        {{-- Search Bar --}}
         <div class="w-full md:max-w-md">
             <x-search-bar
                 :value="$search"
@@ -117,7 +113,6 @@
             />
         </div>
 
-        {{-- Toggle Filters --}}
         @if(!empty($filters))
             <button 
                 type="button"
@@ -137,15 +132,13 @@
             </button>
         @endif
 
-        {{-- Hidden Sort Preservation --}}
         @if($sort) <input type="hidden" name="sort" value="{{ $sort }}"> @endif
         @if($direction) <input type="hidden" name="direction" value="{{ $direction }}"> @endif
         
-        {{-- Persist Filter Visibility --}}
         <input type="hidden" name="filters_visible" :value="filtersVisible ? 'true' : 'false'">
+        {{ $slot }}
     </div>
 
-    {{-- BARIS 2: Filter Buttons (Hanya muncul jika ada definisi filters) --}}
     @if(!empty($filters))
         <div 
             class="flex flex-wrap items-center gap-2"
@@ -166,7 +159,6 @@
                 </x-filter-chip>
             @endforeach
 
-            {{-- CLEAR ALL --}}
             @if($hasActiveFilter)
                 <button 
                     type="button" 
