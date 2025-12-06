@@ -32,7 +32,7 @@
                     @if($product->exists || $readonly) readonly @endif
                     
                     @class([
-                        'mt-1 block w-full rounded-lg text-sm',
+                        'mt-1 block w-full rounded-xl text-sm',
                         'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $product->exists || $readonly,
                         'border-slate-300 focus:border-teal-500 focus:ring-teal-500' => !$product->exists && !$readonly
                     ])
@@ -58,7 +58,7 @@
                     required
                     @disabled($readonly)
                     @class([
-                        'mt-1 block w-full rounded-lg text-sm',
+                        'mt-1 block w-full rounded-xl text-sm',
                         'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $readonly,
                         'border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-sm' => !$readonly
                     ])
@@ -73,7 +73,7 @@
         >
             <x-input-label for="rack_location" value="Lokasi Rak Gudang *" class="text-sm font-semibold text-slate-700" />
             <div class="flex mt-1">
-                <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 text-slate-500">
+                <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-300 bg-slate-50 text-slate-500">
                     <x-lucide-map-pin class="w-4 h-4" />
                 </span>
                 <input
@@ -88,7 +88,7 @@
                     placeholder="Contoh: A12-03"
                     @disabled($readonly)
                     @class([
-                        'block w-full rounded-r-lg text-sm uppercase placeholder:normal-case',
+                        'block w-full rounded-r-xl text-sm uppercase placeholder:normal-case placeholder:text-slate-400',
                         'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed focus:ring-0' => $readonly,
                         'border-slate-300 focus:border-teal-500 focus:ring-teal-500' => !$readonly
                     ])

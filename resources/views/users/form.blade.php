@@ -10,7 +10,6 @@
     $defaultStatus = \App\Enums\UserStatus::ACTIVE->value;
 @endphp
 
-{{-- SECTION: General --}}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-2">
         <x-input-label for="name" value="Nama" />
@@ -20,7 +19,6 @@
             type="text"
             value="{{ old('name', $user->name ?? '') }}"
             required
-            class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
         />
         <x-input-error :messages="$errors->get('name')" />
     </div>
@@ -33,7 +31,6 @@
             type="email"
             value="{{ old('email', $user->email ?? '') }}"
             required
-            class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
         />
         <x-input-error :messages="$errors->get('email')" />
     </div>
@@ -45,7 +42,6 @@
             name="department"
             type="text"
             value="{{ old('department', $user->department ?? '') }}"
-            class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
         />
         <x-input-error :messages="$errors->get('department')" />
     </div>
@@ -77,26 +73,19 @@
     </div>
 </div>
 
-{{-- SECTION: Password --}}
-{{-- SECTION: Password --}}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-    <x-password-generator 
-        name="password" 
-        :label="$isEdit ? 'Reset Password (opsional)' : 'Password'" 
-        :required="!$isEdit" 
-        :placeholder="$isEdit ? 'Kosongkan jika tidak ingin mengubah' : ''"
+    <x-password-input
+        name="password"
+        id="password"
+        :label="$isEdit ? 'Reset Password (opsional)' : 'Password'"
+        :required="!$isEdit"
+        placeholder="{{ $isEdit ? 'Kosongkan jika tidak ingin mengubah' : '' }}"
     />
 
-    <div class="space-y-2">
-        <x-input-label for="password_confirmation" :value="$isEdit ? 'Konfirmasi Password Baru' : 'Konfirmasi Password'" />
-        <x-text-input
-            id="password_confirmation"
-            name="password_confirmation"
-            type="password"
-            autocomplete="{{ $isEdit ? 'new-password' : 'password' }}"
-            class="block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-            @if(!$isEdit) required @endif
-        />
-        <x-input-error :messages="$errors->get('password_confirmation')" />
-    </div>
+    <x-password-input
+        name="password_confirmation"
+        id="password_confirmation"
+        :label="$isEdit ? 'Konfirmasi Password Baru' : 'Konfirmasi Password'"
+        :required="!$isEdit"
+    />
 </div>

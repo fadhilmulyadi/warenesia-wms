@@ -173,13 +173,12 @@
                         </x-table.tbody>
                     </x-table>
                 </div>
-
-                @if($users->hasPages() || $users->total() > 0)
-                    <div class="p-4 border-t border-slate-200">
-                        <x-advanced-pagination :paginator="$users" />
-                    </div>
-                @endif
             </x-card>
+
+            {{-- PAGINATION --}}
+            @if($users->hasPages() || $users->total() > 0)
+                <x-advanced-pagination :paginator="$users" />
+            @endif
         </div>
 
     </div>

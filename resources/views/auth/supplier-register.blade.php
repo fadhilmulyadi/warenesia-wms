@@ -61,7 +61,9 @@
                         <x-input-label for="phone" value="Nomor Telepon / WA" />
                         <x-text-input id="phone"
                             class="block w-full rounded-xl border-slate-300 focus:border-teal-500 focus:ring-teal-500 shadow-sm py-2.5"
-                            type="text" name="phone" :value="old('phone')" required placeholder="081234567890" />
+                            type="tel" name="phone" :value="old('phone')" required placeholder="081234567890"
+                            inputmode="numeric" pattern="[0-9]*"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                         <x-input-error :messages="$errors->get('phone')" />
                     </div>
 

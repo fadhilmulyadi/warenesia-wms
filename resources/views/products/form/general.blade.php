@@ -30,9 +30,8 @@
 
             <input type="text" id="sku" name="sku" x-model="form.sku" :readonly="true"
                 :class="'bg-slate-50 text-slate-700 cursor-not-allowed border-slate-200 focus:border-slate-200 focus:ring-0'"
-                class="block w-full rounded-lg text-sm font-mono transition-colors duration-200"
+                class="block w-full rounded-xl text-sm font-mono transition-colors duration-200"
                 x-bind:placeholder="skuHint">
-            <p class="text-[11px] text-slate-500" x-text="skuHint"></p>
             @unless($readonly)
                 <x-input-error class="mt-1.5" :messages="$errors->get('sku')" />
             @endunless
@@ -42,7 +41,7 @@
         <div>
             <x-input-label for="description" value="Deskripsi *" class="text-sm font-semibold text-slate-700" />
             <textarea id="description" name="description" rows="4" required @disabled($readonly) @class([
-                'mt-1 block w-full rounded-lg border-slate-300 shadow-sm sm:text-sm',
+                'mt-1 block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm placeholder:text-slate-400',
                 'bg-slate-50 text-slate-500 border-slate-200 cursor-not-allowed resize-none focus:ring-0' => $readonly,
                 'focus:border-teal-500 focus:ring-teal-500' => !$readonly
             ])
