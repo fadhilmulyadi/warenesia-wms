@@ -8,8 +8,10 @@
         RestockOrder::STATUS_RECEIVED => ['label' => 'Received', 'icon' => 'package-check'],
     ];
 
-    $isCancelled = $status === RestockOrder::STATUS_CANCELLED;
-    $currentIndex = $isCancelled ? -1 : array_search($status, array_keys($steps), true);
+    $statusValue = $status instanceof \BackedEnum ? $status->value : $status;
+
+    $isCancelled = $statusValue === RestockOrder::STATUS_CANCELLED;
+    $currentIndex = $isCancelled ? -1 : array_search($statusValue, array_keys($steps), true);
 @endphp
 
 <div class="w-full py-4 px-2">

@@ -24,9 +24,14 @@
         RestockOrder::STATUS_CANCELLED  => 'bg-rose-50 text-rose-700 border-rose-200',
     ];
 
-    $color = $colors[$status] ?? 'bg-slate-50 text-slate-700 border-slate-200';
+    $statusValue = $status instanceof \BackedEnum ? $status->value : (string) $status;
 
-    $badgeLabel = $label ?? ucfirst(str_replace('_', ' ', (string) $status));
+    $color = $colors[$statusValue] ?? 'bg-slate-50 text-slate-700 border-slate-200';
+
+    $badgeLabel = $label
+        ?? (is_object($status) && method_exists($status, 'label')
+            ? $status->label()
+            : ucfirst(str_replace('_', ' ', $statusValue)));
 @endphp
 
 <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold {{ $color }}">

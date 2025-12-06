@@ -59,6 +59,7 @@ class Product extends Model
     {
         if (! $value) {
             $this->attributes['rack_location'] = null;
+
             return;
         }
 
@@ -71,6 +72,7 @@ class Product extends Model
             $bin = $matches[3];
 
             $this->attributes['rack_location'] = "{$zone}{$rack}-{$bin}";
+
             return;
         }
 
@@ -80,6 +82,7 @@ class Product extends Model
             $bin = str_pad($matches[3], 2, '0', STR_PAD_LEFT);
 
             $this->attributes['rack_location'] = "{$zone}{$rack}-{$bin}";
+
             return;
         }
 

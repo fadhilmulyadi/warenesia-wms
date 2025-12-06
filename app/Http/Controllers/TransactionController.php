@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Enums\IncomingTransactionStatus;
+use App\Enums\OutgoingTransactionStatus;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Models\Customer;
 use App\Models\IncomingTransaction;
 use App\Models\OutgoingTransaction;
 use App\Models\Supplier;
-use Illuminate\Database\Eloquent\Builder;
+use App\Services\IncomingTransactionService;
+use App\Services\OutgoingTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -17,13 +19,18 @@ class TransactionController extends Controller
     use HasIndexQueryHelpers;
 
     private const DEFAULT_PER_PAGE = 10;
+
     private const MAX_PER_PAGE = 250;
+
     private const TYPE_INCOMING = 'barang_masuk';
+
     private const TYPE_OUTGOING = 'barang_keluar';
 
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(
+        private readonly IncomingTransactionService $incomingTransactions,
+        private readonly OutgoingTransactionService $outgoingTransactions
+    ) {}
+
     public function index(Request $request): View
     {
         $activeTab = $this->resolveTransactionMode($request);
@@ -49,11 +56,20 @@ class TransactionController extends Controller
             defaultDirection: 'desc'
         );
 
-        $transactionsQuery = $activeTab === 'incoming'
-            ? $this->buildIncomingIndexQuery($request, $sort, $direction)
-            : $this->buildOutgoingIndexQuery($request, $sort, $direction);
+        $filters = [
+            'search' => (string) $request->query('q', ''),
+            'status' => (array) $request->query('status', []),
+            'supplier_id' => $request->query('supplier_id'),
+            'customer_ids' => (array) $request->query('customer_id', []),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'sort' => $sort,
+            'direction' => $direction,
+        ];
 
-        $this->applyStaffScope($transactionsQuery, $request);
+        $transactionsQuery = $activeTab === 'incoming'
+            ? $this->incomingTransactions->indexQuery($filters, $request->user())
+            : $this->outgoingTransactions->indexQuery($filters, $request->user());
 
         $transactions = $transactionsQuery
             ->paginate($perPage)
@@ -79,155 +95,6 @@ class TransactionController extends Controller
             'direction',
             'perPage'
         ));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    private function buildIncomingIndexQuery(
-        Request $request,
-        string $sort,
-        string $direction
-    ): Builder {
-        $search = (string) $request->query('q', '');
-
-        $query = IncomingTransaction::query()
-            ->with(['supplier', 'createdBy']);
-
-        if ($search !== '') {
-            $query->where(function (Builder $searchQuery) use ($search): void {
-                $this->applySearch($searchQuery, $search, ['transaction_number']);
-                $searchQuery->orWhereHas('supplier', function (Builder $supplierQuery) use ($search): void {
-                    $supplierQuery->where('name', 'like', '%' . $search . '%');
-                });
-            });
-        }
-
-        $this->applyFilters($query, $request, [
-            'status' => function (Builder $statusQuery, $value): void {
-                $statuses = array_values(array_intersect(
-                    (array) $value,
-                    array_keys($this->incomingStatusOptions())
-                ));
-
-                if (count($statuses) > 0) {
-                    $statusQuery->whereIn('status', $statuses);
-                }
-            },
-            'supplier_id' => 'supplier_id',
-        ]);
-
-        $this->applyDateRange($query, $request, 'transaction_date');
-
-        $query->orderBy($sort, $direction)
-            ->orderBy('id');
-
-        return $query;
-    }
-
-    private function buildOutgoingIndexQuery(
-        Request $request,
-        string $sort,
-        string $direction
-    ): Builder {
-        $search = (string) $request->query('q', '');
-
-        $query = OutgoingTransaction::query()
-            ->with(['createdBy']);
-
-        $this->applySearch($query, $search, ['transaction_number', 'customer_name']);
-
-        $this->applyFilters($query, $request, [
-            'status' => function (Builder $statusQuery, $value): void {
-                $statuses = array_values(array_intersect(
-                    (array) $value,
-                    array_keys($this->outgoingStatusOptions())
-                ));
-
-                if (count($statuses) > 0) {
-                    $statusQuery->whereIn('status', $statuses);
-                }
-            },
-            'customer_id' => function (Builder $customerQuery, $value): void {
-                $customerIds = array_values(array_filter((array) $value, static function ($id) {
-                    return $id !== null && $id !== '';
-                }));
-
-                if (count($customerIds) === 0) {
-                    return;
-                }
-
-                $customerNames = Customer::whereIn('id', $customerIds)
-                    ->pluck('name')
-                    ->filter()
-                    ->values();
-
-                if ($customerNames->isNotEmpty()) {
-                    $customerQuery->whereIn('customer_name', $customerNames);
-                }
-            },
-        ]);
-
-        $this->applyDateRange($query, $request, 'transaction_date');
-
-        $query->orderBy($sort, $direction)
-            ->orderBy('id');
-
-        return $query;
-    }
-
-    private function applyStaffScope(Builder $query, Request $request): void
-    {
-        $user = $request->user();
-
-        if ($user !== null && $user->role === 'staff') {
-            $query->where('created_by', $user->id);
-        }
     }
 
     private function resolveTransactionMode(Request $request): string
@@ -268,19 +135,15 @@ class TransactionController extends Controller
 
     private function incomingStatusOptions(): array
     {
-        return [
-            IncomingTransaction::STATUS_PENDING => 'Pending',
-            IncomingTransaction::STATUS_VERIFIED => 'Verified',
-            IncomingTransaction::STATUS_COMPLETED => 'Completed',
-        ];
+        return collect(IncomingTransactionStatus::cases())
+            ->mapWithKeys(fn (IncomingTransactionStatus $status) => [$status->value => $status->label()])
+            ->all();
     }
 
     private function outgoingStatusOptions(): array
     {
-        return [
-            OutgoingTransaction::STATUS_PENDING => 'Pending',
-            OutgoingTransaction::STATUS_APPROVED => 'Approved',
-            OutgoingTransaction::STATUS_SHIPPED => 'Shipped',
-        ];
+        return collect(OutgoingTransactionStatus::cases())
+            ->mapWithKeys(fn (OutgoingTransactionStatus $status) => [$status->value => $status->label()])
+            ->all();
     }
 }

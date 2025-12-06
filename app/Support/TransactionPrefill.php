@@ -26,10 +26,10 @@ class TransactionPrefill
         $base = self::baseFromQuery($request);
 
         return [
-            'product_id'  => $request->query('product_id'),
+            'product_id' => $request->query('product_id'),
             'supplier_id' => $request->query('supplier_id'),
-            'quantity'    => $request->query('quantity') ?? 1,
-            'unit_cost'   => $request->query('unit_cost'),
+            'quantity' => $request->query('quantity') ?? 1,
+            'unit_cost' => $request->query('unit_cost'),
         ];
     }
 

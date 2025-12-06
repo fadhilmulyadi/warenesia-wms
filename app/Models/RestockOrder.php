@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\RestockStatus;
 use App\Services\NumberGeneratorService;
+use App\Services\Support\TransactionTotalsCalculator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Services\Support\TransactionTotalsCalculator;
 
 class RestockOrder extends Model
 {
@@ -24,18 +25,24 @@ class RestockOrder extends Model
         $this->save();
     }
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_CONFIRMED = 'confirmed';
-    public const STATUS_IN_TRANSIT = 'in_transit';
-    public const STATUS_RECEIVED = 'received';
-    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_PENDING = RestockStatus::PENDING->value;
+
+    public const STATUS_CONFIRMED = RestockStatus::CONFIRMED->value;
+
+    public const STATUS_IN_TRANSIT = RestockStatus::IN_TRANSIT->value;
+
+    public const STATUS_RECEIVED = RestockStatus::RECEIVED->value;
+
+    public const STATUS_CANCELLED = RestockStatus::CANCELLED->value;
 
     public const MIN_RATING = 1;
+
     public const MAX_RATING = 5;
 
     public const DEFAULT_PER_PAGE = 10;
 
     private const PURCHASE_ORDER_PREFIX = 'PO';
+
     private const SEQUENCE_PAD_LENGTH = 4;
 
     protected $fillable = [
@@ -64,12 +71,13 @@ class RestockOrder extends Model
         'total_amount' => 'decimal:2',
         'rating' => 'integer',
         'rating_given_at' => 'datetime',
+        'status' => RestockStatus::class,
     ];
 
     public static function generateNextPurchaseOrderNumber(): string
     {
         return app(NumberGeneratorService::class)->generateDailySequence(
-            (new static())->getTable(),
+            (new static)->getTable(),
             'po_number',
             self::PURCHASE_ORDER_PREFIX,
             self::SEQUENCE_PAD_LENGTH
@@ -103,44 +111,44 @@ class RestockOrder extends Model
 
     public static function statusOptions(): array
     {
-        return [
-            self::STATUS_PENDING => 'Pending',
-            self::STATUS_CONFIRMED => 'Confirmed',
-            self::STATUS_IN_TRANSIT => 'In transit',
-            self::STATUS_RECEIVED => 'Received',
-            self::STATUS_CANCELLED => 'Cancelled',
-        ];
+        return collect(RestockStatus::cases())
+            ->mapWithKeys(fn (RestockStatus $status) => [$status->value => $status->label()])
+            ->all();
     }
 
     public function getStatusLabelAttribute(): string
     {
-        return self::statusOptions()[$this->status]
+        $status = $this->status instanceof RestockStatus
+            ? $this->status
+            : RestockStatus::tryFrom((string) $this->status);
+
+        return $status?->label()
             ?? ucfirst((string) $this->status);
     }
 
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === RestockStatus::PENDING;
     }
 
     public function isConfirmed(): bool
     {
-        return $this->status === self::STATUS_CONFIRMED;
+        return $this->status === RestockStatus::CONFIRMED;
     }
 
     public function isInTransit(): bool
     {
-        return $this->status === self::STATUS_IN_TRANSIT;
+        return $this->status === RestockStatus::IN_TRANSIT;
     }
 
     public function isReceived(): bool
     {
-        return $this->status === self::STATUS_RECEIVED;
+        return $this->status === RestockStatus::RECEIVED;
     }
 
     public function isCancelled(): bool
     {
-        return $this->status === self::STATUS_CANCELLED;
+        return $this->status === RestockStatus::CANCELLED;
     }
 
     public function canBeConfirmed(): bool

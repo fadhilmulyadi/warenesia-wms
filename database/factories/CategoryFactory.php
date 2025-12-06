@@ -17,7 +17,7 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => ucfirst($this->faker->unique()->word()) . ' Category',
+            'name' => ucfirst($this->faker->unique()->word()).' Category',
             'description' => $this->faker->sentence(),
             'image_path' => null,
             'sku_prefix' => strtoupper($this->faker->unique()->lexify('???')),

@@ -2,23 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Enums\RestockStatus;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
-use App\Http\Requests\RestockOrderRequest;
 use App\Http\Requests\RestockOrderRatingRequest;
+use App\Http\Requests\RestockOrderRequest;
 use App\Models\Product;
 use App\Models\RestockOrder;
 use App\Models\Supplier;
 use App\Services\RestockService;
 use App\Support\CsvExporter;
-use Illuminate\Database\Eloquent\Builder;
+use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use InvalidArgumentException;
-use DomainException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RestockOrderController extends Controller
@@ -26,22 +25,13 @@ class RestockOrderController extends Controller
     use HasIndexQueryHelpers;
 
     private const DEFAULT_PER_PAGE = RestockOrder::DEFAULT_PER_PAGE;
+
     private const MAX_PER_PAGE = 250;
+
     private const EXPORT_CHUNK_SIZE = 200;
-    private const ALLOWED_STATUS_FILTERS = [
-        RestockOrder::STATUS_PENDING,
-        RestockOrder::STATUS_CONFIRMED,
-        RestockOrder::STATUS_IN_TRANSIT,
-        RestockOrder::STATUS_RECEIVED,
-    ];
 
-    public function __construct(private readonly RestockService $restockService)
-    {
-    }
+    public function __construct(private readonly RestockService $restockService) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): View
     {
         $this->authorize('viewAny', RestockOrder::class);
@@ -59,7 +49,14 @@ class RestockOrderController extends Controller
             defaultDirection: 'desc'
         );
 
-        $restockOrdersQuery = $this->buildRestockOrderIndexQuery($request, $sort, $direction);
+        $restockOrdersQuery = $this->restockService->indexQuery([
+            'search' => (string) $request->query('q', ''),
+            'status' => (array) $request->query('status', []),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'sort' => $sort,
+            'direction' => $direction,
+        ], $request->user());
 
         $restockOrders = $restockOrdersQuery
             ->paginate($perPage)
@@ -71,9 +68,6 @@ class RestockOrderController extends Controller
         return view('restocks.index', compact('restockOrders', 'statusOptions', 'search', 'sort', 'direction', 'perPage'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): View
     {
         $this->authorize('create', RestockOrder::class);
@@ -87,9 +81,6 @@ class RestockOrderController extends Controller
         return view('restocks.create', compact('suppliers', 'products', 'today'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(RestockOrderRequest $request): RedirectResponse
     {
         $this->authorize('create', RestockOrder::class);
@@ -117,9 +108,6 @@ class RestockOrderController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(RestockOrder $restock): View
     {
         $this->authorize('view', $restock);
@@ -134,7 +122,7 @@ class RestockOrderController extends Controller
     {
         $this->authorize('rate', $restockOrder);
 
-        if (!$restockOrder->canBeRated()) {
+        if (! $restockOrder->canBeRated()) {
             return redirect()
                 ->route('restocks.show', $restockOrder)
                 ->withErrors([
@@ -187,7 +175,7 @@ class RestockOrderController extends Controller
             return redirect()
                 ->route('restocks.show', $restock)
                 ->with('success', 'Restock order berhasil diproses.');
-        } catch (DomainException | ModelNotFoundException $exception) {
+        } catch (DomainException|ModelNotFoundException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
                 ->withErrors([
@@ -232,8 +220,15 @@ class RestockOrderController extends Controller
             defaultDirection: 'desc'
         );
 
-        $restockOrdersQuery = $this->buildRestockOrderIndexQuery($request, $sort, $direction);
-        $fileName = 'restocks-' . now()->format('Ymd-His') . '.csv';
+        $restockOrdersQuery = $this->restockService->indexQuery([
+            'search' => (string) $request->query('q', ''),
+            'status' => (array) $request->query('status', []),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'sort' => $sort,
+            'direction' => $direction,
+        ], $request->user());
+        $fileName = 'restocks-'.now()->format('Ymd-His').'.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($restockOrdersQuery): void {
             $output->fputcsv([
@@ -294,7 +289,14 @@ class RestockOrderController extends Controller
             defaultDirection: 'desc'
         );
 
-        $restockOrdersQuery = $this->buildRestockOrderIndexQuery($request, $sort, $direction);
+        $restockOrdersQuery = $this->restockService->indexQuery([
+            'search' => (string) $request->query('q', ''),
+            'status' => (array) $request->query('status', []),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'sort' => $sort,
+            'direction' => $direction,
+        ], $request->user(), true);
 
         $restockOrders = $restockOrdersQuery
             ->paginate($perPage)
@@ -356,59 +358,17 @@ class RestockOrderController extends Controller
         }
     }
 
-    private function buildRestockOrderIndexQuery(
-        Request $request,
-        string $sort,
-        string $direction
-    ): Builder {
-        $search = (string) $request->query('q', '');
-
-        $query = RestockOrder::query()
-            ->with(['supplier', 'createdBy', 'confirmedBy', 'ratingGivenBy', 'incomingTransaction']);
-
-        if ($request->routeIs('supplier.restocks.*') && $request->user() !== null) {
-            $query->where('supplier_id', $request->user()->id);
-        }
-
-        if ($search !== '') {
-            $query->where(function (Builder $searchQuery) use ($search): void {
-                $this->applySearch($searchQuery, $search, ['po_number']);
-
-                $searchQuery->orWhereHas('supplier', function (Builder $supplierQuery) use ($search): void {
-                    $supplierQuery->where('name', 'like', '%' . $search . '%');
-                });
-            });
-        }
-
-        $this->applyFilters($query, $request, [
-            'status' => function (Builder $statusQuery, $value): void {
-                $statuses = array_values(array_intersect(
-                    (array) $value,
-                    self::ALLOWED_STATUS_FILTERS
-                ));
-
-                if (count($statuses) === 0) {
-                    return;
-                }
-
-                $statusQuery->whereIn('status', $statuses);
-            },
-        ]);
-
-        $this->applyDateRange($query, $request, 'order_date');
-
-        $query->orderBy($sort, $direction)
-            ->orderBy('id');
-
-        return $query;
-    }
-
     private function restockStatusFilters(): array
     {
-        return array_intersect_key(
-            RestockOrder::statusOptions(),
-            array_flip(self::ALLOWED_STATUS_FILTERS)
-        );
+        return collect(RestockStatus::cases())
+            ->filter(static fn (RestockStatus $status) => in_array($status, [
+                RestockStatus::PENDING,
+                RestockStatus::CONFIRMED,
+                RestockStatus::IN_TRANSIT,
+                RestockStatus::RECEIVED,
+            ], true))
+            ->mapWithKeys(fn (RestockStatus $status) => [$status->value => $status->label()])
+            ->all();
     }
 
     private function abortIfSupplierDoesNotOwn(RestockOrder $restock, int $supplierId): void

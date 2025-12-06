@@ -12,7 +12,7 @@ class RestockOrderRatingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return false;
         }
 
@@ -32,8 +32,8 @@ class RestockOrderRatingRequest extends FormRequest
             'rating' => [
                 'required',
                 'integer',
-                'min:' . RestockOrder::MIN_RATING,
-                'max:' . RestockOrder::MAX_RATING,
+                'min:'.RestockOrder::MIN_RATING,
+                'max:'.RestockOrder::MAX_RATING,
             ],
             'rating_notes' => [
                 'nullable',
@@ -46,9 +46,9 @@ class RestockOrderRatingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'rating.required' => 'Silakan pilih peringkat antara ' . RestockOrder::MIN_RATING . ' dan ' . RestockOrder::MAX_RATING . '.',
-            'rating.min' => 'Peringkat minimal harus ' . RestockOrder::MIN_RATING . '.',
-            'rating.max' => 'Peringkat tidak boleh melebihi ' . RestockOrder::MAX_RATING . '.',
+            'rating.required' => 'Silakan pilih peringkat antara '.RestockOrder::MIN_RATING.' dan '.RestockOrder::MAX_RATING.'.',
+            'rating.min' => 'Peringkat minimal harus '.RestockOrder::MIN_RATING.'.',
+            'rating.max' => 'Peringkat tidak boleh melebihi '.RestockOrder::MAX_RATING.'.',
         ];
     }
 }

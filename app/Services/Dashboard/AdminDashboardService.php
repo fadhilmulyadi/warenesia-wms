@@ -2,10 +2,9 @@
 
 namespace App\Services\Dashboard;
 
-use App\Models\Product;
 use App\Models\IncomingTransaction;
 use App\Models\OutgoingTransaction;
-use App\Models\RestockOrder;
+use App\Models\Product;
 use Illuminate\Support\Carbon;
 
 class AdminDashboardService
@@ -49,14 +48,14 @@ class AdminDashboardService
             ->whereColumn('current_stock', '<', 'min_stock')
             ->orderBy('current_stock')
             ->limit(6)
-            ->get(['id','name', 'sku', 'current_stock', 'min_stock'])
+            ->get(['id', 'name', 'sku', 'current_stock', 'min_stock'])
             ->map(function ($product) {
                 return [
                     'icon' => 'alert-triangle',
                     'title' => $product->name,
                     'description' => "{$product->sku} - Min {$product->min_stock}",
                     'meta' => "Stok tersisa: {$product->current_stock}",
-                    'meta_color' => $product->current_stock == 0 
+                    'meta_color' => $product->current_stock == 0
                         ? 'border-red-100 bg-red-50 text-red-700'
                         : 'border-amber-100 bg-amber-50 text-amber-700',
                     'href' => route('products.edit', $product->id),
@@ -96,6 +95,6 @@ class AdminDashboardService
 
     private function formatCurrency($value): string
     {
-        return 'Rp ' . number_format($value, 0, ',', '.');
+        return 'Rp '.number_format($value, 0, ',', '.');
     }
 }

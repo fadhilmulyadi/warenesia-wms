@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Category;
 use App\Services\CategoryService;
 use App\Support\CsvExporter;
-use Illuminate\Http\Request;
 use DomainException;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CategoryController extends Controller
@@ -18,13 +17,14 @@ class CategoryController extends Controller
     use HasIndexQueryHelpers;
 
     private const DEFAULT_PER_PAGE = 10;
+
     private const MAX_PER_PAGE = 250;
+
     private const EXPORT_CHUNK_SIZE = 200;
+
     private const NAME_FILTER_THRESHOLD = 8;
 
-    public function __construct(private readonly CategoryService $categories)
-    {
-    }
+    public function __construct(private readonly CategoryService $categories) {}
 
     /**
      * Display a listing of the resource.
@@ -146,7 +146,7 @@ class CategoryController extends Controller
             ->route('categories.index')
             ->with('success', 'Kategori berhasil dihapus.');
     }
-        
+
     public function quickStore(CategoryStoreRequest $request)
     {
         $this->authorize('create', Category::class);
@@ -184,7 +184,7 @@ class CategoryController extends Controller
             'direction' => $direction,
             'name' => $request->query('name'),
         ]);
-        $fileName = 'categories-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'categories-'.now()->format('Ymd-His').'.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($categoryQuery): void {
             $output->fputcsv([

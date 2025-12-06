@@ -10,7 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasColumn('categories', 'sku_prefix')) {
+        if (! Schema::hasColumn('categories', 'sku_prefix')) {
             Schema::table('categories', function (Blueprint $table) {
                 $table->string('sku_prefix')->nullable()->after('image_path');
             });

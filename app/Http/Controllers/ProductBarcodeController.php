@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -11,6 +10,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class ProductBarcodeController extends Controller
 {
     private const QR_SIZE = 256;
+
     private const QR_MARGIN = 1;
 
     public function show(Product $product): Response
@@ -26,7 +26,7 @@ class ProductBarcodeController extends Controller
 
         return response($image, 200, [
             'Content-Type' => 'image/svg+xml',
-            'Content-Disposition' => 'attachment; filename="product-' . $product->id . '-qrcode.svg"',
+            'Content-Disposition' => 'attachment; filename="product-'.$product->id.'-qrcode.svg"',
         ]);
     }
 

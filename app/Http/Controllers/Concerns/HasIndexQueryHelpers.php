@@ -33,11 +33,11 @@ trait HasIndexQueryHelpers
         $sort = $request->query('sort', $defaultSort);
         $direction = strtolower($request->query('direction', $defaultDirection));
 
-        if (!in_array($sort, $allowedSorts, true)) {
+        if (! in_array($sort, $allowedSorts, true)) {
             $sort = $defaultSort;
         }
 
-        if (!in_array($direction, ['asc', 'desc'], true)) {
+        if (! in_array($direction, ['asc', 'desc'], true)) {
             $direction = $defaultDirection;
         }
 
@@ -57,7 +57,7 @@ trait HasIndexQueryHelpers
 
         $query->where(function (Builder $q) use ($keyword, $columns) {
             foreach ($columns as $column) {
-                $q->orWhere($column, 'like', '%' . $keyword . '%');
+                $q->orWhere($column, 'like', '%'.$keyword.'%');
             }
         });
     }
@@ -88,11 +88,13 @@ trait HasIndexQueryHelpers
                 } else {
                     $query->where($handler, $value);
                 }
+
                 continue;
             }
 
             if (is_callable($handler)) {
                 $handler($query, $value);
+
                 continue;
             }
         }
@@ -109,15 +111,15 @@ trait HasIndexQueryHelpers
         if (! $request->filled('date_range')) {
             return;
         }
-        
-        $from = $request->query('date_from');
-        $to   = $request->query('date_to');
 
-        if (!empty($from)) {
+        $from = $request->query('date_from');
+        $to = $request->query('date_to');
+
+        if (! empty($from)) {
             $query->whereDate($column, '>=', $from);
         }
 
-        if (!empty($to)) {
+        if (! empty($to)) {
             $query->whereDate($column, '<=', $to);
         }
     }

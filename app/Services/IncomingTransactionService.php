@@ -2,16 +2,58 @@
 
 namespace App\Services;
 
+use App\Enums\IncomingTransactionStatus;
 use App\Models\IncomingTransaction;
 use App\Models\IncomingTransactionItem;
 use App\Models\Product;
 use App\Models\User;
 use DomainException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 
 class IncomingTransactionService extends BaseTransactionService
 {
+    public function indexQuery(array $filters = [], ?User $user = null): Builder
+    {
+        $filters = $this->normalizeIndexFilters($filters);
+
+        $query = IncomingTransaction::query()
+            ->with(['supplier', 'createdBy', 'verifiedBy']);
+
+        if ($filters['search'] !== '') {
+            $query->where(function (Builder $searchQuery) use ($filters): void {
+                $searchQuery->where('transaction_number', 'like', '%'.$filters['search'].'%');
+
+                $searchQuery->orWhereHas('supplier', function (Builder $supplierQuery) use ($filters): void {
+                    $supplierQuery->where('name', 'like', '%'.$filters['search'].'%');
+                });
+            });
+        }
+
+        if (! empty($filters['status'])) {
+            $query->whereIn('status', array_map(static fn (IncomingTransactionStatus $status) => $status->value, $filters['status']));
+        }
+
+        if ($filters['supplier_id']) {
+            $query->where('supplier_id', $filters['supplier_id']);
+        }
+
+        if ($filters['date_from']) {
+            $query->whereDate('transaction_date', '>=', $filters['date_from']);
+        }
+
+        if ($filters['date_to']) {
+            $query->whereDate('transaction_date', '<=', $filters['date_to']);
+        }
+
+        $this->applyStaffScope($query, $user);
+
+        return $query
+            ->orderBy($filters['sort'], $filters['direction'])
+            ->orderBy('id');
+    }
+
     public function create(array $validatedData, User $creator): IncomingTransaction
     {
         $itemsData = $this->extractItems($validatedData);
@@ -19,7 +61,7 @@ class IncomingTransactionService extends BaseTransactionService
         return $this->runWithNumberRetry(function () use ($validatedData, $creator, $itemsData): IncomingTransaction {
             return DB::transaction(function () use ($validatedData, $creator, $itemsData): IncomingTransaction {
                 $transactionNumber = $this->numberGenerator->generateDailySequence(
-                    (new IncomingTransaction())->getTable(),
+                    (new IncomingTransaction)->getTable(),
                     'transaction_number',
                     'PO'
                 );
@@ -46,7 +88,7 @@ class IncomingTransactionService extends BaseTransactionService
                 $this->logActivity(
                     $creator,
                     'CREATE_INCOMING',
-                    $this->formatDescription($creator, 'CREATE', 'IncomingTransaction #' . $transaction->transaction_number),
+                    $this->formatDescription($creator, 'CREATE', 'IncomingTransaction #'.$transaction->transaction_number),
                     $transaction
                 );
 
@@ -57,7 +99,7 @@ class IncomingTransactionService extends BaseTransactionService
 
     public function update(IncomingTransaction $transaction, array $validatedData, User $updater): IncomingTransaction
     {
-        if (!$transaction->isPending()) {
+        if (! $transaction->isPending()) {
             throw new DomainException('Only pending transactions can be updated.');
         }
 
@@ -80,7 +122,7 @@ class IncomingTransactionService extends BaseTransactionService
             $this->logActivity(
                 $updater,
                 'UPDATE_INCOMING',
-                $this->formatDescription($updater, 'UPDATE', 'IncomingTransaction #' . $transaction->transaction_number),
+                $this->formatDescription($updater, 'UPDATE', 'IncomingTransaction #'.$transaction->transaction_number),
                 $transaction
             );
 
@@ -90,7 +132,7 @@ class IncomingTransactionService extends BaseTransactionService
 
     public function verify(IncomingTransaction $transaction, User $verifier): void
     {
-        if (!$transaction->canBeVerified()) {
+        if (! $transaction->canBeVerified()) {
             throw new DomainException('Only pending transactions can be verified.');
         }
 
@@ -108,7 +150,8 @@ class IncomingTransactionService extends BaseTransactionService
                     $product,
                     (int) $item->quantity,
                     'incoming_transaction',
-                    $transaction
+                    $transaction,
+                    $verifier
                 );
             }
 
@@ -120,7 +163,7 @@ class IncomingTransactionService extends BaseTransactionService
             $this->logActivity(
                 $verifier,
                 'VERIFY_INCOMING',
-                $this->formatDescription($verifier, 'VERIFY', 'IncomingTransaction #' . $transaction->transaction_number),
+                $this->formatDescription($verifier, 'VERIFY', 'IncomingTransaction #'.$transaction->transaction_number),
                 $transaction
             );
         });
@@ -128,7 +171,7 @@ class IncomingTransactionService extends BaseTransactionService
 
     public function reject(IncomingTransaction $transaction, User $verifier, ?string $reason): void
     {
-        if (!$transaction->canBeRejected()) {
+        if (! $transaction->canBeRejected()) {
             throw new DomainException('Only pending transactions can be rejected.');
         }
 
@@ -142,8 +185,8 @@ class IncomingTransactionService extends BaseTransactionService
         if ($reason !== '') {
             $existingNotes = trim((string) ($transaction->notes ?? ''));
             $updates['notes'] = $existingNotes !== ''
-                ? $existingNotes . PHP_EOL . 'Rejection reason: ' . $reason
-                : 'Rejection reason: ' . $reason;
+                ? $existingNotes.PHP_EOL.'Rejection reason: '.$reason
+                : 'Rejection reason: '.$reason;
         }
 
         $transaction->update($updates);
@@ -151,14 +194,53 @@ class IncomingTransactionService extends BaseTransactionService
         $this->logActivity(
             $verifier,
             'REJECT_INCOMING',
-            $this->formatDescription($verifier, 'REJECT', 'IncomingTransaction #' . $transaction->transaction_number),
+            $this->formatDescription($verifier, 'REJECT', 'IncomingTransaction #'.$transaction->transaction_number),
             $transaction
         );
     }
 
+    private function normalizeIndexFilters(array $filters): array
+    {
+        $allowedSorts = ['transaction_date', 'transaction_number', 'status', 'total_items', 'total_quantity', 'total_amount', 'created_at'];
+        $sort = $filters['sort'] ?? 'transaction_date';
+        if (! in_array($sort, $allowedSorts, true)) {
+            $sort = 'transaction_date';
+        }
+
+        $direction = strtolower((string) ($filters['direction'] ?? 'desc'));
+        if (! in_array($direction, ['asc', 'desc'], true)) {
+            $direction = 'desc';
+        }
+
+        $status = $filters['status'] ?? [];
+        $statusEnums = collect(is_array($status) ? $status : [$status])
+            ->filter()
+            ->map(static fn ($value) => $value instanceof IncomingTransactionStatus ? $value : IncomingTransactionStatus::tryFrom((string) $value))
+            ->filter()
+            ->values()
+            ->all();
+
+        return [
+            'search' => trim((string) ($filters['search'] ?? '')),
+            'status' => $statusEnums,
+            'supplier_id' => $filters['supplier_id'] ?? null,
+            'date_from' => $filters['date_from'] ?? null,
+            'date_to' => $filters['date_to'] ?? null,
+            'sort' => $sort,
+            'direction' => $direction,
+        ];
+    }
+
+    private function applyStaffScope(Builder $query, ?User $user): void
+    {
+        if ($user !== null && $user->role === 'staff') {
+            $query->where('created_by', $user->id);
+        }
+    }
+
     public function complete(IncomingTransaction $transaction, User $actor): void
     {
-        if (!$transaction->canBeCompleted()) {
+        if (! $transaction->canBeCompleted()) {
             throw new DomainException('Only verified transactions can be marked as completed.');
         }
 
@@ -169,7 +251,7 @@ class IncomingTransactionService extends BaseTransactionService
         $this->logActivity(
             $actor,
             'COMPLETE_INCOMING',
-            $this->formatDescription($actor, 'COMPLETE', 'IncomingTransaction #' . $transaction->transaction_number),
+            $this->formatDescription($actor, 'COMPLETE', 'IncomingTransaction #'.$transaction->transaction_number),
             $transaction
         );
     }

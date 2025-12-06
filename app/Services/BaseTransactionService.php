@@ -12,8 +12,7 @@ abstract class BaseTransactionService
         protected readonly ActivityLogService $activityLogger,
         protected readonly StockAdjustmentService $stockAdjustments,
         protected readonly NumberGeneratorService $numberGenerator
-    ) {
-    }
+    ) {}
 
     protected function extractItems(array $validatedData): array
     {
@@ -59,7 +58,7 @@ abstract class BaseTransactionService
             } catch (QueryException $exception) {
                 $attempts++;
 
-                if (!$this->isUniqueConstraintViolation($exception) || $attempts >= $maxAttempts) {
+                if (! $this->isUniqueConstraintViolation($exception) || $attempts >= $maxAttempts) {
                     throw $exception;
                 }
             }

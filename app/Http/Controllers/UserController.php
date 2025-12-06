@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserStatusUpdateRequest;
+use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use App\Services\UserManagementService;
@@ -16,8 +16,7 @@ class UserController extends Controller
 {
     public function __construct(
         private readonly UserManagementService $userManagement
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {
@@ -41,7 +40,7 @@ class UserController extends Controller
         ]);
 
         $deletionGuards = collect($users->items())
-            ->mapWithKeys(fn(User $user) => [
+            ->mapWithKeys(fn (User $user) => [
                 $user->id => $this->userManagement->deletionGuardReason($user, $request->user()),
             ]);
 
@@ -131,7 +130,7 @@ class UserController extends Controller
 
         try {
             $this->userManagement->approveSupplier($user, $request->user());
-        } catch (DomainException | \Throwable $exception) {
+        } catch (DomainException|\Throwable $exception) {
             return back()->withErrors(['approve' => $exception->getMessage()]);
         }
 
@@ -145,7 +144,7 @@ class UserController extends Controller
         $allowedSorts = ['created_at', 'last_login_at', 'name', 'email'];
 
         $sort = $request->query('sort', 'created_at');
-        if (!in_array($sort, $allowedSorts, true)) {
+        if (! in_array($sort, $allowedSorts, true)) {
             $sort = 'created_at';
         }
 

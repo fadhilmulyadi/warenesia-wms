@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->foreignId('supplier_id')
                 ->nullable();
-                
+
             $table->text('description')->nullable();
 
             $table->decimal('purchase_price', 15, 2)->default(0);

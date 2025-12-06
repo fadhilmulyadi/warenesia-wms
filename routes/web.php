@@ -8,12 +8,12 @@ use App\Http\Controllers\ProductBarcodeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductScanController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UnitController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestockOrderController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierRegistrationController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -100,7 +100,7 @@ Route::middleware(['auth', 'role:admin,manager'])
 
         Route::get('restocks/export', [RestockOrderController::class, 'export'])
             ->name('restocks.export');
-            
+
         Route::resource('restocks', RestockOrderController::class)
             ->only(['index', 'create', 'store', 'show']);
 
@@ -163,7 +163,6 @@ Route::middleware(['auth', 'role:admin,manager'])
             ->name('sales.ship');
     });
 
-
 Route::middleware(['auth', 'role:supplier'])
     ->prefix('supplier')
     ->as('supplier.')
@@ -181,4 +180,4 @@ Route::middleware(['auth', 'role:supplier'])
             ->name('restocks.reject');
     });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

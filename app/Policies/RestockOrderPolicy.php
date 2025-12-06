@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\RestockStatus;
 use App\Models\RestockOrder;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -11,6 +12,7 @@ class RestockOrderPolicy
     use HandlesAuthorization;
 
     private const VIEW_ROLES = ['admin', 'manager'];
+
     private const MANAGE_ROLES = ['admin', 'manager'];
 
     public function viewAny(User $user): bool
@@ -46,7 +48,7 @@ class RestockOrderPolicy
     public function rate(User $user, RestockOrder $restock): bool
     {
         return $this->canManage($user)
-            && $restock->status === RestockOrder::STATUS_RECEIVED
+            && $restock->status === RestockStatus::RECEIVED
             && $restock->rating === null;
     }
 
@@ -57,7 +59,7 @@ class RestockOrderPolicy
 
     public function viewSupplierRestocks(User $user, mixed $restock = null): bool
     {
-        if (!$user->isSupplier()) {
+        if (! $user->isSupplier()) {
             return false;
         }
 

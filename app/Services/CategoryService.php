@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 class CategoryService
 {
     private const DEFAULT_PER_PAGE = 10;
+
     private const MAX_PER_PAGE = 250;
 
     public function index(array $filters = []): LengthAwarePaginator
@@ -34,9 +35,9 @@ class CategoryService
         if ($filters['search'] !== '') {
             $keyword = $filters['search'];
             $query->where(function (Builder $q) use ($keyword): void {
-                $q->where('name', 'like', '%' . $keyword . '%')
-                    ->orWhere('description', 'like', '%' . $keyword . '%')
-                    ->orWhere('sku_prefix', 'like', '%' . $keyword . '%');
+                $q->where('name', 'like', '%'.$keyword.'%')
+                    ->orWhere('description', 'like', '%'.$keyword.'%')
+                    ->orWhere('sku_prefix', 'like', '%'.$keyword.'%');
             });
         }
 
@@ -53,7 +54,7 @@ class CategoryService
     public function create(array $data): Category
     {
         return DB::transaction(function () use ($data): Category {
-            $category = new Category();
+            $category = new Category;
             $category->name = trim((string) $data['name']);
             $category->description = $data['description'] ?? null;
             $category->sku_prefix = $this->preparePrefix(
@@ -117,7 +118,7 @@ class CategoryService
         $suffixIndex = 0;
 
         while ($this->prefixExists($candidate, $ignoreId)) {
-            $candidate = $base . $this->suffixFromIndex($suffixIndex);
+            $candidate = $base.$this->suffixFromIndex($suffixIndex);
             $suffixIndex++;
         }
 
@@ -156,7 +157,7 @@ class CategoryService
         $candidate = $base;
 
         while ($this->prefixExists($candidate, $ignoreId)) {
-            $candidate = $base . $this->suffixFromIndex($suffixIndex);
+            $candidate = $base.$this->suffixFromIndex($suffixIndex);
             $suffixIndex++;
         }
 
@@ -175,7 +176,7 @@ class CategoryService
 
     private function storeImage(UploadedFile|string|null $image = null, ?string $oldImage = null): ?string
     {
-        if (!$image instanceof UploadedFile) {
+        if (! $image instanceof UploadedFile) {
             return $oldImage;
         }
 
@@ -209,7 +210,7 @@ class CategoryService
         $current = $index;
 
         do {
-            $suffix = $alphabet[$current % $length] . $suffix;
+            $suffix = $alphabet[$current % $length].$suffix;
             $current = intdiv($current, $length) - 1;
         } while ($current >= 0);
 
@@ -228,12 +229,12 @@ class CategoryService
     {
         $allowedSorts = ['name', 'sku_prefix', 'products_count', 'created_at'];
         $sort = $filters['sort'] ?? 'name';
-        if (!in_array($sort, $allowedSorts, true)) {
+        if (! in_array($sort, $allowedSorts, true)) {
             $sort = 'name';
         }
 
         $direction = strtolower((string) ($filters['direction'] ?? 'asc'));
-        if (!in_array($direction, ['asc', 'desc'], true)) {
+        if (! in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'asc';
         }
 

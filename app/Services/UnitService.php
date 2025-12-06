@@ -26,8 +26,8 @@ class UnitService
 
         if ($search !== '') {
             $query->where(function (Builder $builder) use ($search): void {
-                $builder->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('description', 'like', '%' . $search . '%');
+                $builder->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%');
             });
         }
 

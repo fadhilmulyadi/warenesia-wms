@@ -8,9 +8,9 @@ use App\Support\MobileIndex\PurchaseConfig;
 use App\Support\MobileIndex\RestockConfig;
 use App\Support\MobileIndex\SaleConfig;
 use App\Support\MobileIndex\SupplierConfig;
+use App\Support\MobileIndex\SupplierRestockConfig;
 use App\Support\MobileIndex\UnitConfig;
 use App\Support\MobileIndex\UserConfig;
-use App\Support\MobileIndex\SupplierRestockConfig;
 
 class MobileIndexConfig
 {

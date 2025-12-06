@@ -11,6 +11,7 @@ class ProductPolicy
     use HandlesAuthorization;
 
     private const VIEW_ROLES = ['admin', 'manager'];
+
     private const MANAGE_ROLES = ['admin', 'manager'];
 
     public function viewAny(User $user): bool

@@ -21,13 +21,13 @@ use InvalidArgumentException;
 class ProductService
 {
     private const DEFAULT_PER_PAGE = 10;
+
     private const MAX_PER_PAGE = 250;
 
     public function __construct(
         private readonly CategoryService $categories,
         private readonly NumberGeneratorService $numbers
-    ) {
-    }
+    ) {}
 
     public function index(array $filters = []): LengthAwarePaginator
     {
@@ -47,8 +47,8 @@ class ProductService
         if ($filters['search'] !== '') {
             $keyword = $filters['search'];
             $query->where(function (Builder $q) use ($keyword): void {
-                $q->where('name', 'like', '%' . $keyword . '%')
-                    ->orWhere('sku', 'like', '%' . $keyword . '%');
+                $q->where('name', 'like', '%'.$keyword.'%')
+                    ->orWhere('sku', 'like', '%'.$keyword.'%');
             });
         }
 
@@ -56,11 +56,11 @@ class ProductService
             $query->where('category_id', $filters['category_id']);
         }
 
-        if (!empty($filters['stock_status'])) {
+        if (! empty($filters['stock_status'])) {
             $this->applyStockFilter($query, $filters['stock_status']);
         }
 
-        if (!empty($filters['barcode'])) {
+        if (! empty($filters['barcode'])) {
             $query->where('sku', $filters['barcode']);
         }
 
@@ -93,7 +93,7 @@ class ProductService
 
         $category = $this->resolveCategory($categoryId);
         $shouldRegenerateSku = (int) $category->id !== (int) $product->category_id;
-        $shouldRegenerateSku = $shouldRegenerateSku || !$product->sku;
+        $shouldRegenerateSku = $shouldRegenerateSku || ! $product->sku;
 
         $updater = function () use ($product, $data, $category, $unitId, $shouldRegenerateSku): Product {
             $sku = $shouldRegenerateSku
@@ -114,7 +114,7 @@ class ProductService
         };
 
         return $shouldRegenerateSku
-            ? $this->runWithSkuRetry(fn() => DB::transaction($updater))
+            ? $this->runWithSkuRetry(fn () => DB::transaction($updater))
             : DB::transaction($updater);
     }
 
@@ -168,7 +168,7 @@ class ProductService
         $prefix = $this->categories->ensurePrefix($category);
 
         return $this->numbers->generateSequentialNumber(
-            (new Product())->getTable(),
+            (new Product)->getTable(),
             'sku',
             $prefix,
             4,
@@ -180,13 +180,13 @@ class ProductService
 
     private function resolveCategory(int|string|null $categoryId): Category
     {
-        if (!$categoryId) {
+        if (! $categoryId) {
             throw new InvalidArgumentException('Category is required.');
         }
 
         $category = Category::find($categoryId);
 
-        if (!$category) {
+        if (! $category) {
             throw new InvalidArgumentException('Kategori tidak ditemukan.');
         }
 
@@ -195,13 +195,13 @@ class ProductService
 
     private function resolveUnitId(int|string|null $unitId): int
     {
-        if (!$unitId) {
+        if (! $unitId) {
             throw new InvalidArgumentException('Unit produk wajib diisi.');
         }
 
         $unit = Unit::find($unitId);
 
-        if (!$unit) {
+        if (! $unit) {
             throw new InvalidArgumentException('Satuan produk tidak ditemukan.');
         }
 
@@ -210,7 +210,7 @@ class ProductService
 
     private function storeImage(UploadedFile|string|null $image = null, ?string $oldImage = null): ?string
     {
-        if (!$image instanceof UploadedFile) {
+        if (! $image instanceof UploadedFile) {
             return $oldImage;
         }
 
@@ -233,7 +233,7 @@ class ProductService
 
     private function applyStockFilter(Builder $query, array $statuses): void
     {
-        $statuses = array_values(array_filter($statuses, static fn($val) => $val !== null && $val !== ''));
+        $statuses = array_values(array_filter($statuses, static fn ($val) => $val !== null && $val !== ''));
 
         if (empty($statuses)) {
             return;
@@ -275,12 +275,12 @@ class ProductService
     {
         $allowedSorts = ['name', 'sku', 'current_stock', 'created_at'];
         $sort = $filters['sort'] ?? 'name';
-        if (!in_array($sort, $allowedSorts, true)) {
+        if (! in_array($sort, $allowedSorts, true)) {
             $sort = 'name';
         }
 
         $direction = strtolower((string) ($filters['direction'] ?? 'asc'));
-        if (!in_array($direction, ['asc', 'desc'], true)) {
+        if (! in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'asc';
         }
 
@@ -349,6 +349,7 @@ class ProductService
 
         return (float) $value;
     }
+
     public function getTransactionStats(Product $product): array
     {
         $incoming = IncomingTransactionItem::where('product_id', $product->id)
@@ -373,8 +374,9 @@ class ProductService
         $recentTransactions = collect();
 
         foreach ($incoming as $item) {
-            if (!$item->incomingTransaction)
+            if (! $item->incomingTransaction) {
                 continue;
+            }
 
             $recentTransactions->push([
                 'type' => 'IN',
@@ -387,8 +389,9 @@ class ProductService
         }
 
         foreach ($outgoing as $item) {
-            if (!$item->outgoingTransaction)
+            if (! $item->outgoingTransaction) {
                 continue;
+            }
 
             $recentTransactions->push([
                 'type' => 'OUT',

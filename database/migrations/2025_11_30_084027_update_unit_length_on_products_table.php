@@ -12,7 +12,7 @@ return new class extends Migration
     {
         DB::statement('ALTER TABLE products MODIFY unit VARCHAR(80) DEFAULT "pcs"');
     }
-  
+
     /**
      * Reverse the migrations.
      */

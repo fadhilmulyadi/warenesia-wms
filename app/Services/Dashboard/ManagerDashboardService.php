@@ -2,10 +2,10 @@
 
 namespace App\Services\Dashboard;
 
-use App\Models\Product;
 use App\Models\Category;
 use App\Models\IncomingTransaction;
 use App\Models\OutgoingTransaction;
+use App\Models\Product;
 use App\Models\RestockOrder;
 
 class ManagerDashboardService
@@ -35,7 +35,7 @@ class ManagerDashboardService
                 'icon' => 'clipboard-check',
                 'title' => 'Persetujuan Barang Masuk',
                 'description' => 'Pembelian menunggu verifikasi',
-                'meta' => IncomingTransaction::where('status', 'pending')->count() . ' pending',
+                'meta' => IncomingTransaction::where('status', 'pending')->count().' pending',
                 'meta_color' => 'bg-amber-50 text-amber-700 border-amber-200',
                 'href' => route('transactions.index', ['tab' => 'incoming', 'status' => 'pending']),
             ],
@@ -43,7 +43,7 @@ class ManagerDashboardService
                 'icon' => 'truck',
                 'title' => 'Persetujuan Barang Keluar',
                 'description' => 'Penjualan menunggu persetujuan',
-                'meta' => OutgoingTransaction::where('status', 'pending')->count() . ' pending',
+                'meta' => OutgoingTransaction::where('status', 'pending')->count().' pending',
                 'meta_color' => 'bg-amber-50 text-amber-700 border-amber-200',
                 'href' => route('transactions.index', ['tab' => 'outgoing', 'status' => 'pending']),
             ],

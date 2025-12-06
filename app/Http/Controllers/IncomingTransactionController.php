@@ -2,24 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Enums\IncomingTransactionStatus;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Http\Requests\IncomingTransactionRequest;
 use App\Models\IncomingTransaction;
 use App\Models\Product;
 use App\Models\Supplier;
-use App\Models\User;
+use App\Services\IncomingTransactionService;
 use App\Support\CsvExporter;
 use App\Support\TransactionPrefill;
-use App\Services\IncomingTransactionService;
 use DomainException;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Redirect;
-use InvalidArgumentException;
 use Illuminate\View\View;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class IncomingTransactionController extends Controller
@@ -27,13 +24,14 @@ class IncomingTransactionController extends Controller
     use HasIndexQueryHelpers;
 
     private const DEFAULT_PER_PAGE = IncomingTransaction::DEFAULT_PER_PAGE;
+
     private const MAX_PER_PAGE = 250;
+
     private const ROLE_STAFF = 'staff';
+
     private const EXPORT_CHUNK_SIZE = 200;
 
-    public function __construct(private readonly IncomingTransactionService $transactionService)
-    {
-    }
+    public function __construct(private readonly IncomingTransactionService $transactionService) {}
 
     /**
      * Display a listing of the resource.
@@ -139,10 +137,17 @@ class IncomingTransactionController extends Controller
             defaultDirection: 'desc'
         );
 
-        $transactionQuery = $this->buildIncomingTransactionIndexQuery($request, $sort, $direction);
-        $this->applyStaffScope($transactionQuery, $request->user());
+        $transactionQuery = $this->transactionService->indexQuery([
+            'search' => (string) $request->query('q', ''),
+            'status' => (array) $request->query('status', []),
+            'supplier_id' => $request->query('supplier_id'),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'sort' => $sort,
+            'direction' => $direction,
+        ], $request->user());
 
-        $fileName = 'purchases-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'purchases-'.now()->format('Ymd-His').'.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($transactionQuery): void {
             $output->fputcsv([
@@ -165,7 +170,7 @@ class IncomingTransactionController extends Controller
                             $transaction->transaction_number,
                             optional($transaction->transaction_date)->format('Y-m-d'),
                             optional($transaction->supplier)->name ?? '',
-                            $this->incomingStatusLabel((string) $transaction->status),
+                            $this->incomingStatusLabel($transaction->status),
                             (int) $transaction->total_items,
                             (int) $transaction->total_quantity,
                             (float) $transaction->total_amount,
@@ -197,7 +202,7 @@ class IncomingTransactionController extends Controller
     {
         $this->authorize('update', $purchase);
 
-        if (!$purchase->isPending()) {
+        if (! $purchase->isPending()) {
             return redirect()
                 ->route('purchases.show', $purchase)
                 ->withErrors(['general' => 'Only pending transactions can be edited.']);
@@ -217,7 +222,7 @@ class IncomingTransactionController extends Controller
     {
         $this->authorize('update', $purchase);
 
-        if (!$purchase->isPending()) {
+        if (! $purchase->isPending()) {
             return back()->withErrors(['general' => 'Only pending transactions can be edited.']);
         }
 
@@ -237,7 +242,7 @@ class IncomingTransactionController extends Controller
         } catch (\Throwable $exception) {
             return back()
                 ->withInput()
-                ->withErrors(['general' => 'Gagal memperbarui transaksi: ' . $exception->getMessage()]);
+                ->withErrors(['general' => 'Gagal memperbarui transaksi: '.$exception->getMessage()]);
         }
     }
 
@@ -310,58 +315,19 @@ class IncomingTransactionController extends Controller
         }
     }
 
-    private function buildIncomingTransactionIndexQuery(
-        Request $request,
-        string $sort,
-        string $direction
-    ): Builder {
-        $search = (string) $request->query('q', '');
-
-        $query = IncomingTransaction::query()
-            ->with(['supplier', 'createdBy', 'verifiedBy']);
-
-        if ($search !== '') {
-            $query->where(function (Builder $searchQuery) use ($search): void {
-                $this->applySearch($searchQuery, $search, ['transaction_number']);
-                $searchQuery->orWhereHas('supplier', function (Builder $supplierQuery) use ($search): void {
-                    $supplierQuery->where('name', 'like', '%' . $search . '%');
-                });
-            });
-        }
-
-        $this->applyFilters($query, $request, [
-            'status' => 'status',
-        ]);
-
-        $this->applyDateRange($query, $request, 'transaction_date');
-
-        $query->orderBy($sort, $direction)
-            ->orderBy('id');
-
-        return $query;
-    }
-
-    private function applyStaffScope(Builder $query, ?User $user): void
-    {
-        if ($user !== null && $user->role === self::ROLE_STAFF) {
-            $query->where('created_by', $user->id);
-        }
-    }
-
     private function incomingStatusOptions(): array
     {
-        return [
-            IncomingTransaction::STATUS_PENDING => 'Pending',
-            IncomingTransaction::STATUS_VERIFIED => 'Verified',
-            IncomingTransaction::STATUS_COMPLETED => 'Completed',
-            IncomingTransaction::STATUS_REJECTED => 'Rejected',
-        ];
+        return collect(IncomingTransactionStatus::cases())
+            ->mapWithKeys(fn (IncomingTransactionStatus $status) => [$status->value => $status->label()])
+            ->all();
     }
 
-    private function incomingStatusLabel(string $status): string
+    private function incomingStatusLabel(IncomingTransactionStatus|string $status): string
     {
-        $options = $this->incomingStatusOptions();
+        $statusEnum = $status instanceof IncomingTransactionStatus
+            ? $status
+            : IncomingTransactionStatus::tryFrom((string) $status);
 
-        return $options[$status] ?? ucfirst($status);
+        return $statusEnum?->label() ?? ucfirst((string) $status);
     }
 }

@@ -34,7 +34,7 @@ return new class extends Migration
                     ->where('name', $unitName)
                     ->value('id');
 
-                if (!$unitId) {
+                if (! $unitId) {
                     $unitId = DB::table('units')->insertGetId([
                         'name' => $unitName,
                         'description' => null,

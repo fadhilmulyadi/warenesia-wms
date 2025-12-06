@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OutgoingTransactionStatus;
 use App\Services\NumberGeneratorService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,9 +24,11 @@ class OutgoingTransaction extends Model
         $this->save();
     }
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_APPROVED = 'approved';
-    public const STATUS_SHIPPED = 'shipped';
+    public const STATUS_PENDING = OutgoingTransactionStatus::PENDING->value;
+
+    public const STATUS_APPROVED = OutgoingTransactionStatus::APPROVED->value;
+
+    public const STATUS_SHIPPED = OutgoingTransactionStatus::SHIPPED->value;
 
     public const DEFAULT_PER_PAGE = 10;
 
@@ -47,12 +50,13 @@ class OutgoingTransaction extends Model
         'total_items' => 'integer',
         'total_quantity' => 'integer',
         'total_amount' => 'decimal:2',
+        'status' => OutgoingTransactionStatus::class,
     ];
 
     public static function generateNextTransactionNumber(): string
     {
         return app(NumberGeneratorService::class)->generateDailySequence(
-            (new static())->getTable(),
+            (new static)->getTable(),
             'transaction_number',
             'SO'
         );
@@ -75,17 +79,17 @@ class OutgoingTransaction extends Model
 
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === OutgoingTransactionStatus::PENDING;
     }
 
     public function isApproved(): bool
     {
-        return $this->status === self::STATUS_APPROVED;
+        return $this->status === OutgoingTransactionStatus::APPROVED;
     }
 
     public function isShipped(): bool
     {
-        return $this->status === self::STATUS_SHIPPED;
+        return $this->status === OutgoingTransactionStatus::SHIPPED;
     }
 
     public function canBeApproved(): bool

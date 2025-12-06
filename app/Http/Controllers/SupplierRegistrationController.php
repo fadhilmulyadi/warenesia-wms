@@ -9,9 +9,7 @@ use Illuminate\View\View;
 
 class SupplierRegistrationController extends Controller
 {
-    public function __construct(private SupplierService $suppliers)
-    {
-    }
+    public function __construct(private SupplierService $suppliers) {}
 
     public function create(): View
     {

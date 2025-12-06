@@ -16,11 +16,10 @@ use InvalidArgumentException;
 class SupplierService
 {
     private const DEFAULT_PER_PAGE = Supplier::DEFAULT_PER_PAGE;
+
     private const MAX_PER_PAGE = 250;
 
-    public function __construct(private readonly SupplierProfileService $profiles)
-    {
-    }
+    public function __construct(private readonly SupplierProfileService $profiles) {}
 
     public function index(array $filters = []): LengthAwarePaginator
     {
@@ -45,10 +44,10 @@ class SupplierService
         if ($filters['search'] !== '') {
             $keyword = $filters['search'];
             $query->where(function (Builder $builder) use ($keyword): void {
-                $builder->where('name', 'like', '%' . $keyword . '%')
-                    ->orWhere('contact_person', 'like', '%' . $keyword . '%')
-                    ->orWhere('email', 'like', '%' . $keyword . '%')
-                    ->orWhere('phone', 'like', '%' . $keyword . '%');
+                $builder->where('name', 'like', '%'.$keyword.'%')
+                    ->orWhere('contact_person', 'like', '%'.$keyword.'%')
+                    ->orWhere('email', 'like', '%'.$keyword.'%')
+                    ->orWhere('phone', 'like', '%'.$keyword.'%');
             });
         }
 
@@ -140,12 +139,12 @@ class SupplierService
     {
         $allowedSorts = ['name', 'average_rating', 'rated_restock_count', 'created_at'];
         $sort = $filters['sort'] ?? 'name';
-        if (!in_array($sort, $allowedSorts, true)) {
+        if (! in_array($sort, $allowedSorts, true)) {
             $sort = 'name';
         }
 
         $direction = strtolower((string) ($filters['direction'] ?? 'asc'));
-        if (!in_array($direction, ['asc', 'desc'], true)) {
+        if (! in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'asc';
         }
 

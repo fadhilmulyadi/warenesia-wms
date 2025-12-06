@@ -7,7 +7,6 @@ class TransactionTotalsCalculator
     /**
      * Calculate totals from a collection of items.
      *
-     * @param iterable $items
      * @return array{total_items: int, total_quantity: int, total_amount: float}
      */
     public static function calculate(iterable $items): array

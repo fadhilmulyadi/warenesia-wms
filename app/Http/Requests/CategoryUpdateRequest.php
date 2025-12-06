@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CategoryUpdateRequest extends FormRequest
@@ -29,7 +28,7 @@ class CategoryUpdateRequest extends FormRequest
                 'required',
                 'string',
                 'max:80',
-                'unique:categories,name,' . $categoryId,
+                'unique:categories,name,'.$categoryId,
             ],
             'sku_prefix' => [
                 'nullable',

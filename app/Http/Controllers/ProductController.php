@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
@@ -12,8 +11,8 @@ use App\Models\Supplier;
 use App\Models\Unit;
 use App\Services\ProductService;
 use App\Support\CsvExporter;
-use Illuminate\Http\Request;
 use DomainException;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
@@ -21,12 +20,12 @@ class ProductController extends Controller
     use HasIndexQueryHelpers;
 
     private const DEFAULT_PER_PAGE = 10;
+
     private const MAX_PER_PAGE = 250;
+
     private const EXPORT_CHUNK_SIZE = 200;
 
-    public function __construct(private readonly ProductService $products)
-    {
-    }
+    public function __construct(private readonly ProductService $products) {}
 
     /**
      * Display a listing of the resource.
@@ -199,7 +198,7 @@ class ProductController extends Controller
             'direction' => $direction,
         ]);
 
-        $fileName = 'products-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'products-'.now()->format('Ymd-His').'.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($productQuery): void {
             $output->fputcsv([

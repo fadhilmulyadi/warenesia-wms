@@ -23,7 +23,7 @@ class SupplierProfileService
             ?? null;
 
         if (Supplier::where('name', $companyName)->where('id', '!=', $user->id)->exists()) {
-            $companyName = $companyName . ' #' . $user->id;
+            $companyName = $companyName.' #'.$user->id;
         }
 
         return Supplier::updateOrCreate(

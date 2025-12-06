@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\DB;
 
 class NumberGeneratorService
 {
-
     public function generateDailySequence(
         string $table,
         string $column,
@@ -17,7 +16,7 @@ class NumberGeneratorService
         $callback = function () use ($table, $column, $prefix, $padLength, $dateColumn): string {
             $date = now()->toDateString();
             $datePart = now()->format('Ymd');
-            $pattern = $prefix . '-' . $datePart . '-%';
+            $pattern = $prefix.'-'.$datePart.'-%';
 
             $lastNumber = DB::table($table)
                 ->where($column, 'like', $pattern)
@@ -52,7 +51,7 @@ class NumberGeneratorService
     ): string {
         $callback = function () use ($table, $column, $prefix, $padLength, $constraint): string {
             $query = DB::table($table)
-                ->where($column, 'like', $prefix . '-%');
+                ->where($column, 'like', $prefix.'-%');
 
             if ($constraint) {
                 $constraint($query);

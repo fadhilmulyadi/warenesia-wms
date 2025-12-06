@@ -11,9 +11,7 @@ use Illuminate\Http\Request;
 
 class UnitController extends Controller
 {
-    public function __construct(private readonly UnitService $units)
-    {
-    }
+    public function __construct(private readonly UnitService $units) {}
 
     public function index(Request $request)
     {

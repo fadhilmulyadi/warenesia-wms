@@ -14,8 +14,7 @@ class AuthenticatedSessionController extends Controller
 {
     public function __construct(
         private readonly UserManagementService $userManagement
-    ) {
-    }
+    ) {}
 
     /**
      * Display the login view.

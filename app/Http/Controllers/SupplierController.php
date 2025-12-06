@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
 use App\Http\Requests\SupplierStoreRequest;
 use App\Http\Requests\SupplierUpdateRequest;
 use App\Models\Supplier;
 use App\Services\SupplierService;
 use App\Support\CsvExporter;
+use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use DomainException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupplierController extends Controller
@@ -20,12 +19,12 @@ class SupplierController extends Controller
     use HasIndexQueryHelpers;
 
     private const DEFAULT_PER_PAGE = Supplier::DEFAULT_PER_PAGE;
+
     private const MAX_PER_PAGE = 250;
+
     private const EXPORT_CHUNK_SIZE = 200;
 
-    public function __construct(private readonly SupplierService $suppliers)
-    {
-    }
+    public function __construct(private readonly SupplierService $suppliers) {}
 
     /**
      * Display a listing of the resource.
@@ -153,7 +152,7 @@ class SupplierController extends Controller
             'sort' => $sort,
             'direction' => $direction,
         ]);
-        $fileName = 'suppliers-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'suppliers-'.now()->format('Ymd-His').'.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($supplierQuery): void {
             $output->fputcsv([

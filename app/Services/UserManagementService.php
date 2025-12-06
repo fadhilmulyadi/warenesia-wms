@@ -21,8 +21,7 @@ class UserManagementService
     public function __construct(
         private readonly SupplierProfileService $supplierProfiles,
         private readonly SupplierService $suppliers
-    ) {
-    }
+    ) {}
 
     public function list(array $filters = []): LengthAwarePaginator
     {
@@ -148,8 +147,8 @@ class UserManagementService
         if ($filters['search'] !== '') {
             $keyword = $filters['search'];
             $query->where(function (Builder $builder) use ($keyword): void {
-                $builder->where('name', 'like', '%' . $keyword . '%')
-                    ->orWhere('email', 'like', '%' . $keyword . '%');
+                $builder->where('name', 'like', '%'.$keyword.'%')
+                    ->orWhere('email', 'like', '%'.$keyword.'%');
             });
         }
 

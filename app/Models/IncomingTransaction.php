@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\IncomingTransactionStatus;
 use App\Services\NumberGeneratorService;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -23,10 +24,13 @@ class IncomingTransaction extends Model
         $this->save();
     }
 
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_VERIFIED = 'verified';
-    public const STATUS_COMPLETED = 'completed';
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PENDING = IncomingTransactionStatus::PENDING->value;
+
+    public const STATUS_VERIFIED = IncomingTransactionStatus::VERIFIED->value;
+
+    public const STATUS_COMPLETED = IncomingTransactionStatus::COMPLETED->value;
+
+    public const STATUS_REJECTED = IncomingTransactionStatus::REJECTED->value;
 
     public const DEFAULT_PER_PAGE = 10;
 
@@ -49,12 +53,13 @@ class IncomingTransaction extends Model
         'total_items' => 'integer',
         'total_quantity' => 'integer',
         'total_amount' => 'decimal:2',
+        'status' => IncomingTransactionStatus::class,
     ];
 
     public static function generateNextTransactionNumber(): string
     {
         return app(NumberGeneratorService::class)->generateDailySequence(
-            (new static())->getTable(),
+            (new static)->getTable(),
             'transaction_number',
             'PO'
         );
@@ -82,22 +87,22 @@ class IncomingTransaction extends Model
 
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === IncomingTransactionStatus::PENDING;
     }
 
     public function isVerified(): bool
     {
-        return $this->status === self::STATUS_VERIFIED;
+        return $this->status === IncomingTransactionStatus::VERIFIED;
     }
 
     public function isCompleted(): bool
     {
-        return $this->status === self::STATUS_COMPLETED;
+        return $this->status === IncomingTransactionStatus::COMPLETED;
     }
 
     public function isRejected(): bool
     {
-        return $this->status === self::STATUS_REJECTED;
+        return $this->status === IncomingTransactionStatus::REJECTED;
     }
 
     public function canBeVerified(): bool

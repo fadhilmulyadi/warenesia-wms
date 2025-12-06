@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\IncomingTransactionStatus;
 use App\Models\IncomingTransaction;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -11,6 +12,7 @@ class IncomingTransactionPolicy
     use HandlesAuthorization;
 
     private const CREATOR_ROLES = ['admin', 'manager', 'staff'];
+
     private const APPROVER_ROLES = ['admin', 'manager'];
 
     public function viewAny(User $user): bool
@@ -82,7 +84,7 @@ class IncomingTransactionPolicy
 
     private function staffOwnsPending(User $user, IncomingTransaction $transaction): bool
     {
-        return $transaction->status === IncomingTransaction::STATUS_PENDING
+        return $transaction->status === IncomingTransactionStatus::PENDING
             && (int) $transaction->created_by === (int) $user->id;
     }
 }

@@ -5,36 +5,36 @@ namespace App\Services;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Product;
 use App\Models\StockAdjustment;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class StockAdjustmentService
 {
-    public function __construct(private readonly ActivityLogService $activityLogger)
-    {
-    }
+    public function __construct(private readonly ActivityLogService $activityLogger) {}
 
-    public function increaseStock(Product $product, int $qty, ?string $reason = null, ?Model $related = null): StockAdjustment
+    public function increaseStock(Product $product, int $qty, ?string $reason = null, ?Model $related = null, ?User $actor = null): StockAdjustment
     {
         $quantity = $this->assertPositiveQuantity($qty);
 
-        return $this->adjust($product, $quantity, $reason ?? 'incoming_transaction', $related);
+        return $this->adjust($product, $quantity, $reason ?? 'incoming_transaction', $related, $actor);
     }
 
-    public function decreaseStock(Product $product, int $qty, ?string $reason = null, ?Model $related = null): StockAdjustment
+    public function decreaseStock(Product $product, int $qty, ?string $reason = null, ?Model $related = null, ?User $actor = null): StockAdjustment
     {
         $quantity = $this->assertPositiveQuantity($qty);
 
-        return $this->adjust($product, -$quantity, $reason ?? 'outgoing_transaction', $related);
+        return $this->adjust($product, -$quantity, $reason ?? 'outgoing_transaction', $related, $actor);
     }
 
-    private function adjust(Product $product, int $delta, string $reason, ?Model $related): StockAdjustment
+    private function adjust(Product $product, int $delta, string $reason, ?Model $related, ?User $actor): StockAdjustment
     {
         $reason = trim($reason);
+        $actor ??= Auth::user();
 
-        return DB::transaction(function () use ($product, $delta, $reason, $related): StockAdjustment {
+        return DB::transaction(function () use ($product, $delta, $reason, $related, $actor): StockAdjustment {
             $lockedProduct = Product::query()
                 ->whereKey($product->getKey())
                 ->lockForUpdate()
@@ -57,11 +57,11 @@ class StockAdjustmentService
                 'reason' => $reason !== '' ? $reason : null,
                 'related_type' => $related?->getMorphClass(),
                 'related_id' => $related?->getKey(),
-                'adjusted_by' => Auth::id(),
+                'adjusted_by' => $actor?->id,
             ]);
 
             $this->activityLogger->log(
-                Auth::user(),
+                $actor,
                 $delta >= 0 ? 'STOCK_INCREASE' : 'STOCK_DECREASE',
                 sprintf(
                     'Stock %s untuk produk "%s" berubah dari %d ke %d (%+d). Reason: %s',

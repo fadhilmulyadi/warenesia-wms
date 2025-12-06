@@ -63,7 +63,7 @@ class OutgoingTransactionRequest extends FormRequest
                 },
             ],
             'items.*.unit_price' => ['nullable', 'numeric', 'min:0'],
-            
+
         ];
     }
 

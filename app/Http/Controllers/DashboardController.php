@@ -6,9 +6,9 @@ use App\Services\Dashboard\AdminDashboardService;
 use App\Services\Dashboard\ManagerDashboardService;
 use App\Services\Dashboard\StaffDashboardService;
 use App\Services\Dashboard\SupplierDashboardService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class DashboardController extends Controller
 {
