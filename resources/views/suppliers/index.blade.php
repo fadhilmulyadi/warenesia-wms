@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Suppliers')
+@section('title', 'Supplier')
 
 @section('page-header')
     <x-page-header title="Data Supplier" description="Kelola informasi supplier, kontak, dan relasi pengadaan barang." />
@@ -50,11 +50,11 @@
                         <x-table.th>Kontak</x-table.th>
                         <x-table.th>Email</x-table.th>
                         <x-table.th>No. Handphone</x-table.th>
-                        <x-table.th sortable name="average_rating">Avg rating</x-table.th>
-                        <x-table.th sortable name="rated_restock_count">Rated restocks</x-table.th>
+                        <x-table.th sortable name="average_rating">Rata-rata rating</x-table.th>
+                        <x-table.th sortable name="rated_restock_count">Restock dinilai</x-table.th>
                         <x-table.th class="text-center">Status</x-table.th>
                         @can('create', \App\Models\Supplier::class)
-                            <x-table.th align="right">Actions</x-table.th>
+                            <x-table.th align="right">Aksi</x-table.th>
                         @endcan
                     </x-table.thead>
                     <x-table.tbody>
@@ -106,24 +106,7 @@
                                 </x-table.td>
                                 @can('create', \App\Models\Supplier::class)
                                     <x-table.td align="right">
-                                        <x-table.actions>
-                                            @can('update', $supplier)
-                                                <x-table.action-item icon="pencil" href="{{ route('suppliers.edit', $supplier) }}">
-                                                    Edit
-                                                </x-table.action-item>
-                                            @endcan
-
-                                            @can('delete', $supplier)
-                                                <x-table.action-itemicon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                                                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
-                                                                                                                                    title: 'Delete Supplier',
-                                                                                                                                    message: 'Delete this supplier? This action cannot be undone.',
-                                                                                                                                    itemName: '{{ $supplier->name }}'
-                                                                                                                                })">
-                                                    Delete
-                                                </x-table.action-itemicon=>
-                                            @endcan
-                                        </x-table.actions>
+                                        <x-supplier.actions :supplier="$supplier" />
                                     </x-table.td>
                                 @endcan
                             </x-table.tr>

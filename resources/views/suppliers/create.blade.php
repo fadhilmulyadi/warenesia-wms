@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', 'Add Supplier')
+@section('title', 'Tambah Supplier')
 
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Add Supplier" description="Register a new supplier for Warenesia warehouse operations." />
+        <x-page-header title="Tambah Supplier" description="Daftarkan supplier baru untuk operasional gudang." />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
-        <x-mobile-header title="Add Supplier" back="{{ route('suppliers.index') }}" />
+        <x-mobile-header title="Tambah Supplier" back="{{ route('suppliers.index') }}" />
     </div>
 @endsection
 
@@ -24,7 +24,7 @@
                 <x-slot:fields>
                     @if($errors->any())
                         <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-red-700 mb-4 text-xs">
-                            <div class="font-semibold mb-1">There are some issues with your input:</div>
+                            <div class="font-semibold mb-1">Ada kesalahan pada input:</div>
                             <ul class="list-disc list-inside space-y-0.5">
                                 @foreach($errors->all() as $errorMessage)
                                     <li>{{ $errorMessage }}</li>
@@ -46,8 +46,8 @@
             {{-- TOOLBAR --}}
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <x-breadcrumbs :items="[
-            'Suppliers' => route('suppliers.index'),
-            'Add Supplier' => '#',
+            'Supplier' => route('suppliers.index'),
+            'Tambah Supplier' => '#',
         ]" />
 
                 <div class="flex flex-wrap gap-2">
@@ -63,7 +63,7 @@
 
             @if($errors->any())
                 <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-red-700 text-sm">
-                    <div class="font-semibold mb-1">There are some issues with your input:</div>
+                    <div class="font-semibold mb-1">Ada kesalahan pada input:</div>
                     <ul class="list-disc list-inside space-y-0.5">
                         @foreach($errors->all() as $errorMessage)
                             <li>{{ $errorMessage }}</li>

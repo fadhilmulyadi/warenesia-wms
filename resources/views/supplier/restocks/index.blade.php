@@ -64,52 +64,12 @@
                 </x-slot:filter_status>
 
                 <x-slot:filter_date_range>
-                    <div
-                        x-data="{
-                            updateMeta() {
-                                const from = this.$refs.from?.value || '';
-                                const to = this.$refs.to?.value || '';
-                                const hasRange = !!(from || to);
-
-                                if (this.$refs.flag) {
-                                    this.$refs.flag.value = hasRange ? '1' : '';
-                                }
-
-                                if (this.$refs.option && this.$refs.display) {
-                                    this.$refs.option.textContent = hasRange
-                                        ? [from || 'Dari', to || 'Sampai'].join(' - ')
-                                        : '';
-                                    this.$refs.display.value = hasRange ? 'applied' : '';
-                                    this.$refs.display.dispatchEvent(new Event('change', { bubbles: true }));
-                                }
-                            }
-                        }"
-                        x-init="updateMeta()"
-                        class="space-y-2"
-                    >
-                        <input type="hidden" name="date_range" x-ref="flag">
-                        <select class="hidden" x-ref="display">
-                            <option value=""></option>
-                            <option value="applied" x-ref="option"></option>
-                        </select>
-
-                        <div class="flex items-center gap-2">
-                            <x-form.date
-                                name="date_from"
-                                x-ref="from"
-                                :value="request('date_from')"
-                                placeholder="Dari tanggal"
-                                x-on:change="updateMeta()"
-                            />
-                            <x-form.date
-                                name="date_to"
-                                x-ref="to"
-                                :value="request('date_to')"
-                                placeholder="Sampai tanggal"
-                                x-on:change="updateMeta()"
-                            />
-                        </div>
-                    </div>
+                    <x-filter.date-range
+                        from-name="date_from"
+                        to-name="date_to"
+                        :from-value="request('date_from')"
+                        :to-value="request('date_to')"
+                    />
                 </x-slot:filter_date_range>
             </x-filter-bar>
         </x-toolbar>

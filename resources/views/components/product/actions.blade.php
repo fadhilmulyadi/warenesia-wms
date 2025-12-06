@@ -1,5 +1,12 @@
 @props(['product'])
 
+@php
+    /** @var \App\Models\Product $product */
+    $deleteMessage = $product->current_stock > 0
+        ? "Produk ini masih memiliki stok sebanyak <b>{$product->current_stock}</b>. Menghapus produk ini akan menghilangkan data stok secara permanen. Lanjutkan?"
+        : null;
+@endphp
+
 <x-table.actions>
     @can('update', $product)
         <x-table.action-item icon="pencil" href="{{ route('products.edit', $product) }}">
@@ -14,13 +21,14 @@
     @endcan
 
     @can('delete', $product)
-        <x-table.action-item 
-            icon="trash-2" 
-            danger="true" 
-            on-click="$dispatch('open-delete-modal', { 
+        <x-table.action-item
+            icon="trash-2"
+            danger="true"
+            x-on:click="$dispatch('open-delete-modal', {
                 action: '{{ route('products.destroy', $product) }}',
                 title: 'Hapus Produk',
-                itemName: '{{ $product->name }}'
+                itemName: '{{ addslashes($product->name) }}',
+                message: {{ $deleteMessage ? "'" . addslashes($deleteMessage) . "'" : 'null' }}
             })"
         >
             Hapus
