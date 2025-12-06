@@ -4,8 +4,8 @@
 
 @section('page-header')
     <x-page-header
-        title="Edit Restock"
-        :description="'Restock #' . $restock->po_number"
+        title="Edit Pesanan Restock"
+        description="Ubah detail item atau kuantitas order pembelian"
     />
 @endsection
 
@@ -124,8 +124,9 @@
     <div class="hidden md:block space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <x-breadcrumbs :items="[
-                'Restock Orders' => route('restocks.index'),
-                'Edit #' . $restock->id => '#',
+                'Restock' => route('restocks.index'),
+                '#'.$restock->po_number => route('restocks.show', $restock),
+                'Edit' => '#',
             ]" />
             <div class="flex flex-wrap gap-2 justify-end">
                 <x-action-button href="{{ route('restocks.index') }}" variant="secondary" icon="arrow-left">

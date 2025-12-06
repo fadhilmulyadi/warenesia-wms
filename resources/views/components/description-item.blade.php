@@ -1,13 +1,17 @@
-@props(['label', 'value' => null, 'icon' => null])
+@props([
+    'label',
+    'value' => null,
+    'icon' => null
+])
 
-<div class="group">
-    <div class="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-1 flex items-center gap-1">
+<div {{ $attributes->merge(['class' => 'flex flex-col gap-1 border-b border-slate-100 last:border-0 pb-3 last:pb-0']) }}>
+    <dt class="text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
         @if($icon)
-            <x-dynamic-component :component="'lucide-'.$icon" class="w-3 h-3 opacity-70" />
+            <x-dynamic-component :component="'lucide-' . $icon" class="w-3.5 h-3.5 opacity-70" />
         @endif
         {{ $label }}
-    </div>
-    <div class="text-sm font-medium text-slate-900 group-hover:text-teal-700 transition-colors">
+    </dt>
+    <dd class="text-sm font-medium text-slate-800 break-words">
         {{ $value ?? $slot }}
-    </div>
+    </dd>
 </div>

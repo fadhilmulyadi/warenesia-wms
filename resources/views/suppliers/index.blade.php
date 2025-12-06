@@ -3,7 +3,7 @@
 @section('title', 'Supplier')
 
 @section('page-header')
-    <x-page-header title="Data Supplier" description="Kelola informasi supplier, kontak, dan relasi pengadaan barang." />
+    <x-page-header title="Data Supplier" description="Database pemasok dan riwayat relasi pengadaan" />
 @endsection
 
 @section('content')
@@ -112,8 +112,20 @@
                             </x-table.tr>
                         @empty
                             <x-table.tr>
-                                <x-table.td colspan="8" class="text-center text-slate-500 py-6">
-                                    No suppliers found. Try changing the filter or add a new supplier.
+                                <x-table.td colspan="8" class="py-10">
+                                    <x-empty-state
+                                        title="Supplier tidak ditemukan"
+                                        description="Coba ubah filter pencarian atau tambahkan supplier baru."
+                                        icon="building-2"
+                                    >
+                                        <x-slot name="actions">
+                                            @can('create', \App\Models\Supplier::class)
+                                                <x-action-button href="{{ route('suppliers.create') }}" variant="primary" icon="plus">
+                                                    Tambah Supplier
+                                                </x-action-button>
+                                            @endcan
+                                        </x-slot>
+                                    </x-empty-state>
                                 </x-table.td>
                             </x-table.tr>
                         @endforelse

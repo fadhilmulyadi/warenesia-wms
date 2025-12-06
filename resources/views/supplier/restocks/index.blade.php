@@ -6,15 +6,15 @@
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
         <x-page-header
-            title="Pesanan Saya"
-            description="Pantau status pesanan pembelian yang ditugaskan kepada perusahaan Anda."
+            title="Pesanan Masuk"
+            description="Daftar permintaan stok yang perlu diproses"
         />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">
         <x-mobile-header
-            title="Pesanan Saya"
+            title="Pesanan Masuk"
         />
     </div>
 @endsection

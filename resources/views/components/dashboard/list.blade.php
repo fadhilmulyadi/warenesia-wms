@@ -1,5 +1,8 @@
 @props([
     'items' => [],
+    'emptyTitle' => 'Tidak ada data',
+    'emptyDescription' => null,
+    'emptyIcon' => 'package-search',
 ])
 
 <ul class="divide-y divide-slate-100">
@@ -38,6 +41,17 @@
         @endif
 
     @empty
-        <li class="py-3 text-sm text-slate-500">No data available.</li>
+        <li class="py-6">
+            @isset($empty)
+                {{ $empty }}
+            @else
+                <x-empty-state
+                    :title="$emptyTitle"
+                    :description="$emptyDescription"
+                    :icon="$emptyIcon"
+                    containerClass="border-2 border-dashed border-slate-200 bg-slate-50 rounded-xl py-6"
+                />
+            @endisset
+        </li>
     @endforelse
 </ul>

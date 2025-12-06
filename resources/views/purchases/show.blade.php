@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Detail Barang Masuk" :description="'Transaksi #' . $purchase->transaction_number" />
+        <x-page-header title="Detail Barang Masuk" :description="'Bukti transaksi penerimaan #' . $purchase->transaction_number" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
@@ -180,8 +180,9 @@
             {{-- TOOLBAR --}}
             <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <x-breadcrumbs :items="[
-            'Transaksi' => route('transactions.index', ['tab' => 'incoming']),
-            'Detail Barang Masuk' => route('purchases.show', $purchase),
+            'Transaksi' => route('transactions.index'),
+            'Barang Masuk' => route('transactions.index', ['tab' => 'incoming']),
+            '#'.$purchase->transaction_number => route('purchases.show', $purchase),
         ]" />
 
                 <div class="flex flex-wrap items-center gap-2 justify-end">
@@ -257,50 +258,34 @@
                 <x-card class="p-6 space-y-6 lg:col-span-2">
                     <div class="space-y-3">
                         <p class="text-base font-semibold text-slate-900">Informasi Supplier</p>
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="text-slate-500">Nama</div>
-                            <div class="font-medium text-slate-900">{{ optional($purchase->supplier)->name ?? '-' }}</div>
-
+                        <div class="space-y-2">
+                            <x-description-item label="Nama" :value="optional($purchase->supplier)->name ?? '-'" icon="building-2" />
                             @if(optional($purchase->supplier)->contact_person)
-                                <div class="text-slate-500">Kontak</div>
-                                <div class="font-medium text-slate-900">{{ $purchase->supplier->contact_person }}</div>
+                                <x-description-item label="Kontak" :value="$purchase->supplier->contact_person" icon="user-round" />
                             @endif
-
                             @if(optional($purchase->supplier)->email)
-                                <div class="text-slate-500">Email</div>
-                                <div class="font-medium text-slate-900">{{ $purchase->supplier->email }}</div>
+                                <x-description-item label="Email" :value="$purchase->supplier->email" icon="mail" />
                             @endif
-
                             @if(optional($purchase->supplier)->phone)
-                                <div class="text-slate-500">Telepon</div>
-                                <div class="font-medium text-slate-900">{{ $purchase->supplier->phone }}</div>
+                                <x-description-item label="Telepon" :value="$purchase->supplier->phone" icon="phone" />
                             @endif
                         </div>
                     </div>
 
                     <div class="space-y-3">
                         <p class="text-base font-semibold text-slate-900">Informasi Transaksi</p>
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="text-slate-500">Nomor Transaksi</div>
-                            <div class="font-medium text-slate-900">{{ $purchase->transaction_number }}</div>
-
-                            <div class="text-slate-500">Jenis</div>
-                            <div class="font-medium text-slate-900">Barang Masuk</div>
-
-                            <div class="text-slate-500">Tanggal</div>
-                            <div class="font-medium text-slate-900">{{ $purchase->transaction_date->format('d M Y') }}
-                            </div>
-
-                            <div class="text-slate-500">Catatan</div>
-                            <div class="text-slate-900">{{ $purchase->notes ?? '-' }}</div>
+                        <div class="space-y-2">
+                            <x-description-item label="Nomor Transaksi" :value="$purchase->transaction_number" icon="hash" />
+                            <x-description-item label="Jenis" value="Barang Masuk" icon="log-in" />
+                            <x-description-item label="Tanggal" :value="$purchase->transaction_date->format('d M Y')" icon="calendar" />
+                            <x-description-item label="Catatan" :value="$purchase->notes ?? '-'" icon="notebook-pen" />
                         </div>
                     </div>
 
                     <div class="space-y-3">
                         <p class="text-base font-semibold text-slate-900">Informasi Tambahan</p>
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="text-slate-500">Diverifikasi oleh</div>
-                            <div class="font-medium text-slate-900">{{ optional($purchase->verifiedBy)->name ?? '-' }}</div>
+                        <div class="space-y-2">
+                            <x-description-item label="Diverifikasi oleh" :value="optional($purchase->verifiedBy)->name ?? '-'" icon="shield-check" />
                         </div>
                     </div>
                 </x-card>

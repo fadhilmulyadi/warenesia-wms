@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Tambah Supplier" description="Daftarkan supplier baru untuk operasional gudang." />
+        <x-page-header title="Tambah Supplier" description="Registrasi mitra pemasok baru untuk operasional" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
@@ -47,7 +47,7 @@
             <div class="flex items-center justify-between flex-wrap gap-3">
                 <x-breadcrumbs :items="[
             'Supplier' => route('suppliers.index'),
-            'Tambah Supplier' => '#',
+            'Tambah' => '#',
         ]" />
 
                 <div class="flex flex-wrap gap-2">

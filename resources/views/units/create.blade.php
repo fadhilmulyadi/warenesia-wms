@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Tambah Satuan" description="Daftarkan satuan baru untuk digunakan di produk." />
+        <x-page-header title="Tambah Satuan" description="Definisikan satuan ukur baru dalam sistem" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}

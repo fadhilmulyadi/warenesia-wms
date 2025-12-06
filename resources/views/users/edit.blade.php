@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Edit User" description="Perbarui profil dan status akun pengguna." />
+        <x-page-header title="Edit User" description="Perbarui data profil dan status aktif pengguna" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
@@ -66,7 +66,7 @@
     <div class="hidden md:block space-y-4 max-w-6xl mx-auto pb-24">
         {{-- TOOLBAR --}}
         <div class="flex items-center justify-between flex-wrap gap-3">
-            <x-breadcrumbs :items="['Users' => route('users.index'), $user->name => '#']" />
+            <x-breadcrumbs :items="['Pengguna' => route('users.index'), $user->name => route('users.edit', $user), 'Edit' => '#']" />
 
             <div class="flex flex-wrap gap-2">
                 <x-action-button href="{{ route('users.index') }}" variant="secondary" icon="arrow-left">

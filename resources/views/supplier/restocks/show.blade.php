@@ -7,7 +7,7 @@
     <div class="hidden md:block">
         <x-page-header
             :title="'Restock #' . $restock->po_number"
-            :description="'Supplier: ' . ($restock->supplier->name ?? 'Unknown')"
+            :description="'Rincian item yang harus dikirim ke gudang'"
         />
     </div>
 
@@ -249,8 +249,8 @@
             {{-- TOOLBAR --}}
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <x-breadcrumbs :items="[
-                    'Restocks' => route('supplier.restocks.index'),
-                    'Detail Restock' => route('supplier.restocks.show', $restock),
+                    'Pesanan Masuk' => route('supplier.restocks.index'),
+                    '#'.$restock->po_number => route('supplier.restocks.show', $restock),
                 ]" />
 
                 <div class="flex flex-wrap items-center gap-2 justify-end">
@@ -325,55 +325,20 @@
                 <p class="text-base font-semibold text-slate-900">Informasi Pesanan</p>
                 
                 <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                    <div class="space-y-1">
-                        <p class="text-sm text-slate-500">Nomor PO</p>
-                        <p class="text-sm font-semibold text-slate-900">{{ $restock->po_number }}</p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-sm text-slate-500">Tanggal Order</p>
-                        <p class="text-sm text-slate-900">
-                            {{ optional($restock->order_date)->format('d M Y') ?? '-' }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-sm text-slate-500">{{ $restock->status === 'received' ? 'Tanggal Diterima' : 'Perkiraan Tiba' }}</p>
-                        <p class="text-sm text-slate-900">
-                            {{ $restock->status === 'received' 
-                                ? ($restock->incomingTransaction?->transaction_date?->format('d M Y') ?? $restock->updated_at->format('d M Y'))
-                                : ($restock->expected_delivery_date?->format('d M Y') ?? '-') 
-                            }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-sm text-slate-500">Supplier</p>
-                        <p class="text-sm text-slate-900">
-                            {{ $restock->supplier->name ?? 'Unknown supplier' }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-sm text-slate-500">Total Item</p>
-                        <p class="text-sm font-semibold text-slate-900">
-                            {{ number_format((int) $restock->total_items) }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-sm text-slate-500">Total Kuantitas</p>
-                        <p class="text-sm font-semibold text-slate-900">
-                            {{ number_format((int) $restock->total_quantity, 0, ',', '.') }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-sm text-slate-500">Total Nilai</p>
-                        <p class="text-sm font-semibold text-slate-900">
-                            Rp {{ number_format((float) $restock->total_amount, 2, ',', '.') }}
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-sm text-slate-500">Dibuat oleh</p>
-                        <p class="text-sm text-slate-900">
-                            {{ optional($restock->createdBy)->name ?? '-' }}
-                        </p>
-                    </div>
+                    <x-description-item label="Nomor PO" :value="$restock->po_number" icon="hash" />
+                    <x-description-item label="Tanggal Order" :value="optional($restock->order_date)->format('d M Y') ?? '-'" icon="calendar" />
+                    <x-description-item
+                        :label="$restock->status === 'received' ? 'Tanggal Diterima' : 'Perkiraan Tiba'"
+                        :value="$restock->status === 'received' 
+                            ? ($restock->incomingTransaction?->transaction_date?->format('d M Y') ?? $restock->updated_at->format('d M Y'))
+                            : ($restock->expected_delivery_date?->format('d M Y') ?? '-')"
+                        icon="clock"
+                    />
+                    <x-description-item label="Supplier" :value="$restock->supplier->name ?? 'Unknown supplier'" icon="building-2" />
+                    <x-description-item label="Total Item" :value="number_format((int) $restock->total_items)" icon="list" />
+                    <x-description-item label="Total Kuantitas" :value="number_format((int) $restock->total_quantity, 0, ',', '.')" icon="boxes" />
+                    <x-description-item label="Total Nilai" :value="'Rp ' . number_format((float) $restock->total_amount, 2, ',', '.')" icon="wallet" />
+                    <x-description-item label="Dibuat oleh" :value="optional($restock->createdBy)->name ?? '-'" icon="user" />
                 </div>
 
                 @if($restock->notes)

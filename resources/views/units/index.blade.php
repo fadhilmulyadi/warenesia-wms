@@ -3,7 +3,7 @@
 @section('title', 'Satuan Produk')
 
 @section('page-header')
-    <x-page-header title="Satuan Produk" description="Kelola daftar satuan yang digunakan pada master produk." />
+    <x-page-header title="Satuan Produk" description="Daftar standar satuan ukur untuk master produk" />
 @endsection
 
 @section('content')
@@ -64,8 +64,18 @@
                     </x-table.tr>
                 @empty
                     <x-table.tr>
-                        <x-table.td colspan="4" class="py-8 text-center text-slate-500">
-                            Belum ada data satuan. Tambahkan satuan pertama untuk mulai digunakan di produk.
+                        <x-table.td colspan="4" class="py-10">
+                            <x-empty-state
+                                title="Belum ada data satuan"
+                                description="Tambahkan satuan pertama untuk digunakan di master produk."
+                                icon="ruler"
+                            >
+                                <x-slot name="actions">
+                                    <x-action-button href="{{ route('units.create') }}" variant="primary" icon="plus">
+                                        Tambah Satuan
+                                    </x-action-button>
+                                </x-slot>
+                            </x-empty-state>
                         </x-table.td>
                     </x-table.tr>
                 @endforelse

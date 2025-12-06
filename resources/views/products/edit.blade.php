@@ -6,7 +6,7 @@
     <div class="hidden md:block">
         <x-page-header
             title="Edit Produk"
-            :description="'Perbarui informasi untuk produk dengan SKU: ' . $product->sku"
+            :description="'Perbarui informasi dan spesifikasi produk SKU ' . $product->sku"
         />
     </div>
     <div class="md:hidden">
@@ -52,9 +52,9 @@
     <div class="hidden md:block space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <x-breadcrumbs :items="[
-                'Inventaris' => route('products.index'),
-                'Produk'     => route('products.index'),
-                $product->sku ?? $product->name ?? 'Edit Produk' => '#',
+                'Produk' => route('products.index'),
+                $product->name ?? $product->sku ?? 'Detail Produk' => route('products.show', $product),
+                'Edit' => '#',
             ]" />
             <div class="flex flex-wrap gap-2 justify-end">
                 <x-action-button href="{{ route('products.index') }}" variant="secondary" icon="arrow-left">

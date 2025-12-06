@@ -4,7 +4,7 @@
 
 @section('page-header')
     <div class="hidden md:block">
-        <x-page-header title="Edit Kategori" description="Perbarui nama, prefix SKU, dan metadata kategori." />
+        <x-page-header title="Edit Kategori" description="Perbarui metadata dan aturan prefix kategori" />
     </div>
     <div class="md:hidden">
         <x-mobile-header title="Edit Kategori" back="{{ route('categories.index') }}" />
@@ -41,7 +41,7 @@
     <div class="hidden md:block">
         <x-card class="p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <x-breadcrumbs :items="['Kategori' => route('categories.index'), 'Edit' => '#']" />
+                <x-breadcrumbs :items="['Kategori' => route('categories.index'), $category->name => route('categories.edit', $category), 'Edit' => '#']" />
                 <div class="flex flex-wrap gap-2 justify-end">
                     <x-action-button href="{{ route('categories.index') }}" variant="secondary" icon="arrow-left">
                         Kembali

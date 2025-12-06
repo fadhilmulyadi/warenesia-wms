@@ -3,7 +3,7 @@
 @section('title', 'User')
 
 @section('page-header')
-    <x-page-header title="Manajemen User" description="Kelola seluruh pengguna sistem." />
+    <x-page-header title="Manajemen User" description="Kontrol akses dan profil pengguna aplikasi" />
 @endsection
 
 @section('content')
@@ -150,8 +150,23 @@
                                 </x-table.tr>
                             @empty
                                 <x-table.tr>
-                                    <x-table.td colspan="7" class="text-center text-slate-500 py-6">
-                                        Belum ada user yang memenuhi filter.
+                                    <x-table.td colspan="7" class="py-10">
+                                        <x-empty-state
+                                            title="Belum ada user yang memenuhi filter"
+                                            description="Coba ubah kata kunci atau reset filter pencarian."
+                                            icon="users"
+                                        >
+                                            <x-slot name="actions">
+                                                <x-action-button href="{{ route('users.index') }}" variant="secondary" icon="rotate-ccw">
+                                                    Reset Filter
+                                                </x-action-button>
+                                                @can('create', \App\Models\User::class)
+                                                    <x-action-button href="{{ route('users.create') }}" variant="primary" icon="plus">
+                                                        Tambah User
+                                                    </x-action-button>
+                                                @endcan
+                                            </x-slot>
+                                        </x-empty-state>
                                     </x-table.td>
                                 </x-table.tr>
                             @endforelse

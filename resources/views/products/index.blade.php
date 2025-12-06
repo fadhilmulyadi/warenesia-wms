@@ -3,7 +3,7 @@
 @section('title', 'Produk')
 
 @section('page-header')
-    <x-page-header title="Data Produk" description="Kelola informasi barang, harga, dan ketersediaan stok gudang." />
+    <x-page-header title="Data Produk" description="Kelola informasi barang, harga, dan ketersediaan stok" />
 @endsection
 
 @section('content')
@@ -142,7 +142,23 @@
                             </td>
                         </tr>
                     @else
-                        <x-product.empty-state />
+                        <x-table.tr>
+                            <x-table.td colspan="7" class="py-10">
+                                <x-empty-state
+                                    title="Tidak ada produk ditemukan"
+                                    description="Silakan tambahkan produk baru atau reset filter pencarian."
+                                    icon="box"
+                                >
+                                    <x-slot name="actions">
+                                        @can('create', \App\Models\Product::class)
+                                            <x-action-button href="{{ route('products.create') }}" variant="primary" icon="plus">
+                                                Tambah Produk
+                                            </x-action-button>
+                                        @endcan
+                                    </x-slot>
+                                </x-empty-state>
+                            </x-table.td>
+                        </x-table.tr>
                     @endif
                 @endforelse
             </x-table.tbody>

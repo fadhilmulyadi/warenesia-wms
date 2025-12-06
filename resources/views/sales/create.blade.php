@@ -3,7 +3,7 @@
 @section('title', 'Catat Barang Keluar')
 
 @section('page-header')
-    <x-page-header title="Barang Keluar Baru" description="Buat transaksi penjualan ke customer." />
+    <x-page-header title="Input Barang Keluar" description="Catat pengeluaran barang untuk customer atau operasional" />
 @endsection
 
 @section('content')
@@ -75,7 +75,11 @@
     <div class="hidden md:block space-y-6">
         {{-- TOOLBAR --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <x-breadcrumbs :items="['Data Transaksi' => route('sales.index'), 'Buat Baru' => '#']" />
+            <x-breadcrumbs :items="[
+                'Transaksi' => route('transactions.index'),
+                'Barang Keluar' => route('transactions.index', ['tab' => 'outgoing']),
+                'Buat Baru' => '#',
+            ]" />
             <div class="flex flex-wrap gap-2 justify-end">
                 <x-action-button href="{{ route('sales.index') }}" variant="secondary" icon="arrow-left">
                     Kembali

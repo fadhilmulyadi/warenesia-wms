@@ -4,8 +4,8 @@
 
 @section('page-header')
     <x-page-header
-        title="Data Transaksi"
-        description="Lihat, kelola, dan evaluasi seluruh transaksi operasional."
+        title="Riwayat Transaksi"
+        description="Rekapitulasi seluruh aktivitas masuk dan keluar barang"
     />
 @endsection
 

@@ -3,7 +3,7 @@
 @section('title', 'Dashboard Manajer')
 
 @section('page-header')
-    <x-page-header title="Dashboard Manajer" description="Ringkasan persetujuan, restok, dan kondisi stok" />
+    <x-page-header title="Dashboard Manajer" description="Monitor persetujuan, siklus restock, dan kondisi stok" />
 @endsection
 
 @section('content')
@@ -19,7 +19,12 @@
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <x-dashboard.card title="Persetujuan Menunggu" subtitle="Transaksi masuk dan keluar yang perlu ditinjau">
-                <x-dashboard.list :items="$pendingApprovals" />
+                <x-dashboard.list
+                    :items="$pendingApprovals"
+                    emptyTitle="Tidak ada transaksi yang menunggu"
+                    emptyDescription="Semua transaksi telah ditinjau."
+                    emptyIcon="check-circle"
+                />
             </x-dashboard.card>
 
             <x-dashboard.card title="Pesanan Restok Aktif" subtitle="Pesanan dalam proses konfirmasi">
@@ -47,8 +52,12 @@
                         @unless($loop->last)
                             <div class="border-t border-slate-100"></div>
                         @endunless
-                    @empty
-                        <p class="text-sm text-slate-500">No active restock orders right now.</p>
+                        @empty
+                        <x-empty-state
+                            title="Belum ada pesanan restock aktif"
+                            description="Pesanan yang masih berjalan akan tampil di sini."
+                            icon="repeat"
+                        />
                     @endforelse
                 </div>
             </x-dashboard.card>

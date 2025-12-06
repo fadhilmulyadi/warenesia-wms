@@ -7,7 +7,7 @@
     <div class="hidden md:block">
         <x-page-header
             title="Edit Penjualan"
-            :description="'Perbarui informasi penjualan #' . $sale->id"
+            :description="'Koreksi data pengeluaran untuk Ref #' . $sale->transaction_number"
         />
     </div>
     {{-- PAGE HEADER: Mobile --}}
@@ -121,8 +121,10 @@
         {{-- TOOLBAR --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
             <x-breadcrumbs :items="[
-                'Penjualan' => route('sales.index'),
-                'Edit #' . $sale->id => '#',
+                'Transaksi' => route('transactions.index'),
+                'Barang Keluar' => route('transactions.index', ['tab' => 'outgoing']),
+                '#'.$sale->transaction_number => route('sales.show', $sale),
+                'Edit' => '#',
             ]" />
             <div class="flex flex-wrap gap-2 justify-end">
                 <x-action-button href="{{ route('sales.index') }}" variant="secondary" icon="arrow-left">

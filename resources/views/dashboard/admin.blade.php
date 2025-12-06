@@ -5,7 +5,7 @@
 @section('page-header')
     <x-page-header
         title="Dashboard Admin"
-        description="Ringkasan stok, transaksi, dan notifikasi"
+        description="Pusat kendali stok, transaksi, dan notifikasi sistem"
     />
 @endsection
 
@@ -22,7 +22,12 @@
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <x-dashboard.card title="Peringatan Stok Rendah" subtitle="Produk di bawah batas minimum">
-                <x-dashboard.list :items="$lowStockAlerts" />
+                <x-dashboard.list
+                    :items="$lowStockAlerts"
+                    emptyTitle="Tidak ada peringatan stok"
+                    emptyDescription="Semua stok berada di atas batas minimum."
+                    emptyIcon="check-circle"
+                />
             </x-dashboard.card>
 
             <x-dashboard.card title="Akses Cepat" subtitle="Pintasan ke tugas yang sering dilakukan">

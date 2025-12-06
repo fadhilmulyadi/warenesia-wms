@@ -5,7 +5,7 @@
 @section('page-header')
     <x-page-header
         title="Data Restock"
-        description="Kelola siklus pengadaan barang ke supplier dan monitor status pengiriman pesanan."
+        description="Monitor siklus pengadaan dan status pengiriman supplier"
     />
 @endsection
 
@@ -163,10 +163,20 @@
                     </x-table.tr>
                 @empty
                     <x-table.tr>
-                        <x-table.td colspan="8" align="center">
-                            <span class="text-[11px] text-slate-500 py-6 block">
-                                No restock orders yet.
-                            </span>
+                        <x-table.td colspan="8" class="py-10">
+                            <x-empty-state
+                                title="Belum ada pesanan restock"
+                                description="Buat pesanan baru untuk mulai melacak pengadaan."
+                                icon="repeat"
+                            >
+                                <x-slot name="actions">
+                                    @can('create', \App\Models\RestockOrder::class)
+                                        <x-action-button href="{{ route('restocks.create') }}" variant="primary" icon="plus">
+                                            Tambah Pesanan
+                                        </x-action-button>
+                                    @endcan
+                                </x-slot>
+                            </x-empty-state>
                         </x-table.td>
                     </x-table.tr>
                 @endforelse

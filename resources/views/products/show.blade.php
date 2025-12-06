@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Detail Produk" :description="'SKU: ' . $product->sku" />
+        <x-page-header title="Detail Produk" :description="'Informasi lengkap untuk SKU ' . $product->sku" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
@@ -229,7 +229,7 @@
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <x-breadcrumbs :items="[
             'Produk' => route('products.index'),
-            'Detail Produk' => route('products.show', $product),
+            $product->name => route('products.show', $product),
         ]" />
 
                 <div class="flex flex-wrap items-center gap-2 justify-end">
@@ -335,29 +335,15 @@
                     </p>
 
                     <div class="space-y-4">
-
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="text-slate-500">Harga Beli</div>
-                            <div class="font-semibold text-slate-900">
-                                Rp {{ number_format($product->purchase_price, 2, ',', '.') }}
-                            </div>
-
-                            <div class="text-slate-500">Harga Jual</div>
-                            <div class="font-semibold text-slate-900">
-                                Rp {{ number_format($product->sale_price, 2, ',', '.') }}
-                            </div>
-
-                            <div class="text-slate-500">Stok Saat Ini</div>
-                            <div class="flex items-center gap-2 font-semibold text-slate-900">
-                                <x-lucide-package class="h-4 w-4 text-slate-400" />
-                                <span>{{ number_format($product->current_stock, 0, ',', '.') }}
-                                    {{ $product->unit->name ?? '-' }}</span>
-                            </div>
-
-                            <div class="text-slate-500">Minimum Stok</div>
-                            <div class="font-medium text-slate-900">
-                                {{ number_format($product->min_stock, 0, ',', '.') }} {{ $product->unit->name ?? '-' }}
-                            </div>
+                        <div class="space-y-3">
+                            <x-description-item label="Harga Beli" :value="'Rp ' . number_format($product->purchase_price, 2, ',', '.')" icon="tag" />
+                            <x-description-item label="Harga Jual" :value="'Rp ' . number_format($product->sale_price, 2, ',', '.')" icon="badge-dollar-sign" />
+                            <x-description-item label="Stok Saat Ini" icon="package">
+                                <span class="flex items-center gap-2">
+                                    {{ number_format($product->current_stock, 0, ',', '.') }} {{ $product->unit->name ?? '-' }}
+                                </span>
+                            </x-description-item>
+                            <x-description-item label="Minimum Stok" icon="triangle-alert" :value="number_format($product->min_stock, 0, ',', '.') . ' ' . ($product->unit->name ?? '-')" />
                         </div>
 
                         <div class="border-t border-slate-200"></div>

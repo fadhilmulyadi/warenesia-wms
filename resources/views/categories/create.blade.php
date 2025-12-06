@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Kategori Produk" description="Kelola awalan SKU dan metadata kategori untuk WMS." />
+        <x-page-header title="Kategori Produk" description="Tetapkan nama dan prefix SKU untuk kategori baru" />
     </div>
     {{-- PAGE HEADER: Mobile --}}
     <div class="md:hidden">

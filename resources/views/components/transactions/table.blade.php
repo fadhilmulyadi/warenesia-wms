@@ -133,18 +133,25 @@
             </x-table.tr>
         @empty
             <x-table.tr>
-                <x-table.td colspan="8" class="text-center py-8">
-                    <div class="flex flex-col items-center justify-center">
-                        <div class="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-                           <x-lucide-clipboard-list class="h-6 w-6 text-slate-400" />
-                        </div>
-                        <p class="text-sm font-medium text-slate-900">
-                            Tidak ada data transaksi
-                        </p>
-                        <p class="text-xs text-slate-500 mt-1">
-                            Belum ada data {{ $isIncoming ? 'barang masuk' : 'barang keluar' }} yang tercatat.
-                        </p>
-                    </div>
+                <x-table.td colspan="8" class="py-10">
+                    <x-empty-state
+                        title="Tidak ada data transaksi"
+                        :description="'Belum ada data ' . ($isIncoming ? 'barang masuk' : 'barang keluar') . ' yang tercatat.'"
+                        icon="{{ $isIncoming ? 'log-in' : 'log-out' }}"
+                        containerClass="border-2 border-dashed border-slate-200 bg-slate-50 rounded-xl py-6"
+                    >
+                        <x-slot name="actions">
+                            @can('create', $modelClass)
+                                <x-action-button
+                                    href="{{ route($routePrefix . '.create') }}"
+                                    variant="primary"
+                                    icon="plus"
+                                >
+                                    {{ $isIncoming ? 'Catat Barang Masuk' : 'Catat Barang Keluar' }}
+                                </x-action-button>
+                            @endcan
+                        </x-slot>
+                    </x-empty-state>
                 </x-table.td>
             </x-table.tr>
         @endforelse

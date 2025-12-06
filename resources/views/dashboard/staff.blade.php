@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Staff Gudang')
+@section('title', 'Dashboard Staff')
 
 @section('page-header')
-    <x-page-header title="Dashboard Staff Gudang"
-        description="Input cepat transaksi gudang dan pantau aktivitas hari ini" />
+    <x-page-header title="Dashboard Staff"
+        description="Akses cepat transaksi gudang dan aktivitas harian" />
 @endsection
 
 @php
@@ -73,12 +73,12 @@
                     </div>
                 @else
                     {{-- EMPTY STATE --}}
-                    <div class="flex flex-col items-center justify-center py-8 text-center px-4 border-t border-slate-100">
-                        <div class="bg-slate-50 p-3 rounded-full mb-3">
-                            <x-lucide-check-circle class="w-6 h-6 text-slate-300" />
-                        </div>
-                        <p class="text-sm font-medium text-slate-900">Semua Beres!</p>
-                        <p class="text-xs text-slate-500 mt-1">Tidak ada PO yang perlu diterima saat ini.</p>
+                    <div class="px-4 pb-6 border-t border-slate-100">
+                        <x-empty-state
+                            title="Semua beres!"
+                            description="Tidak ada PO yang perlu diterima saat ini."
+                            icon="check-circle"
+                        />
                     </div>
                 @endif
             </x-dashboard.card>
@@ -115,12 +115,13 @@
         {{-- RIGHT SIDE --}}
         <div class="space-y-6 lg:col-span-3">
             {{-- SECTION: Today Transactions --}}
-            <x-dashboard.card title="Transaksi Hari Ini" subtitle="5-10 transaksi yang kamu buat hari ini." padding="p-4">
+            <x-dashboard.card title="Transaksi Hari Ini" subtitle="Daftar transaksi yang kamu buat hari ini." padding="p-4">
                 @if(count($todayList) === 0)
-                    <div
-                        class="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-xs text-slate-500 text-center">
-                        Belum ada transaksi hari ini.
-                    </div>
+                    <x-empty-state
+                        title="Belum ada transaksi hari ini"
+                        description="Transaksi yang kamu buat hari ini akan muncul di sini."
+                        icon="clock-3"
+                    />
                 @else
                     <x-dashboard.list :items="$todayList" />
                 @endif
@@ -131,7 +132,5 @@
         <x-dashboard.scan-modal />
 
     </div>
-
-    {{-- SCRIPTS --}}
 
 @endsection

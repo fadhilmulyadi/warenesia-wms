@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Detail Barang Keluar" :description="'Transaksi #' . $sale->transaction_number" />
+        <x-page-header title="Detail Barang Keluar" :description="'Bukti transaksi pengeluaran #' . $sale->transaction_number" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
@@ -157,8 +157,9 @@
             {{-- TOOLBAR --}}
             <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <x-breadcrumbs :items="[
-            'Transaksi' => route('transactions.index', ['tab' => 'outgoing']),
-            'Detail Barang Keluar' => route('sales.show', $sale),
+            'Transaksi' => route('transactions.index'),
+            'Barang Keluar' => route('transactions.index', ['tab' => 'outgoing']),
+            '#'.$sale->transaction_number => route('sales.show', $sale),
         ]" />
 
                 <div class="flex flex-wrap items-center gap-2 justify-end">
@@ -218,36 +219,27 @@
                     <div class="space-y-3">
                         <p class="text-base font-semibold text-slate-900">Informasi Customer</p>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="text-slate-500">Nama</div>
-                            <div class="font-medium text-slate-900">{{ $sale->customer_name ?? '-' }}</div>
+                        <div class="space-y-2">
+                            <x-description-item label="Nama" :value="$sale->customer_name ?? '-'" icon="user" />
                         </div>
                     </div>
 
                     <div class="space-y-3">
                         <p class="text-base font-semibold text-slate-900">Informasi Transaksi</p>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="text-slate-500">Nomor Transaksi</div>
-                            <div class="font-medium text-slate-900">{{ $sale->transaction_number }}</div>
-
-                            <div class="text-slate-500">Jenis</div>
-                            <div class="font-medium text-slate-900">Barang Keluar</div>
-
-                            <div class="text-slate-500">Tanggal</div>
-                            <div class="font-medium text-slate-900">{{ $sale->transaction_date->format('d M Y') }}</div>
-
-                            <div class="text-slate-500">Catatan</div>
-                            <div class="text-slate-900">{{ $sale->notes ?? '-' }}</div>
+                        <div class="space-y-2">
+                            <x-description-item label="Nomor Transaksi" :value="$sale->transaction_number" icon="hash" />
+                            <x-description-item label="Jenis" value="Barang Keluar" icon="log-out" />
+                            <x-description-item label="Tanggal" :value="$sale->transaction_date->format('d M Y')" icon="calendar" />
+                            <x-description-item label="Catatan" :value="$sale->notes ?? '-'" icon="notebook-pen" />
                         </div>
                     </div>
 
                     <div class="space-y-3">
                         <p class="text-base font-semibold text-slate-900">Informasi Tambahan</p>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div class="text-slate-500">Disetujui oleh</div>
-                            <div class="font-medium text-slate-900">{{ optional($sale->approvedBy)->name ?? '-' }}</div>
+                        <div class="space-y-2">
+                            <x-description-item label="Disetujui oleh" :value="optional($sale->approvedBy)->name ?? '-'" icon="shield-check" />
                         </div>
                     </div>
                 </x-card>

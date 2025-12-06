@@ -7,7 +7,7 @@
     <div class="hidden md:block">
         <x-page-header
             title="Tambah Produk"
-            description="Tambahkan produk baru ke inventaris gudang."
+            description="Input data produk baru ke dalam inventaris"
         />
     </div>
     {{-- PAGE HEADER: Mobile --}}

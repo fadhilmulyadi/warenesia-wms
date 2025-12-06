@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Edit Satuan" description="Perbarui informasi satuan yang digunakan produk." />
+        <x-page-header title="Edit Satuan" description="Sesuaikan penamaan atau simbol satuan ukur" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
@@ -49,6 +49,7 @@
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <x-breadcrumbs :items="[
             'Satuan' => route('units.index'),
+            $unit->name => route('units.edit', $unit),
             'Edit' => '#',
         ]" />
 

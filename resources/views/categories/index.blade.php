@@ -5,7 +5,7 @@
 
 @section('page-header')
     <x-page-header title="Data Kategori"
-        description="Kelola klasifikasi produk untuk mengorganisir inventaris dengan lebih terstruktur." />
+        description="Atur klasifikasi produk untuk struktur inventaris" />
 @endsection
 
 @section('content')
@@ -134,9 +134,20 @@
                     </x-table.tr>
                 @empty
                     <x-table.tr>
-                        <x-table.td colspan="5" class="py-8 text-center text-slate-500">
-                            Belum ada kategori. Tambahkan kategori pertama dengan tombol diatas.
-                            <span class="font-semibold">"Tambah Kategori"</span>
+                        <x-table.td colspan="5" class="py-10">
+                            <x-empty-state
+                                title="Belum ada kategori"
+                                description="Tambahkan kategori pertama untuk mengelompokkan produk."
+                                icon="tags"
+                            >
+                                <x-slot name="actions">
+                                    @can('create', \App\Models\Category::class)
+                                        <x-action-button href="{{ route('categories.create') }}" variant="primary" icon="plus">
+                                            Tambah Kategori
+                                        </x-action-button>
+                                    @endcan
+                                </x-slot>
+                            </x-empty-state>
                         </x-table.td>
                     </x-table.tr>
                 @endforelse

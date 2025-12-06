@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Tambah User" description="Buat akun pengguna baru untuk WMS." />
+        <x-page-header title="Tambah User" description="Buat akun pengguna baru dengan hak akses spesifik" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}
@@ -41,7 +41,7 @@
 
             {{-- TOOLBAR --}}
             <div class="flex items-center justify-between flex-wrap gap-3">
-                <x-breadcrumbs :items="['Users' => route('users.index'), 'Tambah User' => '#']" />
+                <x-breadcrumbs :items="['Pengguna' => route('users.index'), 'Tambah' => '#']" />
 
                 <div class="flex flex-wrap gap-2">
                     <x-action-button href="{{ route('users.index') }}" variant="secondary" icon="arrow-left">

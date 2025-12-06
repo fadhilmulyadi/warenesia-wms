@@ -3,9 +3,9 @@
 @section('title', 'Catat Barang Masuk')
 
 @section('page-header')
-    <x-page-header
-        title="Barang Masuk Baru"
-        description="Buat transaksi pembelian dari supplier."
+<x-page-header
+        title="Input Barang Masuk"
+        description="Catat penerimaan barang dari supplier ke gudang"
     />
 @endsection
 
@@ -110,7 +110,11 @@
     <div class="hidden md:block space-y-6">
         {{-- TOOLBAR --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <x-breadcrumbs :items="['Pembelian' => route('purchases.index'), 'Buat Baru' => '#']" />
+            <x-breadcrumbs :items="[
+                'Transaksi' => route('transactions.index'),
+                'Barang Masuk' => route('transactions.index', ['tab' => 'incoming']),
+                'Buat Baru' => '#',
+            ]" />
             <div class="flex flex-wrap gap-2 justify-end">
                 <x-action-button href="{{ route('purchases.index') }}" variant="secondary" icon="arrow-left">
                     Kembali

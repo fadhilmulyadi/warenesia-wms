@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Buat Restock')
+@section('title', 'Buat Pesanan Restock')
 
 @section('page-header')
-    <x-page-header title="Buat Restock Baru" description="Input pembelian barang dari supplier" />
+    <x-page-header title="Buat Pesanan Restock" description="Ajukan permintaan stok baru kepada supplier" />
 @endsection
 
 @section('content')
@@ -91,7 +91,7 @@
 {{-- DESKTOP VERSION --}}
 <div class="hidden md:block space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <x-breadcrumbs :items="['Data Restock' => route('restocks.index'), 'Buat Baru' => '#']" />
+        <x-breadcrumbs :items="['Restock' => route('restocks.index'), 'Buat Baru' => '#']" />
         <div class="flex flex-wrap gap-2 justify-end">
             <x-action-button href="{{ route('restocks.index') }}" variant="secondary" icon="arrow-left">
                 Kembali
