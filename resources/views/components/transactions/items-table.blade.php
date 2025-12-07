@@ -47,6 +47,7 @@
         priceErrors: {{ \Illuminate\Support\Js::from($priceErrorMap) }},
         shouldCheckStock: @js($priceField === 'unit_price'),
         priceField: @js($priceField),
+        productOptions: {{ \Illuminate\Support\Js::from($productOptions) }},
     })"
     x-init="
         items.forEach((item, i) => {
@@ -129,7 +130,7 @@
                                     type="text" 
                                     readonly
                                     :value="getProductSku(item.product_id)"
-                                    class="w-full px-2 py-1.5 rounded-xl border-slate-200 bg-slate-50 text-slate-500 text-xs font-mono shadow-sm focus:ring-0"
+                                    class="w-full px-2 py-1.5 rounded-xl border-slate-300 bg-slate-50 text-slate-500 text-xs font-mono shadow-sm focus:border-teal-500 focus:ring-teal-500"
                                 >
                             </div>
                             
@@ -140,7 +141,7 @@
                                     type="text" 
                                     readonly
                                     :value="getProductStock(item.product_id) !== null ? formatNumber(getProductStock(item.product_id)) : '-'"
-                                    class="w-full px-2 py-1.5 rounded-xl border-slate-200 bg-slate-50 text-slate-500 shadow-sm text-xs text-center focus:ring-0"
+                                    class="w-full px-2 py-1.5 rounded-xl border-slate-300 bg-slate-50 text-slate-500 shadow-sm text-xs text-center focus:border-teal-500 focus:ring-teal-500"
                                     :class="getStockClass(item.product_id)"
                                 >
                             </div>
@@ -156,12 +157,12 @@
                                         type="number" 
                                         :name="`items[${index}][{{ $priceField }}]`"
                                         x-model="item.{{ $priceField }}"
-                                        class="w-full pl-8 pr-3 py-2 rounded-lg border-slate-200 text-sm font-semibold text-right focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
+                                        class="w-full pl-8 pr-3 py-2 rounded-lg border-slate-300 text-sm font-semibold text-right focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
                                         :class="{ 
                                             'border-rose-300 ring-rose-200 bg-rose-50 text-rose-700': priceError(index),
-                                            'bg-slate-50 text-slate-500': @js($priceField === 'unit_cost')
+                                            'bg-slate-50 text-slate-500': !item.product_id || @js($priceField === 'unit_cost')
                                         }"
-                                        :readonly="@js($priceField === 'unit_cost')"
+                                        readonly
                                         :disabled="@js($readonly)"
                                         placeholder="0"
                                     >
@@ -184,8 +185,11 @@
                                     min="1"
                                     :max="shouldCheckStock ? (getProductStock(item.product_id) || 999999) : 999999"
                                     placeholder="Qty"
-                                    class="w-full pl-2 pr-1 py-2 rounded-lg border-slate-200 text-sm font-semibold text-center focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
-                                    :class="{ 'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity }"
+                                    class="w-full pl-2 pr-1 py-2 rounded-lg border-slate-300 text-sm font-semibold text-center focus:border-teal-500 focus:ring-teal-500 disabled:bg-slate-100"
+                                    :class="{ 
+                                        'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity,
+                                        'bg-slate-50 text-slate-400': !item.product_id,
+                                    }"
                                     :disabled="@js($readonly)"
                                     required
                                 >
@@ -214,6 +218,14 @@
             @endif
         </div>
     </div>
+
+    @if(!$hidePrice)
+        {{-- MOBILE GRAND TOTAL --}}
+        <div class="md:hidden border-t border-slate-200 bg-white px-3 py-3 flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Grand Total</span>
+            <span class="text-base font-bold text-slate-900" x-text="`Rp ${formatNumber(grandTotal())}`"></span>
+        </div>
+    @endif
 
     {{-- DESKTOP VERSION --}}
     <div class="hidden md:block overflow-x-visible">
@@ -279,7 +291,7 @@
                                 type="text" 
                                 readonly
                                 :value="getProductSku(item.product_id)"
-                                class="w-full rounded-xl h-[42px] bg-slate-50 text-slate-500 border-slate-200 text-sm font-mono shadow-sm focus:ring-0 "
+                                class="w-full rounded-xl h-[42px] bg-slate-50 text-slate-500 border-slate-300 text-sm font-mono shadow-sm focus:border-teal-500 focus:ring-teal-500"
                             >
                         </td>
 
@@ -289,7 +301,7 @@
                                 type="text" 
                                 readonly
                                 :value="getProductStock(item.product_id) !== null ? formatNumber(getProductStock(item.product_id)) : '-'"
-                                class="w-full text-center rounded-xl h-[42px] bg-slate-50 text-slate-500 border-slate-200 shadow-sm text-sm font-bold focus:ring-0"
+                                class="w-full text-center rounded-xl h-[42px] bg-slate-50 text-slate-500 border-slate-300 shadow-sm text-sm font-bold focus:border-teal-500 focus:ring-teal-500"
                                 :class="getStockClass(item.product_id)"
                             >
                         </td>
@@ -306,10 +318,10 @@
                                         class="w-full pl-8 pr-3 h-[42px] rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 text-sm font-bold text-slate-700 text-right"
                                         :class="{ 
                                             'border-rose-300 ring-rose-200 bg-rose-50 text-rose-700': priceError(index),
-                                            'bg-slate-50 text-slate-500': @js($priceField === 'unit_cost')
+                                            'bg-slate-50 text-slate-500': !item.product_id || @js($priceField === 'unit_cost')
                                         }"
-                                        :readonly="@js($priceField === 'unit_cost')"
-                                        :disabled="@js($readonly) || !item.product_id"
+                                        readonly
+                                        :disabled="@js($readonly)"
                                         placeholder="0"
                                     >
                                 </div>
@@ -332,9 +344,10 @@
                                     :class="{ 
                                         'border-rose-300 ring-rose-200 bg-rose-50 text-rose-700': stockError(index),
                                         'border-yellow-400 focus:border-yellow-500 focus:ring-yellow-500': item.original_quantity && item.quantity != item.original_quantity,
-                                        'bg-slate-100': !item.product_id 
+                                        'bg-slate-50 text-slate-400': !item.product_id 
                                     }"
-                                    :disabled="@js($readonly) || !item.product_id"
+                                    :disabled="@js($readonly)"
+                                    @blur="if (!item.quantity || item.quantity < 1) item.quantity = 1"
                                     required
                                 >
                             </div>
@@ -362,6 +375,19 @@
                     </tr>
                 </template>
             </tbody>
+
+            @if(!$hidePrice)
+                <tfoot class="bg-slate-50 border-t border-slate-200">
+                    <tr>
+                        <td colspan="100%" class="px-6 py-3 text-right">
+                            <div class="inline-flex items-baseline gap-3">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Grand Total</span>
+                                <span class="text-lg font-bold text-slate-900" x-text="`Rp ${formatNumber(grandTotal())}`"></span>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            @endif
         </table>
     </div>
 </div>

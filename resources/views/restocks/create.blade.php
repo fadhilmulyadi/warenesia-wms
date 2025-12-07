@@ -38,6 +38,7 @@
                                 id="supplier_id_mobile"
                                 name="supplier_id"
                                 :options="$suppliers->pluck('name', 'id')->toArray()"
+                                :value="old('supplier_id', $prefilledSupplierId)"
                                 placeholder="Pilih Supplier"
                                 class="mt-1 block w-full"
                                 required
@@ -48,7 +49,7 @@
                         {{-- Tanggal Order --}}
                         <div>
                             <x-input-label for="order_date_mobile" value="Tanggal Order" />
-                            <input type="date" id="order_date_mobile" name="order_date" value="{{ date('Y-m-d') }}"
+                            <input type="date" id="order_date_mobile" name="order_date" value="{{ old('order_date', $orderDate) }}"
                                 class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                                 required>
                             <x-input-error :messages="$errors->get('order_date')" class="mt-2" />
@@ -58,6 +59,7 @@
                         <div>
                             <x-input-label for="expected_delivery_date_mobile" value="Perkiraan Tiba" />
                             <input type="date" id="expected_delivery_date_mobile" name="expected_delivery_date"
+                                value="{{ old('expected_delivery_date', $expectedDeliveryDate) }}"
                                 class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                                 required>
                             <x-input-error :messages="$errors->get('expected_delivery_date')" class="mt-2" />
@@ -68,7 +70,7 @@
                             <x-input-label for="notes_mobile" value="Catatan" />
                             <textarea id="notes_mobile" name="notes" rows="3"
                                 class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                required></textarea>
+                                required>{{ old('notes') }}</textarea>
                             <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                         </div>
                     </div>
@@ -81,7 +83,7 @@
                     </h3>
 
                     <div class="overflow-x-auto -mx-4 px-4">
-                        <x-transactions.items-table :products="$products" priceField="unit_cost" priceLabel="Harga Beli" />
+                        <x-transactions.items-table :products="$products" :initial-items="old('items', $initialItems)" priceField="unit_cost" priceLabel="Harga Beli" />
                     </div>
                 </x-card>
             </form>
@@ -122,7 +124,7 @@
                 {{-- Tanggal Order --}}
                 <div>
                     <x-input-label for="order_date" value="Tanggal Order" class="mb-1" />
-                    <input type="date" id="order_date" name="order_date" value="{{ date('Y-m-d') }}"
+                    <input type="date" id="order_date" name="order_date" value="{{ old('order_date', $orderDate) }}"
                         class="w-full rounded-xl h-[42px] border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
                         required>
                     <x-input-error :messages="$errors->get('order_date')" class="mt-2" />
@@ -132,6 +134,7 @@
                 <div>
                     <x-input-label for="expected_delivery_date" value="Perkiraan Tiba" class="mb-1" />
                     <input type="date" id="expected_delivery_date" name="expected_delivery_date"
+                        value="{{ old('expected_delivery_date', $expectedDeliveryDate) }}"
                         class="w-full rounded-xl h-[42px] border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
                         required>
                     <x-input-error :messages="$errors->get('expected_delivery_date')" class="mt-2" />
@@ -141,6 +144,7 @@
                 <div class="md:col-span-2">
                     <x-input-label for="supplier_id" value="Supplier" class="mb-1" />
                     <x-custom-select id="supplier_id" name="supplier_id" :options="$suppliers->pluck('name', 'id')->toArray()"
+                        :value="old('supplier_id', $prefilledSupplierId)"
                         placeholder="Pilih Supplier" class="block w-full" required />
                     <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
                 </div>
@@ -150,7 +154,7 @@
                     <x-input-label for="notes" value="Catatan" class="mb-1" />
                     <textarea id="notes" name="notes" rows="2"
                         class="w-full rounded-xl border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
-                        placeholder="Contoh: Keterangan tambahan..." required></textarea>
+                        placeholder="Contoh: Keterangan tambahan..." required>{{ old('notes') }}</textarea>
                     <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                 </div>
             </div>
@@ -158,7 +162,7 @@
             {{-- Daftar Item --}}
             <div class="mt-8">
                 <h3 class="text-base font-semibold text-slate-900 mb-4">Daftar Item</h3>
-                <x-transactions.items-table :products="$products" priceField="unit_cost" priceLabel="Harga Beli" />
+                <x-transactions.items-table :products="$products" :initial-items="old('items', $initialItems)" priceField="unit_cost" priceLabel="Harga Beli" />
             </div>
         </x-card>
     </form>

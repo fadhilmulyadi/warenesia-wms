@@ -79,6 +79,7 @@
                 <x-table.th>Kategori</x-table.th>
                 <x-table.th>Lokasi Rak</x-table.th>
                 <x-table.th align="right" sortable name="current_stock">Stok</x-table.th>
+                <x-table.th align="right" sortable name="created_at">Tanggal Ditambahkan</x-table.th>
                 <x-table.th align="right">Harga Jual</x-table.th>
                 @can('create', \App\Models\Product::class)
                     <x-table.th align="right">Aksi</x-table.th>
@@ -107,6 +108,10 @@
 
                         <x-table.td align="right">
                             <x-product.stock-badge :product="$product" />
+                        </x-table.td>
+
+                        <x-table.td align="right">
+                            {{ $product->created_at?->format('d M Y') ?? '-' }}
                         </x-table.td>
 
                         <x-table.td align="right">
@@ -142,8 +147,12 @@
                             </td>
                         </tr>
                     @else
+                        @php
+                            $hasActionColumn = auth()->user()?->can('create', \App\Models\Product::class);
+                            $emptyStateColspan = $hasActionColumn ? 8 : 7;
+                        @endphp
                         <x-table.tr>
-                            <x-table.td colspan="7" class="py-10">
+                            <x-table.td :colspan="$emptyStateColspan" class="py-10">
                                 <x-empty-state
                                     title="Tidak ada produk ditemukan"
                                     description="Silakan tambahkan produk baru atau reset filter pencarian."

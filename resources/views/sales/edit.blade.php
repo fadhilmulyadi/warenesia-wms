@@ -61,7 +61,7 @@
                                 id="transaction_date_mobile"
                                 name="transaction_date"
                                 value="{{ old('transaction_date', $sale->transaction_date->format('Y-m-d')) }}"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                class="mt-1 block w-full h-[42px] rounded-xl border-slate-300 bg-white text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                                 required
                             >
                             <x-input-error :messages="$errors->get('transaction_date')" class="mt-2" />
@@ -76,7 +76,8 @@
                                 name="customer_name"
                                 value="{{ old('customer_name', $sale->customer_name) }}"
                                 class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                placeholder="Nama Customer (Opsional)"
+                                placeholder="Nama Customer"
+                                required
                             >
                             <x-input-error :messages="$errors->get('customer_name')" class="mt-2" />
                         </div>
@@ -88,7 +89,7 @@
                                 id="notes_mobile"
                                 name="notes"
                                 rows="2"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                class="mt-1 block w-full rounded-xl border-slate-300 bg-white text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                             >{{ old('notes', $sale->notes) }}</textarea>
                             <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                         </div>
@@ -154,8 +155,9 @@
                     <x-text-input
                         name="customer_name"
                         :value="old('customer_name', $sale->customer_name)"
-                        placeholder="Nama Customer (Opsional)"
+                        placeholder="Nama Customer"
                         class="w-full"
+                        required
                     />
                 </x-transactions.form-header>
 

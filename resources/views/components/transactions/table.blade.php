@@ -78,10 +78,17 @@
                 </x-table.td>
 
                 {{-- Status --}}
+                @php
+                    $statusValue = $transaction->status instanceof \BackedEnum ? $transaction->status->value : (string) $transaction->status;
+                    $statusLabel = $transaction->status instanceof \BackedEnum && method_exists($transaction->status, 'label')
+                        ? $transaction->status->label()
+                        : ucfirst(str_replace('_', ' ', $statusValue));
+                @endphp
+
                 <x-table.td class="text-center">
                     @include('components.status-badge', [
                         'status' => $transaction->status,
-                        'label' => ucfirst(str_replace('_', ' ', $transaction->status)),
+                        'label' => $statusLabel,
                     ])
                 </x-table.td>
 

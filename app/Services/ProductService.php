@@ -53,7 +53,22 @@ class ProductService
         }
 
         if ($filters['category_id']) {
-            $query->where('category_id', $filters['category_id']);
+            $categoryFilter = $filters['category_id'];
+
+            if (is_array($categoryFilter)) {
+                $categoryIds = collect($categoryFilter)
+                    ->filter(static fn ($id) => $id !== null && $id !== '')
+                    ->map(static fn ($id) => (int) $id)
+                    ->unique()
+                    ->values()
+                    ->all();
+
+                if (! empty($categoryIds)) {
+                    $query->whereIn('category_id', $categoryIds);
+                }
+            } elseif ($categoryFilter !== null && $categoryFilter !== '') {
+                $query->where('category_id', $categoryFilter);
+            }
         }
 
         if (! empty($filters['stock_status'])) {

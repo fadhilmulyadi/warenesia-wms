@@ -31,7 +31,7 @@
                             <x-input-label for="transaction_date_mobile" value="Tanggal Transaksi" />
                             <input type="date" id="transaction_date_mobile" name="transaction_date"
                                 value="{{ date('Y-m-d') }}"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                class="mt-1 block w-full h-[42px] rounded-xl border-slate-300 bg-white text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                                 required>
                             <x-input-error :messages="$errors->get('transaction_date')" class="mt-2" />
                         </div>
@@ -41,8 +41,9 @@
                             <x-input-label for="customer_name_mobile" value="Nama Customer" />
                             <input type="text" id="customer_name_mobile" name="customer_name"
                                 class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
-                                placeholder="Nama Customer (Opsional)"
-                                value="{{ old('customer_name', $prefilledCustomerName) }}">
+                                placeholder="Nama Customer"
+                                value="{{ old('customer_name', $prefilledCustomerName) }}"
+                                required>
                             <x-input-error :messages="$errors->get('customer_name')" class="mt-2" />
                         </div>
 
@@ -50,7 +51,7 @@
                         <div>
                             <x-input-label for="notes_mobile" value="Catatan / Referensi" />
                             <textarea id="notes_mobile" name="notes" rows="2"
-                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                class="mt-1 block w-full rounded-xl border-slate-300 bg-white text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
                                 placeholder="Contoh: No. Resi, Keterangan..."></textarea>
                             <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                         </div>
@@ -97,8 +98,8 @@
             <x-card class="p-6">
                 <x-transactions.form-header>
                     <x-input-label value="Nama Customer" class="mb-1" />
-                    <x-text-input name="customer_name" placeholder="Nama Customer (Opsional)" class="w-full"
-                        :value="$prefilledCustomerName" />
+                    <x-text-input name="customer_name" placeholder="Nama Customer" class="w-full"
+                        :value="$prefilledCustomerName" required />
                 </x-transactions.form-header>
 
                 <div class="mt-8">

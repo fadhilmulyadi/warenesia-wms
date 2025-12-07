@@ -6,11 +6,14 @@
         'completed' => 'success',
         'canceled' => 'danger',
     ];
-    $statusVariant = $statusVariants[$item->status] ?? 'neutral';
+    $statusValue = $item->status instanceof \BackedEnum ? $item->status->value : (string) $item->status;
+    $statusVariant = $statusVariants[$statusValue] ?? 'neutral';
     
     $statusLabel = isset($statusOptions) 
-        ? ($statusOptions[$item->status] ?? ucfirst($item->status)) 
-        : ucfirst($item->status);
+        ? ($statusOptions[$statusValue] ?? ucfirst(str_replace('_', ' ', $statusValue))) 
+        : ($item->status instanceof \BackedEnum && method_exists($item->status, 'label')
+            ? $item->status->label()
+            : ucfirst(str_replace('_', ' ', $statusValue)));
 @endphp
 
 <x-mobile.card>

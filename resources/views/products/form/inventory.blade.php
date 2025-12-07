@@ -29,6 +29,8 @@
                     id="current_stock"
                     name="current_stock" 
                     value="{{ old('current_stock', $product->current_stock) }}"
+                    min="0"
+                    oninput="this.value = this.value.replace(/-/g, '');"
                     @if($product->exists || $readonly) readonly @endif
                     
                     @class([
@@ -55,6 +57,8 @@
                     id="min_stock"
                     name="min_stock" 
                     value="{{ old('min_stock', $product->min_stock) }}"
+                    min="0"
+                    oninput="this.value = this.value.replace(/-/g, '');"
                     required
                     @disabled($readonly)
                     @class([

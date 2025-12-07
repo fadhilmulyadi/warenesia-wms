@@ -56,12 +56,18 @@
                         <x-lucide-x class="h-5 w-5" />
                     </div>
                 </template>
+
+                <template x-if="toast.type === 'info'">
+                    <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 text-sky-500">
+                        <x-lucide-info class="h-5 w-5" />
+                    </div>
+                </template>
             </div>
 
             {{-- Text --}}
             <div class="flex-1">
                 <p class="text-sm font-semibold text-slate-900"
-                    x-text="toast.type === 'success' ? 'Berhasil' : 'Gagal'"></p>
+                    x-text="toast.type === 'success' ? 'Berhasil' : (toast.type === 'info' ? 'Info' : 'Gagal')"></p>
                 <p class="text-xs text-slate-500 mt-0.5" x-text="toast.message"></p>
             </div>
 

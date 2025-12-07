@@ -2,6 +2,7 @@
 
 namespace App\Services\Dashboard;
 
+use App\Enums\RestockStatus;
 use App\Models\Category;
 use App\Models\IncomingTransaction;
 use App\Models\OutgoingTransaction;
@@ -69,13 +70,19 @@ class ManagerDashboardService
             ->all();
     }
 
-    private function progress($status): int
+    private function progress(RestockStatus|string|null $status): int
     {
-        return [
-            'pending' => 20,
-            'confirmed' => 45,
-            'in_transit' => 75,
-            'received' => 100,
-        ][$status] ?? 10;
+        $value = $status instanceof RestockStatus
+            ? $status->value
+            : (string) $status;
+
+        $map = [
+            RestockStatus::PENDING->value => 20,
+            RestockStatus::CONFIRMED->value => 45,
+            RestockStatus::IN_TRANSIT->value => 75,
+            RestockStatus::RECEIVED->value => 100,
+        ];
+
+        return $map[$value] ?? 10;
     }
 }

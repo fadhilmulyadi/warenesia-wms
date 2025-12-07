@@ -205,13 +205,13 @@
 
             {{-- SUPPORT BUTTON --}}
             <div class="px-3 pb-3 pt-2 mt-auto border-t border-slate-800">
-                <button type="button"
+                <a href="https://github.com/fadhilmulyadi/warenesia-wms" target="_blank" rel="noopener noreferrer"
                     class="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-teal-400/70 px-3 py-2 text-xs font-semibold text-teal-200 hover:bg-teal-400 hover:text-slate-900 transition">
                     <span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-teal-300">
                         ?
                     </span>
                     <span x-show="sidebarOpen" x-transition>Support</span>
-                </button>
+                </a>
             </div>
 
         </aside>

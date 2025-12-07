@@ -59,6 +59,7 @@
                     <x-mobile.stat-row label="Tanggal" :value="$sale->transaction_date?->format('d M Y') ?? '-'" />
                     <x-mobile.stat-row label="Total Item" :value="number_format($totalItems, 0, ',', '.')" />
                     <x-mobile.stat-row label="Total Qty" :value="number_format($totalQty, 0, ',', '.')" />
+                    <x-mobile.stat-row label="Total Nilai" :value="'Rp ' . number_format($totalValue, 0, ',', '.')" />
                 </div>
             </x-mobile.card>
 
@@ -277,6 +278,20 @@
                     <x-card class="p-4">
                         <div class="flex items-center gap-3">
                             <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                <x-lucide-wallet class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Total Nilai</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    Rp {{ number_format($sale->total_amount, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </x-card>
+
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
                                 @if($sale->isPending())
                                     <x-lucide-clock class="h-5 w-5" />
                                 @elseif($sale->isApproved())
@@ -310,10 +325,11 @@
 
                 <x-table>
                     <x-table.thead>
-                        <x-table.th>Product Name</x-table.th>
+                        <x-table.th>Produk</x-table.th>
                         <x-table.th>SKU</x-table.th>
-                        <x-table.th align="right">Stok Awal</x-table.th>
                         <x-table.th align="right">Qty</x-table.th>
+                        <x-table.th align="right">Harga Jual</x-table.th>
+                        <x-table.th align="right">Subtotal</x-table.th>
                     </x-table.thead>
 
                     <x-table.tbody>
@@ -328,15 +344,18 @@
                                     {{ optional($item->product)->sku ?? '-' }}
                                 </x-table.td>
                                 <x-table.td align="right">
-                                    {{ number_format($item->product->current_stock ?? 0, 0, ',', '.') }}
+                                    {{ number_format($item->quantity, 0, ',', '.') }}
+                                </x-table.td>
+                                <x-table.td align="right">
+                                    <x-money :value="$item->unit_price" />
                                 </x-table.td>
                                 <x-table.td align="right" class="font-semibold text-slate-900">
-                                    {{ number_format($item->quantity, 0, ',', '.') }}
+                                    <x-money :value="$item->unit_price * $item->quantity" />
                                 </x-table.td>
                             </x-table.tr>
                         @empty
                             <x-table.tr>
-                                <x-table.td colspan="4" class="text-center text-slate-500">
+                                <x-table.td colspan="5" class="text-center text-slate-500">
                                     Tidak ada produk pada transaksi ini.
                                 </x-table.td>
                             </x-table.tr>

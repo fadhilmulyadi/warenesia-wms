@@ -15,26 +15,41 @@
         value: @js((string) $initial),
         displayValue: '',
 
+        normalizeNumber(val) {
+            if (val === null || val === undefined) return '';
+
+            let str = val.toString().trim();
+            if (str === '') return '';
+
+            str = str.replace(/,/g, '.');
+            str = str.replace(/\.(?=\d{3,}(?:\.|$))/g, '');
+
+            const num = parseFloat(str);
+            if (Number.isNaN(num)) return '';
+
+            return Math.round(num);
+        },
+
         format(val) {
-            if (!val) return '';
-            let number = val.toString().replace(/[^0-9]/g, '');
-            return new Intl.NumberFormat('id-ID').format(number);
+            const num = this.normalizeNumber(val);
+            if (num === '') return '';
+
+            return new Intl.NumberFormat('id-ID').format(num);
         },
 
         updateValue(event) {
             const input = event.target.value || '';
-            const rawValue = input.replace(/\./g, '');
-            this.value = rawValue;
+            const rawValue = this.normalizeNumber(input);
+            this.value = rawValue === '' ? '' : rawValue.toString();
             this.displayValue = this.format(rawValue);
             if (this.$refs.hidden) {
-                this.$refs.hidden.value = rawValue;
+                this.$refs.hidden.value = this.value;
             }
         },
 
         init() {
-            if (this.value) {
-                this.displayValue = this.format(this.value);
-            }
+            this.value = this.normalizeNumber(this.value);
+            this.displayValue = this.format(this.value);
             if (this.$refs.hidden) {
                 this.$refs.hidden.value = this.value;
             }

@@ -26,6 +26,7 @@ export function itemsTable(config) {
         priceErrors = {},
         shouldCheckStock = false,
         priceField = 'price',
+        productOptions = {},
     } = config;
 
     const initial = initialItems.length > 0
@@ -41,6 +42,7 @@ export function itemsTable(config) {
         quantityErrors,
         priceErrors,
         shouldCheckStock,
+        productOptions,
         currentIndex: null,
 
         init() {
@@ -59,6 +61,19 @@ export function itemsTable(config) {
 
                 const match = String(inputName).match(/items\[(\d+)\]/);
                 this.currentIndex = match ? Number(match[1]) : null;
+
+                if (this.currentIndex !== null) {
+                    const options = this.getAvailableProductOptions(this.currentIndex);
+                    const currentItem = this.items[this.currentIndex] || {};
+
+                    window.dispatchEvent(new CustomEvent('custom-select-update', {
+                        detail: {
+                            name: inputName,
+                            options,
+                            value: currentItem.product_id ? String(currentItem.product_id) : '',
+                        },
+                    }));
+                }
             });
 
             window.addEventListener('product-selected', (event) => {
@@ -80,16 +95,52 @@ export function itemsTable(config) {
         },
 
         onProductChange(index, productId) {
-            this.items[index].product_id = productId;
+            if (!this.items[index]) return;
+
+            const previousProductId = this.items[index].product_id ?? '';
 
             if (productId) {
-                const isUnitCost = priceField === 'unit_cost';
-                const price = isUnitCost
-                    ? (this.purchasePrices[productId] ?? 0)
-                    : (this.salePrices[productId] ?? 0);
+                const duplicateIndex = this.items.findIndex((item, idx) =>
+                    idx !== index && String(item.product_id) === String(productId)
+                );
 
-                this.items[index][priceField] = price;
+                if (duplicateIndex !== -1) {
+                    const productName = this.getProductName(productId);
+                    const rowNumber = duplicateIndex + 1;
+
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: {
+                            type: 'error',
+                            message: `${productName} sudah ada di baris ${rowNumber}. Silakan edit kuantitas di baris tersebut.`,
+                        },
+                    }));
+
+                    // Kembalikan ke produk sebelumnya
+                    this.items[index].product_id = previousProductId || '';
+
+                    if (previousProductId) {
+                        this.items[index][priceField] = this.getProductPrice(previousProductId);
+                    } else {
+                        this.items[index][priceField] = '';
+                    }
+
+                    return;
+                }
             }
+
+            this.items[index].product_id = productId || '';
+
+            if (productId) {
+                this.items[index][priceField] = this.getProductPrice(productId);
+            } else {
+                this.items[index][priceField] = '';
+            }
+        },
+
+        getProductPrice(productId) {
+            const isUnitCost = priceField === 'unit_cost';
+            const source = isUnitCost ? this.purchasePrices : this.salePrices;
+            return source[productId] ?? 0;
         },
 
         getProductStock(productId) {
@@ -103,6 +154,44 @@ export function itemsTable(config) {
             if (stock === 0) return 'text-rose-600 bg-rose-50 border-rose-100 font-bold';
             if (stock < 5) return 'text-amber-600 bg-amber-50 border-amber-100 font-bold';
             return 'text-slate-600 bg-slate-100 border-slate-200';
+        },
+
+        getProductName(productId) {
+            if (!productId) return 'Produk';
+
+            const key = String(productId);
+            const raw = this.productOptions && Object.prototype.hasOwnProperty.call(this.productOptions, key)
+                ? this.productOptions[key]
+                : null;
+
+            if (!raw) return 'Produk';
+
+            if (typeof raw === 'string') return raw;
+
+            if (typeof raw === 'object' && raw !== null) {
+                return raw.label ?? raw.name ?? 'Produk';
+            }
+
+            return String(raw);
+        },
+
+        getAvailableProductOptions(currentIndex) {
+            const usedIds = new Set(
+                this.items
+                    .map((item, idx) => (idx === currentIndex ? null : item.product_id))
+                    .filter((id) => id !== null && id !== undefined && id !== '')
+                    .map((id) => String(id))
+            );
+
+            const result = {};
+
+            Object.keys(this.productOptions || {}).forEach((key) => {
+                if (!usedIds.has(String(key))) {
+                    result[key] = this.productOptions[key];
+                }
+            });
+
+            return result;
         },
 
         isStockInsufficient(index) {
@@ -132,6 +221,23 @@ export function itemsTable(config) {
             if (hasShortage) {
                 event.preventDefault();
             }
+        },
+
+        getItemSubtotal(item) {
+            if (!item || !item.product_id) return 0;
+
+            const quantity = Number(item.quantity ?? 0);
+            const price = Number(item[priceField] ?? 0);
+
+            if (!Number.isFinite(quantity) || !Number.isFinite(price)) {
+                return 0;
+            }
+
+            return quantity * price;
+        },
+
+        grandTotal() {
+            return this.items.reduce((sum, item) => sum + this.getItemSubtotal(item), 0);
         },
 
         stockError(index) {

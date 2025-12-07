@@ -101,7 +101,7 @@
         </div>
     </button>
 
-    {{-- DROPDOWN CONTENT (Popover) --}}
+    {{-- DROPDOWN CONTENT --}}
     <div 
         x-show="open" 
         x-transition:enter="transition ease-out duration-100"

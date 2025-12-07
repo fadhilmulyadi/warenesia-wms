@@ -360,10 +360,11 @@
 
                 <x-table>
                     <x-table.thead>
-                        <x-table.th>Nama Produk</x-table.th>
+                        <x-table.th>Produk</x-table.th>
                         <x-table.th>SKU</x-table.th>
-                        <x-table.th align="right">Stok Awal</x-table.th>
                         <x-table.th align="right">Qty</x-table.th>
+                        <x-table.th align="right">Harga Beli</x-table.th>
+                        <x-table.th align="right">Subtotal</x-table.th>
                     </x-table.thead>
 
                     <x-table.tbody>
@@ -377,16 +378,19 @@
                                 <x-table.td class="text-slate-500">
                                     {{ optional($item->product)->sku ?? '-' }}
                                 </x-table.td>
-                                <x-table.td align="right">
-                                    {{ number_format($item->product->current_stock ?? 0, 0, ',', '.') }}
-                                </x-table.td>
                                 <x-table.td align="right" class="font-semibold text-slate-900">
                                     {{ number_format($item->quantity, 0, ',', '.') }}
+                                </x-table.td>
+                                <x-table.td align="right">
+                                    Rp {{ number_format((float) $item->unit_cost, 2, ',', '.') }}
+                                </x-table.td>
+                                <x-table.td align="right" class="font-semibold text-slate-900">
+                                    Rp {{ number_format((float) $item->line_total, 2, ',', '.') }}
                                 </x-table.td>
                             </x-table.tr>
                         @empty
                             <x-table.tr>
-                                <x-table.td colspan="4" class="text-center text-slate-500">
+                                <x-table.td colspan="5" class="text-center text-slate-500">
                                     Tidak ada produk pada transaksi ini.
                                 </x-table.td>
                             </x-table.tr>

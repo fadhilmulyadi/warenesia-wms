@@ -35,13 +35,28 @@
         pageInput: '{{ $paginator->currentPage() }}',
         lastPage: {{ $lastPage }},
         goToPage() {
-            let page = parseInt(this.pageInput);
-            if (isNaN(page) || page < 1 || page > this.lastPage) {
-                alert(`Halaman harus antara 1 dan ${this.lastPage}.`);
-                this.pageInput = '{{ $paginator->currentPage() }}';
-                return;
+            let page = parseInt(this.pageInput, 10);
+
+            if (isNaN(page) || page < 1) {
+                page = 1;
             }
-            window.location.href = '{{ $makeUrl('PAGE_NUMBER') }}'.replace('PAGE_NUMBER', page);
+
+            const originalPage = page;
+
+            if (page > this.lastPage) {
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: {
+                        message: 'Halaman ' + originalPage + ' tidak ditemukan. Dialihkan ke halaman terakhir.',
+                        type: 'info',
+                    }
+                }));
+
+                page = this.lastPage;
+            }
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
         }
     }"
     class="flex flex-col md:flex-row items-center justify-between text-xs text-slate-500 py-4 border-t border-slate-200 mt-4">
@@ -68,11 +83,11 @@
         </div>
 
         {{-- Go To Page --}}
-        <div class="flex items-center bg-white border border-slate-200 shadow-sm rounded-xl p-1 h-[42px]">
+        <div class="flex items-center bg-white border border-slate-300 shadow-sm rounded-xl p-1 h-[42px]">
             <span class="pl-3 pr-2 text-xs font-medium text-slate-400 whitespace-nowrap">Ke Hal.</span>
 
-            <input type="number" x-model.lazy="pageInput" @keydown.enter.prevent="goToPage()"
-                class="w-10 border-none bg-slate-50 rounded-lg text-center text-xs font-bold text-slate-700 focus:ring-2 focus:ring-teal-500/20 p-1 mx-1 h-7"
+            <input type="number" x-model="pageInput" @keydown.enter.prevent="goToPage()"
+                class="w-10 bg-slate-50 rounded-lg text-center text-xs font-bold text-slate-700 border border-slate-300 focus:border-teal-500 focus:ring-teal-500 p-1 mx-1 h-7"
                 min="1" max="{{ $lastPage }}" />
 
             <button type="button" @click="goToPage()"

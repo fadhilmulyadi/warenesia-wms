@@ -11,6 +11,7 @@ use App\Models\RestockOrder;
 use App\Models\Supplier;
 use App\Services\RestockService;
 use App\Support\CsvExporter;
+use App\Support\RestockPrefill;
 use DomainException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
@@ -68,17 +69,27 @@ class RestockOrderController extends Controller
         return view('restocks.index', compact('restockOrders', 'statusOptions', 'search', 'sort', 'direction', 'perPage'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $this->authorize('create', RestockOrder::class);
 
+        $products = Product::orderBy('name')->get();
+        $prefill = RestockPrefill::forCreate($request, $products);
+
         $suppliers = Supplier::where('is_active', true)
+            ->when($prefill['supplier_id'], fn ($query, $supplierId) => $query->orWhere('id', $supplierId))
             ->orderBy('name')
             ->get();
-        $products = Product::orderBy('name')->get();
-        $today = now()->toDateString();
+        $prefilledSupplierId = $prefill['supplier_id'];
 
-        return view('restocks.create', compact('suppliers', 'products', 'today'));
+        return view('restocks.create', [
+            'suppliers' => $suppliers,
+            'products' => $products,
+            'orderDate' => $prefill['order_date'],
+            'expectedDeliveryDate' => $prefill['expected_delivery_date'],
+            'prefilledSupplierId' => $prefilledSupplierId,
+            'initialItems' => $prefill['items'],
+        ]);
     }
 
     public function store(RestockOrderRequest $request): RedirectResponse

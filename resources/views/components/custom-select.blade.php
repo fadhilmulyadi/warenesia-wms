@@ -22,7 +22,22 @@
     }
 
     $id = $id ?? $name;
-    $currentValue = (string) $value;
+
+    $normalizeValue = function ($input) {
+        if ($input instanceof \Illuminate\Support\Collection) {
+            $input = $input->toArray();
+        }
+
+        if (is_array($input)) {
+            $input = collect($input)
+                ->first(fn ($val) => $val !== null && $val !== '');
+        }
+
+        return $input === null ? '' : (string) $input;
+    };
+
+    // Allow incoming value to be an array (e.g., multi-filter query params) without triggering string conversion notices
+    $currentValue = $normalizeValue($value);
     $initialOption = $options[$currentValue] ?? null;
     $initialLabel = is_array($initialOption) ? ($initialOption['label'] ?? '') : (string) $initialOption;
     $inputName = $dynamic_name ?? $name;

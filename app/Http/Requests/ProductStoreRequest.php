@@ -22,8 +22,8 @@ class ProductStoreRequest extends FormRequest
             'category_id' => ['required', 'exists:categories,id'],
             'supplier_id' => ['required', 'exists:suppliers,id'],
             'description' => ['required', 'string'],
-            'purchase_price' => ['required', 'numeric', 'min:0'],
-            'sale_price' => ['required', 'numeric', 'min:0'],
+            'purchase_price' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
+            'sale_price' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
             'min_stock' => ['required', 'integer', 'min:0'],
             'current_stock' => ['required', 'integer', 'min:0'],
             'unit_id' => ['required', 'exists:units,id'],
@@ -51,6 +51,8 @@ class ProductStoreRequest extends FormRequest
     {
         return [
             'rack_location.regex' => 'Format lokasi rak tidak valid. Gunakan format ZRR-BB, misalnya A12-03.',
+            'purchase_price.max' => 'Harga beli terlalu besar. Maksimal 13 digit sebelum koma (hingga sekitar 9.999.999.999.999,99).',
+            'sale_price.max' => 'Harga jual terlalu besar. Maksimal 13 digit sebelum koma (hingga sekitar 9.999.999.999.999,99).',
         ];
     }
 }

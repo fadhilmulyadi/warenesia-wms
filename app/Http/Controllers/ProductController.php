@@ -12,6 +12,7 @@ use App\Models\Unit;
 use App\Services\ProductService;
 use App\Support\CsvExporter;
 use DomainException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -96,9 +97,11 @@ class ProductController extends Controller
         try {
             $this->products->create($request->validated());
         } catch (\Throwable $exception) {
+            $message = $this->transformProductException($exception);
+
             return back()
                 ->withInput()
-                ->withErrors(['store' => $exception->getMessage()]);
+                ->withErrors(['store' => $message]);
         }
 
         return redirect()
@@ -151,9 +154,11 @@ class ProductController extends Controller
         try {
             $this->products->update($product, $request->validated());
         } catch (\Throwable $exception) {
+            $message = $this->transformProductException($exception);
+
             return back()
                 ->withInput()
-                ->withErrors(['update' => $exception->getMessage()]);
+                ->withErrors(['update' => $message]);
         }
 
         return redirect()

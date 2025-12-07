@@ -58,7 +58,7 @@ class AdminDashboardService
                     'meta_color' => $product->current_stock == 0
                         ? 'border-red-100 bg-red-50 text-red-700'
                         : 'border-amber-100 bg-amber-50 text-amber-700',
-                    'href' => route('products.edit', $product->id),
+                    'href' => route('products.show', $product->id),
                 ];
             })
             ->all();

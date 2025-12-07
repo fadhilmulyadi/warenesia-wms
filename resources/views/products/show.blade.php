@@ -262,7 +262,7 @@
 
                         <div class="flex flex-col gap-4 md:flex-row md:items-start">
                             <div
-                                class="aspect-square rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center w-full">
+                                class="aspect-square w-64 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center">
                                 @if($imageUrl)
                                     <img src="{{ $imageUrl }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
                                 @else

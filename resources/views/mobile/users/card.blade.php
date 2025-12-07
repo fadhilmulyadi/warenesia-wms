@@ -1,7 +1,13 @@
 @php
-    $roleLabel = $roles[$item->role] ?? ucfirst($item->role);
-    $statusLabel = $statuses[$item->status] ?? ucfirst($item->status);
-    $statusVariant = $statusVariants[$item->status] ?? 'neutral';
+    $roleValue = $item->role instanceof \BackedEnum ? $item->role->value : (string) $item->role;
+    $statusValue = $item->status instanceof \BackedEnum ? $item->status->value : (string) $item->status;
+
+    $roleLabel = $roles[$roleValue] ?? ucfirst(str_replace('_', ' ', $roleValue));
+    $statusLabel = $statuses[$statusValue] 
+        ?? ($item->status instanceof \BackedEnum && method_exists($item->status, 'label')
+            ? $item->status->label()
+            : ucfirst(str_replace('_', ' ', $statusValue)));
+    $statusVariant = $statusVariants[$statusValue] ?? 'neutral';
 @endphp
 
 <x-mobile.card>

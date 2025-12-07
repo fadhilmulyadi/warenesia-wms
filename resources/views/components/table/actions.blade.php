@@ -8,6 +8,7 @@
     @keydown.escape.window="open = false"
     
     class="relative inline-block text-left"
+    data-prevent-row-navigation="true"
 >
     {{-- Tombol Titik Tiga --}}
     <button

@@ -114,22 +114,22 @@
         </div>
 
         @if(!empty($filters))
-            <button 
+            <x-action-button
                 type="button"
+                variant="secondary"
+                icon="filter"
                 @click="filtersVisible = !filtersVisible"
-                class="inline-flex justify-center items-center h-9 px-4 rounded-lg text-xs font-semibold border transition-all duration-200"
-                :class="filtersVisible || activeCount > 0
-                    ? 'bg-teal-50 border-teal-200 text-teal-700'
-                    : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'"
+                x-bind:class="filtersVisible || activeCount > 0
+                    ? 'bg-teal-50 border-2 border-teal-500 text-teal-600'
+                    : ''"
             >
-                <x-lucide-filter class="w-4 h-4 mr-1.5" />
-                <span>Filter</span>
+                Filter
                 <span 
                     x-show="activeCount > 0"
                     x-text="activeCount"
                     class="ml-2 inline-flex items-center justify-center h-5 px-2 rounded-full bg-teal-600 text-white text-[11px] font-bold"
                 ></span>
-            </button>
+            </x-action-button>
         @endif
 
         @if($sort) <input type="hidden" name="sort" value="{{ $sort }}"> @endif
