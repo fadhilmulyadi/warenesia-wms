@@ -150,6 +150,9 @@ Route::middleware(['auth', 'role:admin,manager,staff'])
         Route::resource('sales', OutgoingTransactionController::class);
 
         // Transaction History
+        Route::get('/transactions/export', [TransactionController::class, 'export'])
+            ->name('transactions.export');
+
         Route::get('/transactions', [TransactionController::class, 'index'])
             ->name('transactions.index');
     });

@@ -191,15 +191,24 @@
                                 @method('PATCH')
 
                                 <div class="space-y-2">
-                                    <x-input-label for="rating_mobile"
-                                        value="Rating ({{ \App\Models\RestockOrder::MIN_RATING }}-{{ \App\Models\RestockOrder::MAX_RATING }})" />
-                                    <select id="rating_mobile" name="rating" class="w-full rounded-lg border-slate-200 text-sm">
-                                        @for($i = \App\Models\RestockOrder::MIN_RATING; $i <= \App\Models\RestockOrder::MAX_RATING; $i++)
-                                            <option value="{{ $i }}" @selected((int) old('rating', $restock->rating) === $i)>
-                                                {{ $i }}
-                                            </option>
-                                        @endfor
-                                    </select>
+                                    <label class="block text-sm font-medium text-slate-700">Berikan Penilaian</label>
+                                    <div x-data="{ rating: 0, hoverRating: 0 }" class="flex items-center gap-1">
+                                        <input type="hidden" name="rating" :value="rating" required>
+                                        <template x-for="i in 5">
+                                            <button type="button" @click="rating = i" @mouseenter="hoverRating = i"
+                                                @mouseleave="hoverRating = 0"
+                                                class="focus:outline-none transition-transform active:scale-90">
+                                                <svg class="w-8 h-8 transition-colors duration-200"
+                                                    :class="(hoverRating >= i || rating >= i) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300 fill-transparent'"
+                                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor"
+                                                    stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <p class="text-xs text-slate-500">Klik bintang untuk menilai.</p>
                                     <x-input-error class="mt-1" :messages="$errors->get('rating')" />
                                 </div>
 
@@ -220,15 +229,13 @@
                         @endcan
                     @else
                         <div class="space-y-3">
-                            <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex flex-col gap-2">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-lg font-semibold text-slate-900">
-                                        {{ $restock->rating }}/{{ \App\Models\RestockOrder::MAX_RATING }}
-                                    </span>
-                                    <div class="flex items-center gap-1">
+                                    <span class="text-3xl font-bold text-slate-900">{{ $restock->rating }}</span>
+                                    <div class="flex items-center gap-0.5 text-yellow-400">
                                         @for($i = \App\Models\RestockOrder::MIN_RATING; $i <= \App\Models\RestockOrder::MAX_RATING; $i++)
                                             <x-lucide-star
-                                                class="h-4 w-4 {{ $i <= (int) $restock->rating ? 'text-yellow-400' : 'text-slate-300' }}" />
+                                                class="h-5 w-5 {{ $i <= (int) $restock->rating ? 'fill-current' : 'text-slate-300' }}" />
                                         @endfor
                                     </div>
                                 </div>

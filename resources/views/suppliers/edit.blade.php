@@ -20,10 +20,7 @@
         {{-- MOBILE FORM --}}
         <div class="md:hidden">
             <x-mobile.form form-id="supplier-form" action="{{ route('suppliers.update', $supplier) }}" method="PUT"
-                submit-label="Simpan Perubahan" :show-delete="true"
-                delete-action="{{ route('suppliers.destroy', $supplier) }}" delete-label="Hapus Supplier"
-                delete-confirm="Apakah Anda yakin ingin menghapus supplier ini?" :use-delete-modal="true"
-                delete-title="Hapus Supplier" item-name="{{ $supplier->name }}">
+                submit-label="Simpan Perubahan" :show-delete="false">
                 <x-slot:fields>
                     @if($errors->any())
                         <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-red-700 mb-4 text-xs">
@@ -60,16 +57,7 @@
                         Kembali
                     </x-action-button>
 
-                    @can('delete', $supplier)
-                        <x-action-button type="button" variant="outline-danger" icon="trash-2" x-on:click="$dispatch('open-delete-modal', { 
-                                                action: '{{ route('suppliers.destroy', $supplier) }}',
-                                                title: 'Hapus Supplier',
-                                                message: 'Apakah Anda yakin ingin menghapus supplier ini?',
-                                                itemName: '{{ addslashes($supplier->name) }}'
-                                            })">
-                            Hapus
-                        </x-action-button>
-                    @endcan
+
 
                     <x-action-button type="submit" form="supplier-form-desktop" variant="primary" icon="save">
                         Simpan Perubahan
@@ -96,5 +84,5 @@
             </form>
         </div>
     </div>
-    <x-confirm-delete-modal />
+
 @endsection

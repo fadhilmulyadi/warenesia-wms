@@ -38,7 +38,6 @@
         $mobileIndexConfig = \App\Support\MobileIndexConfig::sales($statusOptions);
         $cardView = 'mobile.sales.card';
     }
-    // Ensure tab persists
     $mobileIndexConfig['hidden_query']['tab'] = $activeTab;
 @endphp
 
@@ -65,10 +64,13 @@
     <div class="hidden md:block space-y-4">
         {{-- TOOLBAR --}}
         <x-toolbar>
-            
-            {{-- FILTER BAR (LEFT) --}}
+
             <x-filter-bar
-                :action="route('transactions.index', ['tab' => $activeTab, 'type' => $typeParam, 'per_page' => $perPage])"
+                :action="route('transactions.index', [
+                    'tab' => $activeTab,
+                    'type' => $typeParam,
+                    'per_page' => $perPage
+                ])"
                 :search="$search"
                 :sort="$sort"
                 :direction="$direction"
@@ -77,6 +79,7 @@
                 :placeholder="$searchPlaceholder"
             >
                 <input type="hidden" name="tab" value="{{ $activeTab }}">
+
                 {{-- STATUS --}}
                 <x-slot:filter_status>
                     <x-filter.checkbox-list
@@ -91,38 +94,61 @@
                     <x-filter.date-range
                         from-name="date_from"
                         to-name="date_to"
-                        :from-value="request('date_range') ? request('date_from') : ''"
-                        :to-value="request('date_range') ? request('date_to') : ''"
-                        layout-class="flex flex-col gap-2 w-full"
+                        :from-value="request('date_from')"
+                        :to-value="request('date_to')"
                     />
                 </x-slot:filter_date_range>
 
+                {{-- SUPPLIER FILTER untuk INCOMING --}}
                 @if($activeTab === 'incoming')
                     <x-slot:filter_supplier_id>
                         <x-filter.checkbox-list
                             name="supplier_id"
-                            :options="$suppliers->map(fn ($s) => ['value' => $s->id, 'label' => $s->name])"
+                            :options="$suppliers->map(fn ($s) => [
+                                'value' => $s->id,
+                                'label' => $s->name
+                            ])"
                             :selected="request()->query('supplier_id', [])"
                         />
                     </x-slot:filter_supplier_id>
                 @endif
-
             </x-filter-bar>
 
-            <div class="flex flex-wrap gap-2 justify-end w-full md:w-auto">
+            {{-- ACTION BUTTONS — kanan --}}
+            <div class="flex flex-wrap flex-none gap-2 justify-end">
+
+                {{-- EXPORT --}}
+                <x-action-button
+                    href="{{ route('transactions.export', array_merge(request()->query(), ['tab' => $activeTab])) }}"
+                    variant="secondary"
+                    icon="download"
+                >
+                    Export CSV
+                </x-action-button>
+
+                {{-- CREATE ACTION --}}
                 @if($activeTab === 'incoming')
                     @can('create', \App\Models\IncomingTransaction::class)
-                        <x-action-button href="{{ route('purchases.create') }}" variant="primary" icon="plus">
+                        <x-action-button
+                            href="{{ route('purchases.create') }}"
+                            variant="primary"
+                            icon="plus"
+                        >
                             Catat Barang Masuk
                         </x-action-button>
                     @endcan
                 @else
                     @can('create', \App\Models\OutgoingTransaction::class)
-                        <x-action-button href="{{ route('sales.create') }}" variant="primary" icon="plus">
+                        <x-action-button
+                            href="{{ route('sales.create') }}"
+                            variant="primary"
+                            icon="plus"
+                        >
                             Catat Barang Keluar
                         </x-action-button>
                     @endcan
                 @endif
+
             </div>
 
         </x-toolbar>

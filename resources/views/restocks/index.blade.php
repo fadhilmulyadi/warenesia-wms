@@ -101,7 +101,6 @@
 
             <x-table.tbody>
                 @forelse($restockOrders as $restockOrder)
-                    {{-- Pertahankan navigasi klik baris untuk UX cepat --}}
                     <x-table.tr :href="route('restocks.show', $restockOrder)"> 
                         
                         <x-table.td class="font-mono group-hover:text-slate-900 whitespace-nowrap">
@@ -148,16 +147,15 @@
 
                         @can('viewAny', \App\Models\RestockOrder::class)
                             <x-table.td align="right">
-                                <x-table.actions>
+                                <div class="flex items-center justify-end gap-2">
                                     @can('view', $restockOrder)
-                                        <x-table.action-item
-                                            icon="eye"
-                                            href="{{ route('restocks.show', $restockOrder) }}"
-                                        >
-                                            Lihat Detail
-                                        </x-table.action-item>
+                                        <a href="{{ route('restocks.show', $restockOrder) }}"
+                                            class="inline-flex items-center justify-center w-8 h-8 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                                            title="Lihat Detail">
+                                            <x-lucide-eye class="w-4 h-4" />
+                                        </a>
                                     @endcan
-                                </x-table.actions>
+                                </div>
                             </x-table.td>
                         @endcan
                     </x-table.tr>

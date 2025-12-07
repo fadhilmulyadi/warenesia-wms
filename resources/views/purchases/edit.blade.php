@@ -29,6 +29,9 @@
         delete-action="{{ route('purchases.destroy', $purchase) }}"
         delete-label="Hapus Pembelian"
         delete-confirm="Hapus pembelian ini?"
+        :use-delete-modal="true"
+        delete-title="Hapus Pembelian"
+        item-name="#{{ $purchase->transaction_number }}"
     >
         <x-slot:fields>
             @if($errors->any())
@@ -189,4 +192,5 @@
             </x-card>
         </form>
     </div>
+    <x-confirm-delete-modal />
 @endsection

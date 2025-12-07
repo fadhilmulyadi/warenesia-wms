@@ -138,7 +138,7 @@
                 <h2 class="text-sm font-semibold text-slate-900 mb-3">
                     Status Restock
                 </h2>
-                @include('components.restocks-status-timeline', ['status' => $restock->status])
+                @include('components.mobile-restocks-status-timeline', ['status' => $restock->status])
             </x-mobile.card>
 
             {{-- SECTION: Info Detail --}}
@@ -320,36 +320,103 @@
                 @include('components.restocks-status-timeline', ['status' => $restock->status])
             </x-card>
 
-            {{-- SECTION: Info Detail --}}
-            <x-card class="p-6 space-y-4">
-                <p class="text-base font-semibold text-slate-900">Informasi Pesanan</p>
-                
-                <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                    <x-description-item label="Nomor PO" :value="$restock->po_number" icon="hash" />
-                    <x-description-item label="Tanggal Order" :value="optional($restock->order_date)->format('d M Y') ?? '-'" icon="calendar" />
-                    <x-description-item
-                        :label="$restock->status === 'received' ? 'Tanggal Diterima' : 'Perkiraan Tiba'"
-                        :value="$restock->status === 'received' 
-                            ? ($restock->incomingTransaction?->transaction_date?->format('d M Y') ?? $restock->updated_at->format('d M Y'))
-                            : ($restock->expected_delivery_date?->format('d M Y') ?? '-')"
-                        icon="clock"
-                    />
-                    <x-description-item label="Supplier" :value="$restock->supplier->name ?? 'Unknown supplier'" icon="building-2" />
-                    <x-description-item label="Total Item" :value="number_format((int) $restock->total_items)" icon="list" />
-                    <x-description-item label="Total Kuantitas" :value="number_format((int) $restock->total_quantity, 0, ',', '.')" icon="boxes" />
-                    <x-description-item label="Total Nilai" :value="'Rp ' . number_format((float) $restock->total_amount, 2, ',', '.')" icon="wallet" />
-                    <x-description-item label="Dibuat oleh" :value="optional($restock->createdBy)->name ?? '-'" icon="user" />
-                </div>
+            @php
+                $totalItems = (int) ($restock->total_items ?? $restock->items->count());
+                $totalQty = (int) ($restock->total_quantity ?? $restock->items->sum('quantity'));
+                $totalValue = (float) ($restock->total_amount ?? $restock->items->sum('line_total'));
+            @endphp
 
-                @if($restock->notes)
-                    <div class="pt-4 border-t border-slate-100 space-y-1">
-                        <p class="text-sm text-slate-500">Catatan</p>
-                        <p class="text-sm text-slate-900 whitespace-pre-line">
-                            {{ $restock->notes }}
-                        </p>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {{-- Informasi utama --}}
+                <x-card class="p-6 space-y-6 lg:col-span-2">
+                    {{-- Informasi Supplier --}}
+                    <div class="space-y-3">
+                        <p class="text-base font-semibold text-slate-900">Informasi Supplier</p>
+                        <div class="space-y-2">
+                            <x-description-item label="Nama" :value="$restock->supplier->name ?? 'Unknown supplier'" icon="building-2" />
+                            @if(optional($restock->supplier)->contact_person)
+                                <x-description-item label="Kontak" :value="$restock->supplier->contact_person" icon="user-round" />
+                            @endif
+                            @if(optional($restock->supplier)->email)
+                                <x-description-item label="Email" :value="$restock->supplier->email" icon="mail" />
+                            @endif
+                            @if(optional($restock->supplier)->phone)
+                                <x-description-item label="Telepon" :value="$restock->supplier->phone" icon="phone" />
+                            @endif
+                        </div>
                     </div>
-                @endif
-            </x-card>
+
+                    {{-- Informasi Pesanan --}}
+                    <div class="space-y-3">
+                        <p class="text-base font-semibold text-slate-900">Informasi Pesanan</p>
+                        <div class="space-y-2">
+                            <x-description-item label="Nomor PO" :value="$restock->po_number" icon="hash" />
+                            <x-description-item label="Tanggal Order" :value="optional($restock->order_date)->format('d M Y') ?? '-'" icon="calendar" />
+                            <x-description-item
+                                :label="$restock->status === 'received' ? 'Tanggal Diterima' : 'Perkiraan Tiba'"
+                                :value="$restock->status === 'received' 
+                                    ? ($restock->incomingTransaction?->transaction_date?->format('d M Y') ?? $restock->updated_at->format('d M Y'))
+                                    : ($restock->expected_delivery_date?->format('d M Y') ?? '-')"
+                                icon="clock"
+                            />
+                            <x-description-item label="Catatan" :value="$restock->notes ?? '-'" icon="notebook-pen" />
+                        </div>
+                    </div>
+
+                    {{-- Informasi Tambahan --}}
+                    <div class="space-y-3">
+                        <p class="text-base font-semibold text-slate-900">Informasi Tambahan</p>
+                        <div class="space-y-2">
+                            <x-description-item label="Dibuat oleh" :value="optional($restock->createdBy)->name ?? '-'" icon="user" />
+                        </div>
+                    </div>
+                </x-card>
+
+                {{-- STATS CARDS --}}
+                <div class="space-y-3">
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                <x-lucide-package class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Total Item</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    {{ number_format($totalItems, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </x-card>
+
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                <x-lucide-layers class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Total Qty</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    {{ number_format($totalQty, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </x-card>
+
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                <x-lucide-wallet class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Total Nilai</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    Rp {{ number_format($totalValue, 2, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </x-card>
+                </div>
+            </div>
 
             {{-- TABLE --}}
             <x-card class="p-6 space-y-4">
@@ -359,38 +426,37 @@
 
                 <x-table>
                     <x-table.thead>
-                        <x-table.th>Product</x-table.th>
-                        <x-table.th align="right">Quantity</x-table.th>
-                        <x-table.th align="right">Unit Cost</x-table.th>
-                        <x-table.th align="right">Line Total</x-table.th>
+                        <x-table.th>Produk</x-table.th>
+                        <x-table.th>SKU</x-table.th>
+                        <x-table.th align="right">Qty</x-table.th>
+                        <x-table.th align="right">Harga Beli</x-table.th>
+                        <x-table.th align="right">Subtotal</x-table.th>
                     </x-table.thead>
 
                     <x-table.tbody>
                         @forelse($restock->items as $item)
                             <x-table.tr>
                                 <x-table.td>
-                                    <div class="flex flex-col">
-                                        <span class="font-medium text-slate-900">
-                                            {{ $item->product->name ?? 'Unknown product' }}
-                                        </span>
-                                        <span class="text-xs text-slate-500">
-                                            SKU: {{ $item->product->sku ?? 'N/A' }}
-                                        </span>
-                                    </div>
+                                    <p class="font-medium text-slate-900">
+                                        {{ $item->product->name ?? 'Unknown product' }}
+                                    </p>
+                                </x-table.td>
+                                <x-table.td class="text-slate-500">
+                                    {{ $item->product->sku ?? 'N/A' }}
                                 </x-table.td>
                                 <x-table.td align="right" class="font-semibold text-slate-900">
                                     {{ number_format((int) $item->quantity, 0, ',', '.') }}
                                 </x-table.td>
                                 <x-table.td align="right">
-                                    {{ number_format((float) $item->unit_cost, 2, ',', '.') }}
+                                    Rp {{ number_format((float) $item->unit_cost, 2, ',', '.') }}
                                 </x-table.td>
                                 <x-table.td align="right" class="font-semibold text-slate-900">
-                                    {{ number_format((float) $item->line_total, 2, ',', '.') }}
+                                    Rp {{ number_format((float) $item->line_total, 2, ',', '.') }}
                                 </x-table.td>
                             </x-table.tr>
                         @empty
                             <x-table.tr>
-                                <x-table.td colspan="4" class="text-center text-slate-500">
+                                <x-table.td colspan="5" class="text-center text-slate-500">
                                     Tidak ada item pada restock ini.
                                 </x-table.td>
                             </x-table.tr>

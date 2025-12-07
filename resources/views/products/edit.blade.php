@@ -27,6 +27,9 @@
         delete-action="{{ route('products.destroy', $product) }}"
         delete-label="Hapus Produk"
         delete-confirm="Hapus produk ini?"
+        :use-delete-modal="true"
+        delete-title="Hapus Produk"
+        item-name="{{ $product->name }}"
     >
         <x-slot:fields>
             <form
@@ -83,4 +86,6 @@
             ])
         </form>
     </div>
+
+    <x-confirm-delete-modal />
 @endsection

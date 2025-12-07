@@ -4,7 +4,7 @@
     'flagName' => 'date_range',
     'fromValue' => null,
     'toValue' => null,
-    'layoutClass' => 'flex items-center gap-2',
+    'layoutClass' => 'flex flex-col gap-2 w-full',
 ])
 
 @php
@@ -36,26 +36,37 @@
         }
     }"
     x-init="updateMeta()"
-    class="space-y-2"
+    class="space-y-2 w-full"
 >
+    {{-- Hidden internal meta --}}
     <input type="hidden" name="{{ $flagName }}" x-ref="flag">
     <select class="hidden" x-ref="display">
         <option value=""></option>
         <option value="applied" x-ref="option"></option>
     </select>
 
+    {{-- VERTICAL DATE INPUTS --}}
     <div class="{{ $layoutClass }}">
-        <x-form.date
-            name="{{ $fromName }}"
-            x-model="from"
-            placeholder="Dari tanggal"
-            x-on:change="updateMeta()"
-        />
-        <x-form.date
-            name="{{ $toName }}"
-            x-model="to"
-            placeholder="Sampai tanggal"
-            x-on:change="updateMeta()"
-        />
+        
+        <div class="flex flex-col gap-1 w-full">
+            <label class="text-[11px] font-medium text-slate-600">Dari</label>
+            <x-form.date
+                name="{{ $fromName }}"
+                x-model="from"
+                placeholder="Dari tanggal"
+                x-on:change="updateMeta()"
+            />
+        </div>
+
+        <div class="flex flex-col gap-1 w-full">
+            <label class="text-[11px] font-medium text-slate-600">Sampai</label>
+            <x-form.date
+                name="{{ $toName }}"
+                x-model="to"
+                placeholder="Sampai tanggal"
+                x-on:change="updateMeta()"
+            />
+        </div>
+
     </div>
 </div>

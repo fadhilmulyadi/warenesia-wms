@@ -10,6 +10,7 @@ use App\Models\OutgoingTransaction;
 use App\Models\Supplier;
 use App\Services\IncomingTransactionService;
 use App\Services\OutgoingTransactionService;
+use App\Support\CsvExporter;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -28,7 +29,8 @@ class TransactionController extends Controller
     public function __construct(
         private readonly IncomingTransactionService $incomingTransactions,
         private readonly OutgoingTransactionService $outgoingTransactions
-    ) {}
+    ) {
+    }
 
     public function index(Request $request): View
     {
@@ -132,14 +134,112 @@ class TransactionController extends Controller
     private function incomingStatusOptions(): array
     {
         return collect(IncomingTransactionStatus::cases())
-            ->mapWithKeys(fn (IncomingTransactionStatus $status) => [$status->value => $status->label()])
+            ->mapWithKeys(fn(IncomingTransactionStatus $status) => [$status->value => $status->label()])
             ->all();
     }
 
     private function outgoingStatusOptions(): array
     {
         return collect(OutgoingTransactionStatus::cases())
-            ->mapWithKeys(fn (OutgoingTransactionStatus $status) => [$status->value => $status->label()])
+            ->mapWithKeys(fn(OutgoingTransactionStatus $status) => [$status->value => $status->label()])
             ->all();
+    }
+
+    public function export(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $activeTab = $this->resolveTransactionMode($request);
+
+        $policyTarget = $activeTab === 'incoming'
+            ? IncomingTransaction::class
+            : OutgoingTransaction::class;
+
+        $this->authorize('viewAny', $policyTarget);
+
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['transaction_number', 'transaction_date'],
+            defaultSort: 'transaction_date',
+            defaultDirection: 'desc'
+        );
+
+        $filters = [
+            'search' => (string) $request->query('q', ''),
+            'status' => (array) $request->query('status', []),
+            'supplier_id' => $request->query('supplier_id'),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'sort' => $sort,
+            'direction' => $direction,
+        ];
+
+        $query = $activeTab === 'incoming'
+            ? $this->incomingTransactions->indexQuery($filters, $request->user())
+            : $this->outgoingTransactions->indexQuery($filters, $request->user());
+
+        $fileName = 'transactions_' . $activeTab . '_' . date('Y-m-d_His') . '.csv';
+
+        return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($query, $activeTab) {
+            if ($activeTab === 'incoming') {
+                $output->fputcsv([
+                    'Transaction Number',
+                    'Date',
+                    'Supplier',
+                    'Created By',
+                    'Verified By',
+                    'Status',
+                    'Total Items',
+                    'Total Quantity',
+                    'Total Amount',
+                    'Notes',
+                ]);
+
+                $query->chunk(100, function ($transactions) use ($output) {
+                    foreach ($transactions as $transaction) {
+                        $output->fputcsv([
+                            $transaction->transaction_number,
+                            $transaction->transaction_date->format('Y-m-d'),
+                            $transaction->supplier->name ?? '-',
+                            $transaction->createdBy->name ?? '-',
+                            $transaction->verifiedBy->name ?? '-',
+                            $transaction->status->label(),
+                            $transaction->total_items,
+                            $transaction->total_quantity,
+                            number_format($transaction->total_amount, 2),
+                            $transaction->notes,
+                        ]);
+                    }
+                });
+            } else {
+                $output->fputcsv([
+                    'Transaction Number',
+                    'Date',
+                    'Customer Name',
+                    'Created By',
+                    'Approved By',
+                    'Status',
+                    'Total Items',
+                    'Total Quantity',
+                    'Total Amount',
+                    'Notes',
+                ]);
+
+                $query->chunk(100, function ($transactions) use ($output) {
+                    foreach ($transactions as $transaction) {
+                        $output->fputcsv([
+                            $transaction->transaction_number,
+                            $transaction->transaction_date->format('Y-m-d'),
+                            $transaction->customer_name,
+                            $transaction->createdBy->name ?? '-',
+                            $transaction->approvedBy->name ?? '-',
+                            $transaction->status->label(),
+                            $transaction->total_items,
+                            $transaction->total_quantity,
+                            number_format($transaction->total_amount, 2),
+                            $transaction->notes,
+                        ]);
+                    }
+                });
+            }
+        });
     }
 }

@@ -19,6 +19,9 @@
         delete-action="{{ route('restocks.destroy', $restock) }}"
         delete-label="Hapus Restock"
         delete-confirm="Hapus pesanan restock ini?"
+        :use-delete-modal="true"
+        delete-title="Hapus Restock"
+        item-name="#{{ $restock->po_number }}"
     >
         <x-slot:fields>
             @if($errors->any())
@@ -241,4 +244,5 @@
             </div>
         </form>
     </div>
+    <x-confirm-delete-modal />
 @endsection

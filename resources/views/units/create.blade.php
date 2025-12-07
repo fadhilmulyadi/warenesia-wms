@@ -34,7 +34,7 @@
                 <x-card class="p-4">
                     <form id="unit-form-mobile" action="{{ route('units.store') }}" method="POST" class="space-y-6">
                         @csrf
-                        @include('units.form.general', ['unit' => new \App\Models\Unit()])
+                        @include('units.form', ['unit' => new \App\Models\Unit()])
                     </form>
                 </x-card>
             </x-slot:fields>
@@ -77,7 +77,7 @@
                 @csrf
 
                 <x-card class="p-6 space-y-6">
-                    @include('units.form.general', ['unit' => new \App\Models\Unit()])
+                    @include('units.form', ['unit' => new \App\Models\Unit()])
                 </x-card>
             </form>
         </div>

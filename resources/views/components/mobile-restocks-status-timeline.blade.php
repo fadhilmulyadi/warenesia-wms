@@ -58,18 +58,10 @@
                     @endif
                 </span>
 
-                <h3 class="flex items-center mb-1 text-base font-semibold {{ $textClass }}">
+                <h3 class="flex items-center mb-1 text-sm font-semibold {{ $textClass }}">
                     {{ $stepData['label'] }}
-                    @if($isCurrent)
-                        <span class="ms-2 text-xs font-medium px-2 py-0.5 rounded {{ $borderClass }}">Current</span>
-                    @endif
                 </h3>
 
-                @if($isCurrent && !$isCancelled)
-                    <p class="mb-4 text-sm text-gray-500">
-                        Order is currently in {{ strtolower($stepData['label']) }} status.
-                    </p>
-                @endif
             </li>
         @endforeach
     </ol>

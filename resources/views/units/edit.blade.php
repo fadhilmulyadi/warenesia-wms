@@ -20,7 +20,8 @@
         {{-- MOBILE FORM --}}
         <x-mobile.form form-id="unit-form-mobile" save-label="Simpan Perubahan" save-icon="save" :show-delete="true"
             delete-action="{{ route('units.destroy', $unit) }}" delete-label="Hapus Satuan"
-            delete-confirm="Hapus satuan ini?">
+            delete-confirm="Hapus satuan ini?" :use-delete-modal="true" delete-title="Hapus Satuan"
+            item-name="{{ $unit->name }}">
             <x-slot:fields>
                 @if($errors->any())
                     <x-card class="p-4 border border-rose-200 bg-rose-50 text-rose-800 mb-4">
@@ -86,5 +87,7 @@
                 </x-card>
             </form>
         </div>
+
+        <x-confirm-delete-modal />
     </div>
 @endsection

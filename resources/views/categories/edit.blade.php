@@ -15,7 +15,8 @@
     {{-- MOBILE VERSION --}}
     <x-mobile.form form-id="category-form-mobile" save-label="Simpan Perubahan" save-icon="save" :show-delete="true"
         delete-action="{{ route('categories.destroy', $category) }}" delete-label="Hapus Kategori"
-        delete-confirm="Hapus kategori ini? Data akan disoft delete.">
+        delete-confirm="Hapus kategori ini? Data akan disoft delete." :use-delete-modal="true" delete-title="Hapus Kategori"
+        item-name="{{ $category->name }}">
         <x-slot:fields>
             @if($errors->any())
                 <x-form-error :errors="$errors" class="mb-4" />
@@ -72,4 +73,6 @@
             </form>
         </x-card>
     </div>
+
+    <x-confirm-delete-modal />
 @endsection
