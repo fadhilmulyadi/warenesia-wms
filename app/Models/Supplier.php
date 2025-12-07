@@ -13,6 +13,7 @@ class Supplier extends Model
     public const DEFAULT_PER_PAGE = 10;
 
     protected $fillable = [
+        'user_id',
         'name',
         'contact_person',
         'email',
@@ -37,5 +38,10 @@ class Supplier extends Model
     public function restockOrders(): HasMany
     {
         return $this->hasMany(RestockOrder::class);
+    }
+
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

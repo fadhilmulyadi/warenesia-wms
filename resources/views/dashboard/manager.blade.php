@@ -19,18 +19,14 @@
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <x-dashboard.card title="Persetujuan Menunggu" subtitle="Transaksi masuk dan keluar yang perlu ditinjau">
-                <x-dashboard.list
-                    :items="$pendingApprovals"
-                    emptyTitle="Tidak ada transaksi yang menunggu"
-                    emptyDescription="Semua transaksi telah ditinjau."
-                    emptyIcon="check-circle"
-                />
+                <x-dashboard.list :items="$pendingApprovals" emptyTitle="Tidak ada transaksi yang menunggu"
+                    emptyDescription="Semua transaksi telah ditinjau." emptyIcon="check-circle" />
             </x-dashboard.card>
 
             <x-dashboard.card title="Pesanan Restok Aktif" subtitle="Pesanan dalam proses konfirmasi">
                 <div class="space-y-4">
                     @forelse($activeRestocks as $order)
-                        <div class="space-y-2">
+                        <a href="{{ $order['url'] }}" class="block space-y-2 hover:bg-slate-50 transition p-2 rounded-lg -mx-2">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="space-y-1">
                                     <p class="text-sm font-semibold text-slate-900">{{ $order['title'] }}</p>
@@ -48,16 +44,13 @@
                                     <span class="text-xs text-slate-500 whitespace-nowrap">ETA {{ $order['eta'] }}</span>
                                 @endif
                             </div>
-                        </div>
+                        </a>
                         @unless($loop->last)
                             <div class="border-t border-slate-100"></div>
                         @endunless
-                        @empty
-                        <x-empty-state
-                            title="Belum ada pesanan restock aktif"
-                            description="Pesanan yang masih berjalan akan tampil di sini."
-                            icon="repeat"
-                        />
+                    @empty
+                        <x-empty-state title="Belum ada pesanan restock aktif"
+                            description="Pesanan yang masih berjalan akan tampil di sini." icon="repeat" />
                     @endforelse
                 </div>
             </x-dashboard.card>

@@ -33,11 +33,7 @@
                     </x-action-button>
                 @endcan
 
-                @can('create', \App\Models\Supplier::class)
-                    <x-action-button href="{{ route('suppliers.create') }}" variant="primary" icon="plus">
-                        Tambah Supplier
-                    </x-action-button>
-                @endcan
+
             </div>
         </x-toolbar>
 
@@ -52,7 +48,7 @@
                         <x-table.th>No. Handphone</x-table.th>
                         <x-table.th sortable name="average_rating">Rata-rata rating</x-table.th>
                         <x-table.th sortable name="rated_restock_count">Restock dinilai</x-table.th>
-                        @can('create', \App\Models\Supplier::class)
+                        @can('viewAny', \App\Models\Supplier::class)
                             <x-table.th align="right">Aksi</x-table.th>
                         @endcan
                     </x-table.thead>
@@ -96,7 +92,7 @@
                                 <x-table.td>
                                     {{ $supplier->rated_restock_count ?? 0 }}
                                 </x-table.td>
-                                @can('create', \App\Models\Supplier::class)
+                                @can('viewAny', \App\Models\Supplier::class)
                                     <x-table.td align="right">
                                         <x-supplier.actions :supplier="$supplier" />
                                     </x-table.td>
@@ -109,12 +105,7 @@
                                         description="Coba ubah filter pencarian atau tambahkan supplier baru."
                                         icon="building-2">
                                         <x-slot name="actions">
-                                            @can('create', \App\Models\Supplier::class)
-                                                <x-action-button href="{{ route('suppliers.create') }}" variant="primary"
-                                                    icon="plus">
-                                                    Tambah Supplier
-                                                </x-action-button>
-                                            @endcan
+
                                         </x-slot>
                                     </x-empty-state>
                                 </x-table.td>

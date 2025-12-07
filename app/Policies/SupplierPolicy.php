@@ -26,7 +26,7 @@ class SupplierPolicy
 
     public function create(User $user): bool
     {
-        return $this->canManage($user);
+        return false;
     }
 
     public function update(User $user, Supplier $supplier): bool

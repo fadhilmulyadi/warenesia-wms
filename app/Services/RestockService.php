@@ -19,7 +19,8 @@ class RestockService
         private readonly StockAdjustmentService $stockAdjustments,
         private readonly NumberGeneratorService $numberGenerator,
         private readonly IncomingTransactionService $incomingTransactions
-    ) {}
+    ) {
+    }
 
     public function indexQuery(array $filters = [], ?User $user = null, bool $supplierContext = false): Builder
     {
@@ -29,20 +30,26 @@ class RestockService
             ->with(['supplier', 'createdBy', 'confirmedBy', 'ratingGivenBy', 'incomingTransaction']);
 
         if ($supplierContext && $user !== null) {
-            $query->where('supplier_id', $user->id);
+            $supplierId = $user->supplier?->id;
+            if ($supplierId) {
+                $query->where('supplier_id', $supplierId);
+            } else {
+                // If user is supplier but has no supplier record, they shouldn't see any orders
+                $query->whereRaw('1 = 0');
+            }
         }
 
         if ($filters['search'] !== '') {
             $query->where(function (Builder $searchQuery) use ($filters): void {
-                $searchQuery->where('po_number', 'like', '%'.$filters['search'].'%');
+                $searchQuery->where('po_number', 'like', '%' . $filters['search'] . '%');
                 $searchQuery->orWhereHas('supplier', function (Builder $supplierQuery) use ($filters): void {
-                    $supplierQuery->where('name', 'like', '%'.$filters['search'].'%');
+                    $supplierQuery->where('name', 'like', '%' . $filters['search'] . '%');
                 });
             });
         }
 
-        if (! empty($filters['status'])) {
-            $query->whereIn('status', array_map(static fn (RestockStatus $status) => $status->value, $filters['status']));
+        if (!empty($filters['status'])) {
+            $query->whereIn('status', array_map(static fn(RestockStatus $status) => $status->value, $filters['status']));
         }
 
         if ($filters['date_from']) {
@@ -105,7 +112,7 @@ class RestockService
 
     public function markInTransit(RestockOrder $restock, ?User $actor = null): void
     {
-        if (! $restock->canBeMarkedInTransit()) {
+        if (!$restock->canBeMarkedInTransit()) {
             throw new DomainException('Only confirmed orders can be marked as in transit.');
         }
 
@@ -123,7 +130,7 @@ class RestockService
 
     public function markReceived(RestockOrder $restock, ?User $actor = null): void
     {
-        if (! $restock->canBeMarkedReceived()) {
+        if (!$restock->canBeMarkedReceived()) {
             throw new DomainException('Only in transit orders can be marked as received.');
         }
 
@@ -138,19 +145,6 @@ class RestockService
                 'status' => RestockOrder::STATUS_RECEIVED,
             ]);
 
-            $incoming = $restock->incomingTransaction()->first();
-
-            if ($incoming === null) {
-                $incoming = $this->incomingTransactions->create(
-                    $this->buildIncomingPayload($restock),
-                    $actor
-                );
-            }
-
-            if ($incoming->isPending()) {
-                $this->incomingTransactions->verify($incoming, $actor);
-            }
-
             $this->logActivity(
                 $actor,
                 'MARK_RESTOCK_RECEIVED',
@@ -162,7 +156,7 @@ class RestockService
 
     public function cancel(RestockOrder $restock, ?User $actor = null): void
     {
-        if (! $restock->canBeCancelled()) {
+        if (!$restock->canBeCancelled()) {
             throw new DomainException('Only pending or confirmed orders can be cancelled.');
         }
 
@@ -180,11 +174,13 @@ class RestockService
 
     public function supplierConfirm(RestockOrder $restock, User $supplier): void
     {
-        if (! $restock->canBeConfirmedBySupplier()) {
+        if (!$restock->canBeConfirmedBySupplier()) {
             throw new DomainException('Only pending orders can be confirmed.');
         }
 
-        if ((int) $restock->supplier_id !== (int) $supplier->id) {
+        $supplierId = $supplier->supplier?->id;
+
+        if ($supplierId === null || (int) $restock->supplier_id !== (int) $supplierId) {
             throw new DomainException('Supplier is not allowed to confirm this order.');
         }
 
@@ -203,11 +199,13 @@ class RestockService
 
     public function supplierReject(RestockOrder $restock, User $supplier, ?string $reason = null): void
     {
-        if (! $restock->canBeConfirmedBySupplier()) {
+        if (!$restock->canBeConfirmedBySupplier()) {
             throw new DomainException('Only pending orders can be rejected.');
         }
 
-        if ((int) $restock->supplier_id !== (int) $supplier->id) {
+        $supplierId = $supplier->supplier?->id;
+
+        if ($supplierId === null || (int) $restock->supplier_id !== (int) $supplierId) {
             throw new DomainException('Supplier is not allowed to reject this order.');
         }
 
@@ -219,8 +217,8 @@ class RestockService
 
         if ($reason !== '') {
             $existingNotes = (string) ($restock->notes ?? '');
-            $notePrefix = $existingNotes !== '' ? $existingNotes.PHP_EOL : '';
-            $updates['notes'] = $notePrefix.'Supplier rejection reason: '.$reason;
+            $notePrefix = $existingNotes !== '' ? $existingNotes . PHP_EOL : '';
+            $updates['notes'] = $notePrefix . 'Supplier rejection reason: ' . $reason;
         }
 
         $restock->update($updates);
@@ -275,21 +273,21 @@ class RestockService
     {
         $allowedSorts = ['po_number', 'order_date'];
         $sort = $filters['sort'] ?? 'order_date';
-        if (! in_array($sort, $allowedSorts, true)) {
+        if (!in_array($sort, $allowedSorts, true)) {
             $sort = 'order_date';
         }
 
         $direction = strtolower((string) ($filters['direction'] ?? 'desc'));
-        if (! in_array($direction, ['asc', 'desc'], true)) {
+        if (!in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'desc';
         }
 
         $statusFilter = $filters['status'] ?? [];
         $statusEnums = collect(is_array($statusFilter) ? $statusFilter : [$statusFilter])
             ->filter()
-            ->map(static fn ($value) => $value instanceof RestockStatus ? $value : RestockStatus::tryFrom((string) $value))
-            ->filter(static fn (?RestockStatus $status) => $status !== null)
-            ->filter(static fn (RestockStatus $status) => $supplierContext
+            ->map(static fn($value) => $value instanceof RestockStatus ? $value : RestockStatus::tryFrom((string) $value))
+            ->filter(static fn(?RestockStatus $status) => $status !== null)
+            ->filter(static fn(RestockStatus $status) => $supplierContext
                 ? in_array($status, [RestockStatus::PENDING, RestockStatus::CONFIRMED, RestockStatus::IN_TRANSIT, RestockStatus::RECEIVED], true)
                 : true)
             ->values()
@@ -316,7 +314,7 @@ class RestockService
             } catch (QueryException $exception) {
                 $attempts++;
 
-                if (! $this->isUniqueConstraintViolation($exception) || $attempts >= $maxAttempts) {
+                if (!$this->isUniqueConstraintViolation($exception) || $attempts >= $maxAttempts) {
                     throw $exception;
                 }
             }

@@ -3,8 +3,7 @@
 @section('title', 'Dashboard Staff')
 
 @section('page-header')
-    <x-page-header title="Dashboard Staff"
-        description="Akses cepat transaksi gudang dan aktivitas harian" />
+    <x-page-header title="Dashboard Staff" description="Akses cepat transaksi gudang dan aktivitas harian" />
 @endsection
 
 @php
@@ -24,9 +23,9 @@
 @section('content')
     {{-- DASHBOARD INIT --}}
     <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6" x-data="staffDashboard({
-                                                    skuMap: @js($productSkuMap), 
-                                                    products: @js($productOptions) 
-                                                 })">
+                                                        skuMap: @js($productSkuMap), 
+                                                        products: @js($productOptions) 
+                                                     })">
 
         {{-- LEFT SIDE --}}
         <div class="space-y-6 lg:col-span-3">
@@ -74,11 +73,8 @@
                 @else
                     {{-- EMPTY STATE --}}
                     <div class="px-4 pb-6 border-t border-slate-100">
-                        <x-empty-state
-                            title="Semua beres!"
-                            description="Tidak ada PO yang perlu diterima saat ini."
-                            icon="check-circle"
-                        />
+                        <x-empty-state title="Semua beres!" description="Tidak ada PO yang perlu diterima saat ini."
+                            icon="check-circle" />
                     </div>
                 @endif
             </x-dashboard.card>
@@ -117,11 +113,8 @@
             {{-- SECTION: Today Transactions --}}
             <x-dashboard.card title="Transaksi Hari Ini" subtitle="Daftar transaksi yang kamu buat hari ini." padding="p-4">
                 @if(count($todayList) === 0)
-                    <x-empty-state
-                        title="Belum ada transaksi hari ini"
-                        description="Transaksi yang kamu buat hari ini akan muncul di sini."
-                        icon="clock-3"
-                    />
+                    <x-empty-state title="Belum ada transaksi hari ini"
+                        description="Transaksi yang kamu buat hari ini akan muncul di sini." icon="clock-3" />
                 @else
                     <x-dashboard.list :items="$todayList" />
                 @endif

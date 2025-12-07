@@ -20,7 +20,7 @@
                 $statusLabel = $restock->status_label ?? ucfirst($restock->status);
                 $statusVariant = match ($restock->status) {
                     'pending' => 'warning',
-                    'approved' => 'info',
+                    'confirmed' => 'info',
                     'in_transit' => 'primary',
                     'received' => 'success',
                     'cancelled' => 'danger',

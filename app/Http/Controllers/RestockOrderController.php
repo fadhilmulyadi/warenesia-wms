@@ -9,6 +9,7 @@ use App\Http\Requests\RestockOrderRequest;
 use App\Models\Product;
 use App\Models\RestockOrder;
 use App\Models\Supplier;
+use App\Models\User;
 use App\Services\RestockService;
 use App\Support\CsvExporter;
 use App\Support\RestockPrefill;
@@ -79,7 +80,6 @@ class RestockOrderController extends Controller
         $prefill = RestockPrefill::forCreate($request, $products);
 
         $suppliers = Supplier::query()
-            ->when($prefill['supplier_id'], fn($query, $supplierId) => $query->orWhere('id', $supplierId))
             ->orderBy('name')
             ->get();
         $prefilledSupplierId = $prefill['supplier_id'];
@@ -338,7 +338,7 @@ class RestockOrderController extends Controller
     {
         $this->authorize('viewSupplierRestocks', $restock);
 
-        $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
+        $this->abortIfSupplierDoesNotOwn($restock, $request->user());
 
         $restock->load(['supplier', 'createdBy', 'confirmedBy', 'items.product', 'incomingTransaction']);
         $statusOptions = RestockOrder::statusOptions();
@@ -350,7 +350,7 @@ class RestockOrderController extends Controller
     {
         $this->authorize('confirmSupplierRestock', $restock);
 
-        $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
+        $this->abortIfSupplierDoesNotOwn($restock, $request->user());
 
         try {
             $this->restockService->supplierConfirm($restock, $request->user());
@@ -369,7 +369,7 @@ class RestockOrderController extends Controller
     {
         $this->authorize('rejectSupplierRestock', $restock);
 
-        $this->abortIfSupplierDoesNotOwn($restock, $request->user()->id);
+        $this->abortIfSupplierDoesNotOwn($restock, $request->user());
 
         try {
             $this->restockService->supplierReject($restock, $request->user(), $request->input('reject_reason'));
@@ -397,9 +397,11 @@ class RestockOrderController extends Controller
             ->all();
     }
 
-    private function abortIfSupplierDoesNotOwn(RestockOrder $restock, int $supplierId): void
+    private function abortIfSupplierDoesNotOwn(RestockOrder $restock, User $user): void
     {
-        if ((int) $restock->supplier_id !== $supplierId) {
+        $supplierId = $user->supplier?->id;
+
+        if ($supplierId === null || (int) $restock->supplier_id !== (int) $supplierId) {
             abort(403);
         }
     }

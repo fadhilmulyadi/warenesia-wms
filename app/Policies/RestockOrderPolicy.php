@@ -59,12 +59,12 @@ class RestockOrderPolicy
 
     public function viewSupplierRestocks(User $user, mixed $restock = null): bool
     {
-        if (! $user->isSupplier()) {
+        if (!$user->isSupplier()) {
             return false;
         }
 
         if ($restock instanceof RestockOrder) {
-            return (int) $restock->supplier_id === (int) $user->id;
+            return (int) $restock->supplier_id === (int) $user->supplier?->id;
         }
 
         return true;
@@ -73,14 +73,14 @@ class RestockOrderPolicy
     public function confirmSupplierRestock(User $user, RestockOrder $restock): bool
     {
         return $user->isSupplier()
-            && (int) $restock->supplier_id === (int) $user->id
+            && (int) $restock->supplier_id === (int) $user->supplier?->id
             && $restock->canBeConfirmedBySupplier();
     }
 
     public function rejectSupplierRestock(User $user, RestockOrder $restock): bool
     {
         return $user->isSupplier()
-            && (int) $restock->supplier_id === (int) $user->id
+            && (int) $restock->supplier_id === (int) $user->supplier?->id
             && $restock->canBeConfirmedBySupplier();
     }
 

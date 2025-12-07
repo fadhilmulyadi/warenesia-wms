@@ -29,6 +29,21 @@
                 </div>
             @endif
 
+
+            @can('approveSupplier', $user)
+                @if($user->role === \App\Enums\Role::SUPPLIER->value && $user->status === \App\Enums\UserStatus::PENDING->value)
+                    <form method="POST" action="{{ route('users.approve', $user) }}" class="mb-4">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit"
+                            class="w-full flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
+                            <x-lucide-check class="h-4 w-4" />
+                            Approve Supplier
+                        </button>
+                    </form>
+                @endif
+            @endcan
+
             <form id="user-form-mobile" method="POST" action="{{ route('users.update', $user) }}" class="space-y-4">
                 @csrf
                 @method('PUT')

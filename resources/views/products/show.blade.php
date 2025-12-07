@@ -406,7 +406,7 @@
             <x-card class="p-6 space-y-4">
                 {{-- HEADER --}}
                 <div class="flex items-center justify-between">
-                    <p class="text-base font-semibold text-slate-900">RIWAYAT TRANSAKSI TERBARU</p>
+                    <p class="text-base font-semibold text-slate-900">Riwayat Transaksi Terbaru</p>
                 </div>
 
                 <x-table>

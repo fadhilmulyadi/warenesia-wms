@@ -61,12 +61,25 @@ class SupplierService
 
     public function create(array $data): Supplier
     {
-        return Supplier::create($this->mapPayload($data));
+        throw new DomainException('Penambahan supplier baru harus dilakukan melalui menu User Management.');
     }
 
     public function update(Supplier $supplier, array $data): Supplier
     {
         $supplier->update($this->mapPayload($data, $supplier));
+
+        if ($supplier->user_id) {
+            $updates = [];
+            if (isset($data['email']) && $data['email'] !== $supplier->user->email) {
+                $updates['email'] = $data['email'];
+            }
+            if (isset($data['name']) && $data['name'] !== $supplier->user->name) {
+                $updates['name'] = $data['name'];
+            }
+            if (!empty($updates)) {
+                $supplier->user->update($updates);
+            }
+        }
 
         return $supplier->refresh();
     }

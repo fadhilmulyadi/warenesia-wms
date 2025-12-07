@@ -67,9 +67,7 @@ class SupplierController extends Controller
      */
     public function create()
     {
-        $this->authorize('create', Supplier::class);
-
-        return view('suppliers.create');
+        abort(404);
     }
 
     /**
@@ -77,13 +75,7 @@ class SupplierController extends Controller
      */
     public function store(SupplierStoreRequest $request): RedirectResponse
     {
-        $this->authorize('create', Supplier::class);
-
-        $this->suppliers->create($request->validated());
-
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Supplier berhasil ditambahkan.');
+        abort(404);
     }
 
     /**

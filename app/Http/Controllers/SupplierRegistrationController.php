@@ -9,7 +9,9 @@ use Illuminate\View\View;
 
 class SupplierRegistrationController extends Controller
 {
-    public function __construct(private SupplierService $suppliers) {}
+    public function __construct(private SupplierService $suppliers)
+    {
+    }
 
     public function create(): View
     {
@@ -18,7 +20,14 @@ class SupplierRegistrationController extends Controller
 
     public function store(SupplierRegistrationRequest $request): RedirectResponse
     {
-        $this->suppliers->register($request->validated());
+        $data = $request->validated();
+
+        // Ensure critical fields are present
+        $data['company_name'] = $data['company_name'] ?? $request->input('company_name');
+        $data['supplier_name'] = $data['supplier_name'] ?? $request->input('supplier_name');
+        $data['phone'] = $data['phone'] ?? $request->input('phone');
+
+        $this->suppliers->register($data);
 
         return redirect()
             ->route('login')

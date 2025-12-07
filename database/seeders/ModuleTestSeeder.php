@@ -98,7 +98,7 @@ class ModuleTestSeeder extends Seeder
     private function seedProducts(Collection $categories, Collection $units, Collection $suppliers): Collection
     {
         return Product::factory()
-            ->count(40)
+            ->count(150)
             ->make([
                 'category_id' => null, // pakai kategori yang sudah ada
                 'unit_id' => null, // pakai unit yang sudah ada

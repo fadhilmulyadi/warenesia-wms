@@ -92,6 +92,11 @@ class User extends Authenticatable
         return $this->belongsTo(self::class, 'approved_by');
     }
 
+    public function supplier(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Supplier::class);
+    }
+
     public static function roleOptions(): array
     {
         return collect(Role::cases())

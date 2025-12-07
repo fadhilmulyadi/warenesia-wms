@@ -23,10 +23,10 @@
             @endphp
 
             <x-mobile.index :items="$users" :config="$mobileIndexConfig" card-view="mobile.users.card" :extra-data="[
-                                    'roles' => $roles,
-                                    'statuses' => $statuses,
-                                    'statusVariants' => $statusVariants ?? [],
-                                ]" />
+                                        'roles' => $roles,
+                                        'statuses' => $statuses,
+                                        'statusVariants' => $statusVariants ?? [],
+                                    ]" />
         </div>
 
         {{-- PAGE CONTENT --}}
@@ -118,17 +118,7 @@
                                             </a>
                                         </div>
 
-                                        @can('approveSupplier', $user)
-                                            @if($user->role === \App\Enums\Role::SUPPLIER->value && $user->status === \App\Enums\UserStatus::PENDING->value)
-                                                <form method="POST" action="{{ route('users.approve', $user) }}" class="m-0">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <x-table.action-item type="submit" icon="check">
-                                                        Approve
-                                                    </x-table.action-item>
-                                                </form>
-                                            @endif
-                                        @endcan
+
                                     </x-table.td>
                                 </x-table.tr>
                             @empty

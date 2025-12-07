@@ -20,7 +20,7 @@ class StaffDashboardService
 
         return [
             'products' => $products,
-            'productSkuMap' => $products->mapWithKeys(fn ($p) => [$p->sku => $p->id]),
+            'productSkuMap' => $products->mapWithKeys(fn($p) => [$p->sku => $p->id]),
             'suppliers' => $this->suppliers(),
             'todayTransactions' => $this->todayTransactions($user),
             'poReadyToReceive' => $this->poReadyToReceive(),
@@ -70,13 +70,13 @@ class StaffDashboardService
             ->where('created_by', $user->id)
             ->whereDate('transaction_date', $today)
             ->get()
-            ->map(fn ($trx) => $this->mapTxn($trx, 'download'));
+            ->map(fn($trx) => $this->mapTxn($trx, 'download'));
 
         $outgoing = OutgoingTransaction::query()
             ->where('created_by', $user->id)
             ->whereDate('transaction_date', $today)
             ->get()
-            ->map(fn ($trx) => $this->mapTxn($trx, 'upload'));
+            ->map(fn($trx) => $this->mapTxn($trx, 'upload'));
 
         return $incoming->concat($outgoing)
             ->sortByDesc('created_at')
@@ -95,7 +95,7 @@ class StaffDashboardService
         return [
             'icon' => $icon,
             'title' => ucfirst($trx->transaction_number),
-            'description' => "{$trx->total_quantity} items - ".ucfirst(str_replace('_', ' ', $trx->status->value)),
+            'description' => "{$trx->total_quantity} items - " . ucfirst(str_replace('_', ' ', $trx->status->value)),
             'meta' => $trx->created_at?->format('H:i'),
             'created_at' => $trx->created_at,
             'href' => route('dashboard.staff', [
