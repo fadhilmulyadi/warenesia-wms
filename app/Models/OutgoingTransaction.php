@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\OutgoingTransactionStatus;
+use App\Services\NumberGeneratorService;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class OutgoingTransaction extends Model
+{
+    use HasFactory;
+
+    public function recalculateTotals(): void
+    {
+        $totals = \App\Services\Support\TransactionTotalsCalculator::calculate($this->items);
+
+        $this->total_items = $totals['total_items'];
+        $this->total_quantity = $totals['total_quantity'];
+        $this->total_amount = $totals['total_amount'];
+
+        $this->save();
+    }
+
+    public const STATUS_PENDING = OutgoingTransactionStatus::PENDING->value;
+
+    public const STATUS_APPROVED = OutgoingTransactionStatus::APPROVED->value;
+
+    public const STATUS_SHIPPED = OutgoingTransactionStatus::SHIPPED->value;
+
+    public const DEFAULT_PER_PAGE = 10;
+
+    protected $fillable = [
+        'transaction_number',
+        'transaction_date',
+        'customer_name',
+        'created_by',
+        'approved_by',
+        'status',
+        'total_items',
+        'total_quantity',
+        'total_amount',
+        'notes',
+    ];
+
+    protected $casts = [
+        'transaction_date' => 'date',
+        'total_items' => 'integer',
+        'total_quantity' => 'integer',
+        'total_amount' => 'decimal:2',
+        'status' => OutgoingTransactionStatus::class,
+    ];
+
+    public static function generateNextTransactionNumber(): string
+    {
+        return app(NumberGeneratorService::class)->generateDailySequence(
+            (new static)->getTable(),
+            'transaction_number',
+            'SO'
+        );
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(OutgoingTransactionItem::class);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === OutgoingTransactionStatus::PENDING;
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === OutgoingTransactionStatus::APPROVED;
+    }
+
+    public function isShipped(): bool
+    {
+        return $this->status === OutgoingTransactionStatus::SHIPPED;
+    }
+
+    public function canBeApproved(): bool
+    {
+        return $this->isPending();
+    }
+
+    public function canBeShipped(): bool
+    {
+        return $this->isApproved();
+    }
+}

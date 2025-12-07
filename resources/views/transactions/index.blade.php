@@ -1,0 +1,174 @@
+@extends('layouts.app')
+
+@section('title', 'Transactions')
+
+@section('page-header')
+    <x-page-header
+        title="Riwayat Transaksi"
+        description="Rekapitulasi seluruh aktivitas masuk dan keluar barang"
+    />
+@endsection
+
+@section('content')
+
+@php
+    $currentPaginator = $transactions;
+
+    $searchPlaceholder = $activeTab === 'incoming'
+        ? 'Cari nomor transaksi atau pemasok...'
+        : 'Cari nomor transaksi atau customer...';
+
+    $filters = [
+        'status' => 'Status',
+    ];
+
+    if ($activeTab === 'incoming') {
+        $filters['supplier_id'] = 'Supplier';
+    }
+
+    $resetKeys = ['status', 'supplier_id', 'date_from', 'date_to', 'date_range'];
+
+    $filters['date_range'] = 'Rentang Tanggal';
+
+    // Mobile Config
+    if ($activeTab === 'incoming') {
+        $mobileIndexConfig = \App\Support\MobileIndexConfig::purchases($statusOptions);
+        $cardView = 'mobile.purchases.card';
+    } else {
+        $mobileIndexConfig = \App\Support\MobileIndexConfig::sales($statusOptions);
+        $cardView = 'mobile.sales.card';
+    }
+    $mobileIndexConfig['hidden_query']['tab'] = $activeTab;
+@endphp
+
+<div class="space-y-6">
+
+    <div class="max-w-md">
+        <x-tab-navigation 
+            :tabs="$tabs" 
+            :active="$activeTab" 
+            base-url="transactions.index" 
+        />
+    </div>
+
+    {{-- MOBILE LIST --}}
+    <div class="md:hidden">
+        <x-mobile.index
+            :items="$transactions"
+            :config="$mobileIndexConfig"
+            :card-view="$cardView"
+        />
+    </div>
+
+    {{-- PAGE CONTENT --}}
+    <div class="hidden md:block space-y-4">
+        {{-- TOOLBAR --}}
+        <x-toolbar>
+
+            <x-filter-bar
+                :action="route('transactions.index', [
+                    'tab' => $activeTab,
+                    'type' => $typeParam,
+                    'per_page' => $perPage
+                ])"
+                :search="$search"
+                :sort="$sort"
+                :direction="$direction"
+                :filters="$filters"
+                :resetKeys="$resetKeys"
+                :placeholder="$searchPlaceholder"
+            >
+                <input type="hidden" name="tab" value="{{ $activeTab }}">
+
+                {{-- STATUS --}}
+                <x-slot:filter_status>
+                    <x-filter.checkbox-list
+                        name="status"
+                        :options="$statusOptions"
+                        :selected="request()->query('status', [])"
+                    />
+                </x-slot:filter_status>
+
+                {{-- DATE RANGE --}}
+                <x-slot:filter_date_range>
+                    <x-filter.date-range
+                        from-name="date_from"
+                        to-name="date_to"
+                        :from-value="request('date_from')"
+                        :to-value="request('date_to')"
+                    />
+                </x-slot:filter_date_range>
+
+                {{-- SUPPLIER FILTER untuk INCOMING --}}
+                @if($activeTab === 'incoming')
+                    <x-slot:filter_supplier_id>
+                        <x-filter.checkbox-list
+                            name="supplier_id"
+                            :options="$suppliers->map(fn ($s) => [
+                                'value' => $s->id,
+                                'label' => $s->name
+                            ])"
+                            :selected="request()->query('supplier_id', [])"
+                        />
+                    </x-slot:filter_supplier_id>
+                @endif
+            </x-filter-bar>
+
+            {{-- ACTION BUTTONS — kanan --}}
+            <div class="flex flex-wrap flex-none gap-2 justify-end">
+
+                {{-- EXPORT --}}
+                <x-action-button
+                    href="{{ route('transactions.export', array_merge(request()->query(), ['tab' => $activeTab])) }}"
+                    variant="secondary"
+                    icon="download"
+                >
+                    Export CSV
+                </x-action-button>
+
+                {{-- CREATE ACTION --}}
+                @if($activeTab === 'incoming')
+                    @can('create', \App\Models\IncomingTransaction::class)
+                        <x-action-button
+                            href="{{ route('purchases.create') }}"
+                            variant="primary"
+                            icon="plus"
+                        >
+                            Catat Barang Masuk
+                        </x-action-button>
+                    @endcan
+                @else
+                    @can('create', \App\Models\OutgoingTransaction::class)
+                        <x-action-button
+                            href="{{ route('sales.create') }}"
+                            variant="primary"
+                            icon="plus"
+                        >
+                            Catat Barang Keluar
+                        </x-action-button>
+                    @endcan
+                @endif
+
+            </div>
+
+        </x-toolbar>
+
+        {{-- TABLE: Using Component --}}
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <x-transactions.table 
+                :transactions="$currentPaginator"
+                :type="$activeTab"
+            />
+        </div>
+
+        @if($currentPaginator && ($currentPaginator->hasPages() || $currentPaginator->total() > 0))
+            <div class="mt-2">
+                <x-advanced-pagination :paginator="$currentPaginator" />
+            </div>
+        @endif
+    </div>
+
+    <x-confirm-delete-modal />
+
+</div>
+@endsection

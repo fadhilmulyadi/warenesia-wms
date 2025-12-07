@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\Unit;
+use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
+
+class UnitPolicy
+{
+    use HandlesAuthorization;
+
+    private const VIEW_ROLES = ['admin', 'manager'];
+
+    private const MANAGE_ROLES = ['admin', 'manager'];
+
+    public function viewAny(User $user): bool
+    {
+        return $this->canView($user);
+    }
+
+    public function view(User $user, Unit $unit): bool
+    {
+        return $this->canView($user);
+    }
+
+    public function create(User $user): bool
+    {
+        return $this->canManage($user);
+    }
+
+    public function update(User $user, Unit $unit): bool
+    {
+        return $this->canManage($user);
+    }
+
+    public function delete(User $user, Unit $unit): bool
+    {
+        return $this->canManage($user);
+    }
+
+    private function canView(User $user): bool
+    {
+        return in_array($user->role, self::VIEW_ROLES, true);
+    }
+
+    private function canManage(User $user): bool
+    {
+        return in_array($user->role, self::MANAGE_ROLES, true);
+    }
+}
