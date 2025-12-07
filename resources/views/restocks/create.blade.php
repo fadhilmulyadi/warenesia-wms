@@ -1,219 +1,181 @@
 @extends('layouts.app')
 
-@section('title', 'New Restock Order')
+@section('title', 'Buat Pesanan Restock')
 
 @section('page-header')
-    <div class="flex flex-col">
-        <h1 class="text-base font-semibold text-slate-900">New restock order</h1>
-        <p class="text-xs text-slate-500">
-            Create a purchase order for suppliers. Stock will be updated when items are received.
-        </p>
+    <div class="hidden md:block">
+        <x-page-header title="Buat Pesanan Restock" description="Ajukan permintaan stok baru kepada supplier" />
     </div>
-
-    <div class="flex items-center gap-2">
-        <a
-            href="{{ route('restocks.index') }}"
-            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-        >
-            Back to list
-        </a>
-        <button
-            type="submit"
-            form="restock-form"
-            class="inline-flex items-center rounded-lg bg-teal-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-teal-600"
-        >
-            Save
-        </button>
+    <div class="md:hidden">
+        <x-mobile-header title="Buat Restock" back="{{ isset($redirectUrl) ? $redirectUrl : route('restocks.index') }}" />
     </div>
 @endsection
 
 @section('content')
-    @php
-        $initialItems = old('items', [
-            [
-                'product_id' => null,
-                'quantity' => 1,
-                'unit_cost' => null,
-            ],
-        ]);
-    @endphp
+    {{-- MOBILE VERSION --}}
+    <x-mobile.form form-id="restock-form-mobile" save-label="Simpan Restock" save-icon="save">
+        <x-slot:fields>
+            @if($errors->any())
+                <div class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 mb-4">
+                    <p class="font-bold">Terdapat kesalahan input:</p>
+                    <ul class="list-disc list-inside mt-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-    <div
-        x-data="{
-            items: @js($initialItems),
-
-            addItem() {
-                this.items.push({ product_id: null, quantity: 1, unit_cost: null });
-            },
-
-            removeItem(index) {
-                if (this.items.length > 1) {
-                    this.items.splice(index, 1);
-                }
-            }
-        }"
-        class="max-w-5xl mx-auto space-y-4 text-xs"
-    >
-        @if($errors->any())
-            <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-red-700">
-                <div class="font-semibold mb-1">There are some issues with your input:</div>
-                <ul class="list-disc list-inside space-y-0.5">
-                    @foreach($errors->all() as $errorMessage)
-                        <li>{{ $errorMessage }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
-            <form
-                id="restock-form"
-                method="POST"
-                action="{{ route('restocks.store') }}"
-            >
+            <form id="restock-form-mobile" method="POST" action="{{ route('restocks.store') }}" class="space-y-6">
                 @csrf
+                @if(isset($redirectUrl))
+                    <input type="hidden" name="redirect_to" value="{{ $redirectUrl }}">
+                @endif
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-[11px] text-slate-600 block">Order date *</label>
-                        <input
-                            type="date"
-                            name="order_date"
-                            value="{{ old('order_date', $today) }}"
-                            required
-                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-                        >
+                {{-- Informasi Pesanan --}}
+                <x-card class="p-4 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                        Informasi Pesanan
+                    </h3>
+
+                    <div class="space-y-4">
+                        {{-- Supplier --}}
+                        <div>
+                            <x-input-label for="supplier_id_mobile" value="Supplier" />
+                            <x-custom-select
+                                id="supplier_id_mobile"
+                                name="supplier_id"
+                                :options="$suppliers->pluck('name', 'id')->toArray()"
+                                :value="old('supplier_id', $prefilledSupplierId)"
+                                placeholder="Pilih Supplier"
+                                class="mt-1 block w-full"
+                                required
+                            />
+                            <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
+                        </div>
+
+                        {{-- Tanggal Order --}}
+                        <div>
+                            <x-input-label for="order_date_mobile" value="Tanggal Order" />
+                            <input type="date" id="order_date_mobile" name="order_date" value="{{ old('order_date', $orderDate) }}"
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                required>
+                            <x-input-error :messages="$errors->get('order_date')" class="mt-2" />
+                        </div>
+
+                        {{-- Perkiraan Tiba --}}
+                        <div>
+                            <x-input-label for="expected_delivery_date_mobile" value="Perkiraan Tiba" />
+                            <input type="date" id="expected_delivery_date_mobile" name="expected_delivery_date"
+                                value="{{ old('expected_delivery_date', $expectedDeliveryDate) }}"
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                required>
+                            <x-input-error :messages="$errors->get('expected_delivery_date')" class="mt-2" />
+                        </div>
+
+                        {{-- Catatan --}}
+                        <div>
+                            <x-input-label for="notes_mobile" value="Catatan" />
+                            <textarea id="notes_mobile" name="notes" rows="3"
+                                class="mt-1 block w-full rounded-lg border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm"
+                                required>{{ old('notes') }}</textarea>
+                            <x-input-error :messages="$errors->get('notes')" class="mt-2" />
+                        </div>
                     </div>
+                </x-card>
 
-                    <div class="space-y-1">
-                        <label class="text-[11px] text-slate-600 block">Expected delivery date</label>
-                        <input
-                            type="date"
-                            name="expected_delivery_date"
-                            value="{{ old('expected_delivery_date') }}"
-                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-                        >
+                {{-- Daftar Item --}}
+                <x-card class="p-4 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                        Daftar Item
+                    </h3>
+
+                    <div class="overflow-x-auto -mx-4 px-4">
+                        <x-transactions.items-table :products="$products" :initial-items="old('items', $initialItems)" priceField="unit_cost" priceLabel="Harga Beli" />
                     </div>
-
-                    <div class="space-y-1">
-                        <label class="text-[11px] text-slate-600 block">Supplier *</label>
-                        <select
-                            name="supplier_id"
-                            required
-                            class="w-full rounded-lg border border-slate-200 px-2 py-2 text-[11px]"
-                        >
-                            <option value="">-- Select supplier --</option>
-                            @foreach($suppliers as $supplier)
-                                <option
-                                    value="{{ $supplier->id }}"
-                                    @selected((int) old('supplier_id') === $supplier->id)
-                                >
-                                    {{ $supplier->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="space-y-1 mt-4">
-                    <label class="text-[11px] text-slate-600 block">Notes</label>
-                    <textarea
-                        name="notes"
-                        rows="2"
-                        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-                        placeholder="Optional notes about this restock order."
-                    >{{ old('notes') }}</textarea>
-                </div>
-
-                <div class="mt-6">
-                    <div class="flex items-center justify-between mb-2">
-                        <h2 class="text-[11px] font-semibold text-slate-800 uppercase tracking-wide">
-                            Products
-                        </h2>
-                        <button
-                            type="button"
-                            @click="addItem()"
-                            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50"
-                        >
-                            <x-lucide-plus class="h-3 w-3 mr-1" />
-                            Add product
-                        </button>
-                    </div>
-
-                    <div class="rounded-xl border border-slate-200 overflow-hidden">
-                        <table class="min-w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-[11px] text-slate-500 uppercase tracking-wide">
-                                <tr>
-                                    <th class="px-3 py-2 w-1/2">Product</th>
-                                    <th class="px-3 py-2 w-20 text-right">Qty</th>
-                                    <th class="px-3 py-2 w-32 text-right">Unit cost (Rp)</th>
-                                    <th class="px-3 py-2 w-32 text-right">Line total</th>
-                                    <th class="px-3 py-2 w-10"></th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                <template x-for="(item, index) in items" :key="index">
-                                    <tr>
-                                        <td class="px-3 py-2">
-                                            <select
-                                                class="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-[11px]"
-                                                :name="`items[${index}][product_id]`"
-                                                x-model="item.product_id"
-                                                required
-                                            >
-                                                <option value="">-- Select product --</option>
-                                                @foreach($products as $product)
-                                                    <option value="{{ $product->id }}">
-                                                        {{ $product->name }} ({{ $product->sku }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td class="px-3 py-2 text-right">
-                                            <input
-                                                type="number"
-                                                min="1"
-                                                class="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-[11px] text-right"
-                                                :name="`items[${index}][quantity]`"
-                                                x-model.number="item.quantity"
-                                                required
-                                            >
-                                        </td>
-                                        <td class="px-3 py-2 text-right">
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                class="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-[11px] text-right"
-                                                :name="`items[${index}][unit_cost]`"
-                                                x-model.number="item.unit_cost"
-                                            >
-                                        </td>
-                                        <td class="px-3 py-2 text-right text-[11px] text-slate-700">
-                                            <span
-                                                x-text="(Number(item.quantity || 0) * Number(item.unit_cost || 0)).toLocaleString('id-ID')"
-                                            ></span>
-                                        </td>
-                                        <td class="px-3 py-2 text-right">
-                                            <button
-                                                type="button"
-                                                @click="removeItem(index)"
-                                                class="inline-flex items-center justify-center rounded-full border border-red-200 p-1 text-red-600 hover:bg-red-50"
-                                            >
-                                                <x-lucide-x class="h-3 w-3" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    @error('items')
-                        <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                </x-card>
             </form>
+        </x-slot:fields>
+    </x-mobile.form>
+
+{{-- DESKTOP VERSION --}}
+<div class="hidden md:block space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <x-breadcrumbs :items="['Restock' => route('restocks.index'), 'Buat Baru' => '#']" />
+        <div class="flex flex-wrap gap-2 justify-end">
+            <x-action-button href="{{ isset($redirectUrl) ? $redirectUrl : route('restocks.index') }}" variant="secondary" icon="arrow-left">
+                Kembali
+            </x-action-button>
+            <x-action-button type="submit" form="restock-form" variant="primary" icon="save">
+                Simpan Data
+            </x-action-button>
         </div>
     </div>
+
+    @if($errors->any())
+        <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <p class="font-bold">Terdapat kesalahan input:</p>
+            <ul class="list-disc list-inside mt-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form id="restock-form" method="POST" action="{{ route('restocks.store') }}" class="space-y-6">
+        @csrf
+        @if(isset($redirectUrl))
+            <input type="hidden" name="redirect_to" value="{{ $redirectUrl }}">
+        @endif
+
+        <x-card class="p-6">
+            {{-- Header Inputs --}}
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                {{-- Tanggal Order --}}
+                <div>
+                    <x-input-label for="order_date" value="Tanggal Order" class="mb-1" />
+                    <input type="date" id="order_date" name="order_date" value="{{ old('order_date', $orderDate) }}"
+                        class="w-full rounded-xl h-[42px] border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
+                        required>
+                    <x-input-error :messages="$errors->get('order_date')" class="mt-2" />
+                </div>
+
+                {{-- Perkiraan Tiba --}}
+                <div>
+                    <x-input-label for="expected_delivery_date" value="Perkiraan Tiba" class="mb-1" />
+                    <input type="date" id="expected_delivery_date" name="expected_delivery_date"
+                        value="{{ old('expected_delivery_date', $expectedDeliveryDate) }}"
+                        class="w-full rounded-xl h-[42px] border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
+                        required>
+                    <x-input-error :messages="$errors->get('expected_delivery_date')" class="mt-2" />
+                </div>
+
+                {{-- Supplier --}}
+                <div class="md:col-span-2">
+                    <x-input-label for="supplier_id" value="Supplier" class="mb-1" />
+                    <x-custom-select id="supplier_id" name="supplier_id" :options="$suppliers->pluck('name', 'id')->toArray()"
+                        :value="old('supplier_id', $prefilledSupplierId)"
+                        placeholder="Pilih Supplier" class="block w-full" required />
+                    <x-input-error :messages="$errors->get('supplier_id')" class="mt-2" />
+                </div>
+
+                {{-- Catatan --}}
+                <div class="md:col-span-4">
+                    <x-input-label for="notes" value="Catatan" class="mb-1" />
+                    <textarea id="notes" name="notes" rows="2"
+                        class="w-full rounded-xl border-slate-200 text-sm focus:border-teal-500 focus:ring-teal-500"
+                        placeholder="Contoh: Keterangan tambahan..." required>{{ old('notes') }}</textarea>
+                    <x-input-error :messages="$errors->get('notes')" class="mt-2" />
+                </div>
+            </div>
+
+            {{-- Daftar Item --}}
+            <div class="mt-8">
+                <h3 class="text-base font-semibold text-slate-900 mb-4">Daftar Item</h3>
+                <x-transactions.items-table :products="$products" :initial-items="old('items', $initialItems)" priceField="unit_cost" priceLabel="Harga Beli" />
+            </div>
+        </x-card>
+    </form>
+</div>
 @endsection

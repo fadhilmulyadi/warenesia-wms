@@ -11,6 +11,7 @@ class ProductPolicy
     use HandlesAuthorization;
 
     private const VIEW_ROLES = ['admin', 'manager'];
+
     private const MANAGE_ROLES = ['admin', 'manager'];
 
     public function viewAny(User $user): bool
@@ -35,12 +36,11 @@ class ProductPolicy
 
     public function delete(User $user, Product $product): bool
     {
-        return $user->role === 'admin';
+        return $this->canManage($user);
     }
 
     public function export(User $user): bool
     {
-        // Controllers should scope exported data per role (e.g., staff only their own rows).
         return $this->canView($user);
     }
 

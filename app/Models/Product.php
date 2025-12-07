@@ -21,9 +21,18 @@ class Product extends Model
         'sale_price',
         'min_stock',
         'current_stock',
-        'unit',
+        'unit_id',
         'rack_location',
         'image_path',
+    ];
+
+    protected $casts = [
+        'purchase_price' => 'decimal:2',
+        'sale_price' => 'decimal:2',
+        'min_stock' => 'integer',
+        'current_stock' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function category(): BelongsTo
@@ -36,53 +45,48 @@ class Product extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    public function increaseStock(int $quantity): void
+    public function unit(): BelongsTo
     {
-        if ($quantity < 0) {
-            throw new \InvalidArgumentException('Quantity must not be negative.');
-        }
-
-        if ($quantity === 0) {
-            return;
-        }
-
-        $this->current_stock = (int) $this->current_stock + $quantity;
-        $this->save();
-    }
-
-    public function hasSufficientStock(int $quantity): bool
-    {
-        if ($quantity <= 0) {
-            return false;
-        }
-
-        return (int) $this->current_stock >= $quantity;
-    }
-
-    public function decreaseStock(int $quantity): void
-    {
-        if ($quantity < 0) {
-            throw new \InvalidArgumentException('Quantity must not be negative.');
-        }
-
-        if ($quantity === 0) {
-            return;
-        }
-
-        $currentStock = (int) $this->current_stock;
-        $newStock = $currentStock - $quantity;
-
-        if ($newStock < 0) {
-            throw new \InvalidArgumentException('Insufficient stock to decrease.');
-        }
-
-        $this->current_stock = $newStock;
-        $this->save();
+        return $this->belongsTo(Unit::class);
     }
 
     public function restockOrderItems(): HasMany
     {
         return $this->hasMany(RestockOrderItem::class);
+    }
+
+    public function setRackLocationAttribute($value): void
+    {
+        if (! $value) {
+            $this->attributes['rack_location'] = null;
+
+            return;
+        }
+
+        $value = strtoupper(trim((string) $value));
+        $value = str_replace(' ', '', $value);
+
+        if (preg_match('/^([A-Z])(\d{2})(\d{2})$/', $value, $matches)) {
+            $zone = $matches[1];
+            $rack = $matches[2];
+            $bin = $matches[3];
+
+            $this->attributes['rack_location'] = "{$zone}{$rack}-{$bin}";
+
+            return;
+        }
+
+        if (preg_match('/^([A-Z])(\d{2})-(\d{1,2})$/', $value, $matches)) {
+            $zone = $matches[1];
+            $rack = $matches[2];
+            $bin = str_pad($matches[3], 2, '0', STR_PAD_LEFT);
+
+            $this->attributes['rack_location'] = "{$zone}{$rack}-{$bin}";
+
+            return;
+        }
+
+        $this->attributes['rack_location'] = $value;
     }
 
     public function getBarcodePayload(): string

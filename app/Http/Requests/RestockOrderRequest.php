@@ -25,8 +25,8 @@ class RestockOrderRequest extends FormRequest
         return [
             'supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
             'order_date' => ['required', 'date'],
-            'expected_delivery_date' => ['nullable', 'date', 'after_or_equal:order_date'],
-            'notes' => ['nullable', 'string'],
+            'expected_delivery_date' => ['required', 'date', 'after_or_equal:order_date'],
+            'notes' => ['required', 'string'],
 
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
@@ -38,8 +38,8 @@ class RestockOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'items.required' => 'At least one product must be added to the restock order.',
-            'items.min' => 'At least one product must be added to the restock order.',
+            'items.required' => 'Setidaknya satu produk harus ditambahkan ke pesanan restock.',
+            'items.min' => 'Setidaknya satu produk harus ditambahkan ke pesanan restock.',
         ];
     }
 

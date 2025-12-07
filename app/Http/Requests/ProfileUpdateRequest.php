@@ -8,6 +8,14 @@ use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
+    public function authorize(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = $this->user();
+
+        return $user?->can('updateProfile', $user) ?? false;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -23,8 +31,19 @@ class ProfileUpdateRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                Rule::unique(User::class)
+                    ->whereNull('deleted_at')
+                    ->ignore($this->user()->id),
             ],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('email')) {
+            $this->merge([
+                'email' => strtolower(trim((string) $this->input('email'))),
+            ]);
+        }
     }
 }

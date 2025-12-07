@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\SupplierRequest;
+use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
+use App\Http\Requests\SupplierStoreRequest;
+use App\Http\Requests\SupplierUpdateRequest;
 use App\Models\Supplier;
+use App\Services\SupplierService;
 use App\Support\CsvExporter;
-use Illuminate\Database\Eloquent\Builder;
+use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,7 +16,17 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SupplierController extends Controller
 {
+    use HasIndexQueryHelpers;
+
+    private const DEFAULT_PER_PAGE = Supplier::DEFAULT_PER_PAGE;
+
+    private const MAX_PER_PAGE = 250;
+
     private const EXPORT_CHUNK_SIZE = 200;
+
+    public function __construct(private readonly SupplierService $suppliers)
+    {
+    }
 
     /**
      * Display a listing of the resource.
@@ -23,14 +35,31 @@ class SupplierController extends Controller
     {
         $this->authorize('viewAny', Supplier::class);
 
-        $suppliersQuery = $this->buildSupplierIndexQuery($request);
+        $perPage = $this->resolvePerPage(
+            $request,
+            self::DEFAULT_PER_PAGE,
+            self::MAX_PER_PAGE
+        );
 
-        $suppliers = $suppliersQuery->paginate(Supplier::DEFAULT_PER_PAGE)
-            ->withQueryString();
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'average_rating', 'rated_restock_count', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
+
+        $filters = [
+            'search' => (string) $request->query('q', ''),
+            'sort' => $sort,
+            'direction' => $direction,
+            'per_page' => $perPage,
+        ];
+
+        $suppliers = $this->suppliers->index($filters);
 
         $search = (string) $request->query('q', '');
 
-        return view('suppliers.index', compact('suppliers', 'search'));
+        return view('suppliers.index', compact('suppliers', 'search', 'sort', 'direction', 'perPage'));
     }
 
     /**
@@ -38,23 +67,15 @@ class SupplierController extends Controller
      */
     public function create()
     {
-        $this->authorize('create', Supplier::class);
-
-        return view('suppliers.create');
+        abort(404);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(SupplierRequest $request): RedirectResponse
+    public function store(SupplierStoreRequest $request): RedirectResponse
     {
-        $this->authorize('create', Supplier::class);
-
-        Supplier::create($request->validated());
-
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Supplier created successfully.');
+        abort(404);
     }
 
     /**
@@ -78,15 +99,15 @@ class SupplierController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SupplierRequest $request, Supplier $supplier): RedirectResponse
+    public function update(SupplierUpdateRequest $request, Supplier $supplier): RedirectResponse
     {
         $this->authorize('update', $supplier);
 
-        $supplier->update($request->validated());
+        $this->suppliers->update($supplier, $request->validated());
 
         return redirect()
             ->route('suppliers.index')
-            ->with('success', 'Supplier updated successfully.');
+            ->with('success', 'Supplier berhasil diperbarui.');
     }
 
     /**
@@ -94,26 +115,25 @@ class SupplierController extends Controller
      */
     public function destroy(Supplier $supplier): RedirectResponse
     {
-        $this->authorize('delete', $supplier);
-
-        if ($supplier->products()->exists()) {
-            return redirect()
-                ->route('suppliers.index')
-                ->with('error', 'Supplier cannot be deleted because it is used by one or more products.');
-        }
-
-        $supplier->delete();
-
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Supplier deleted successfully.');
+        abort(404);
     }
 
     public function export(Request $request): StreamedResponse
     {
         $this->authorize('export', Supplier::class);
 
-        $supplierQuery = $this->buildSupplierIndexQuery($request);
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'average_rating', 'rated_restock_count', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
+
+        $supplierQuery = $this->suppliers->query([
+            'search' => (string) $request->query('q', ''),
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
         $fileName = 'suppliers-' . now()->format('Ymd-His') . '.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($supplierQuery): void {
@@ -135,8 +155,6 @@ class SupplierController extends Controller
             ]);
 
             $supplierQuery
-                ->orderBy('name')
-                ->orderBy('id')
                 ->chunk(self::EXPORT_CHUNK_SIZE, static function ($suppliers) use ($output): void {
                     foreach ($suppliers as $supplier) {
                         $output->fputcsv([
@@ -158,31 +176,5 @@ class SupplierController extends Controller
                     }
                 });
         });
-    }
-
-    private function buildSupplierIndexQuery(Request $request): Builder
-    {
-        $search = (string) $request->query('q', '');
-
-        return Supplier::query()
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $innerQuery) use ($search): void {
-                    $innerQuery
-                        ->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('contact_person', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('phone', 'like', '%' . $search . '%');
-                });
-            })
-            ->withCount([
-                'restockOrders as rated_restock_count' => function ($query): void {
-                    $query->whereNotNull('rating');
-                },
-            ])
-            ->withAvg(
-                'restockOrders as average_rating',
-                'rating'
-            )
-            ->orderBy('name');
     }
 }

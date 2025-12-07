@@ -1,251 +1,420 @@
 @extends('layouts.app')
 
-@section('title', 'Incoming Transaction ' . $purchase->transaction_number)
+@section('title', 'Detail Barang Masuk')
 
 @section('page-header')
-    <div class="flex flex-col">
-        <h1 class="text-base font-semibold text-slate-900">
-            Incoming transaction {{ $purchase->transaction_number }}
-        </h1>
-        <p class="text-xs text-slate-500">
-            Supplier {{ $purchase->supplier->name }} &mdash;
-            {{ $purchase->transaction_date->format('d M Y') }}
-        </p>
+    {{-- PAGE HEADER: Desktop --}}
+    <div class="hidden md:block">
+        <x-page-header title="Detail Barang Masuk" :description="'Bukti transaksi penerimaan #' . $purchase->transaction_number" />
     </div>
 
-    <div class="flex items-center gap-2">
-        <a
-            href="{{ route('purchases.index') }}"
-            class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
-        >
-            Back to list
-        </a>
+    {{-- PAGE HEADER: Mobile --}}
+    <div class="md:hidden">
+        <x-mobile-header title="Detail Barang Masuk" back="{{ route('transactions.index', ['tab' => 'incoming']) }}" />
     </div>
 @endsection
 
 @section('content')
-    <div class="max-w-5xl mx-auto space-y-4 text-xs">
-        @if(session('success'))
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-800">
-                {{ session('success') }}
-            </div>
-        @endif
+    <div class="max-w-6xl mx-auto">
+        {{-- MOBILE CONTENT --}}
+        <div class="md:hidden space-y-3 pb-24">
+            @php
+                $statusLabel = match (true) {
+                    $purchase->isPending() => 'Pending',
+                    $purchase->isVerified() => 'Verified',
+                    $purchase->isCompleted() => 'Completed',
+                    $purchase->isRejected() => 'Rejected',
+                    default => ucfirst($purchase->status)
+                };
 
-        @canany(['verify', 'reject', 'complete'], $purchase)
-            <div class="rounded-2xl border border-slate-200 bg-white p-3 mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
-                <div class="text-[11px] text-slate-600">
-                    Manage status
-                </div>
+                $statusVariant = match (true) {
+                    $purchase->isPending() => 'warning',
+                    $purchase->isVerified() => 'info',
+                    $purchase->isCompleted() => 'success',
+                    $purchase->isRejected() => 'danger',
+                    default => 'neutral'
+                };
 
-                <div class="flex flex-wrap items-center gap-2">
-                    @can('verify', $purchase)
-                        <form
-                            method="POST"
-                            action="{{ route('purchases.verify', $purchase) }}"
-                            onsubmit="return confirm('Verify this transaction and update stock?');"
-                        >
-                            @csrf
-                            @method('PATCH')
-                            <button
-                                type="submit"
-                                class="inline-flex items-center rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-emerald-600"
-                            >
-                                Verify & update stock
-                            </button>
-                        </form>
-                    @endcan
+                $totalItems = $purchase->total_items ?? $purchase->items->count();
+                $totalQty = $purchase->total_quantity;
+                $totalValue = $purchase->total_amount;
+            @endphp
 
-                    @can('reject', $purchase)
-                        <form
-                            method="POST"
-                            action="{{ route('purchases.reject', $purchase) }}"
-                            onsubmit="return confirm('Reject this transaction?');"
-                            class="flex items-center gap-1"
-                        >
-                            @csrf
-                            @method('PATCH')
-                            <input
-                                type="text"
-                                name="reason"
-                                class="rounded-lg border border-slate-200 px-2 py-1 text-[11px] w-40"
-                                placeholder="Reason (optional)"
-                            >
-                            <button
-                                type="submit"
-                                class="inline-flex items-center rounded-lg border border-red-200 px-3 py-1.5 text-[11px] font-semibold text-red-600 hover:bg-red-50"
-                            >
-                                Reject
-                            </button>
-                        </form>
-                    @endcan
-
-                    @can('complete', $purchase)
-                        <form
-                            method="POST"
-                            action="{{ route('purchases.complete', $purchase) }}"
-                            onsubmit="return confirm('Mark this transaction as completed?');"
-                        >
-                            @csrf
-                            @method('PATCH')
-                            <button
-                                type="submit"
-                                class="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-800 hover:bg-slate-50"
-                            >
-                                Mark as completed
-                            </button>
-                        </form>
-                    @endcan
-                </div>
-            </div>
-        @endcanany
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
-                <div class="text-[11px] text-slate-500 uppercase tracking-wide">Transaction info</div>
-                <div class="space-y-1">
+            {{-- SECTION: Summary --}}
+            <x-mobile.card>
+                <div class="flex items-start justify-between gap-2">
                     <div>
-                        <span class="text-[11px] text-slate-500">Number</span>
-                        <div class="font-mono text-[11px] text-slate-900">
-                            {{ $purchase->transaction_number }}
+                        <div class="text-xs text-slate-500">No Transaksi</div>
+                        <div class="text-base font-medium text-slate-900">
+                            #{{ $purchase->transaction_number }}
+                        </div>
+                        <div class="mt-1 text-sm text-slate-900">
+                            Supplier: <span class="font-medium">{{ $purchase->supplier?->name ?? '-' }}</span>
                         </div>
                     </div>
-                    <div>
-                        <span class="text-[11px] text-slate-500">Date</span>
-                        <div class="text-[11px] text-slate-900">
-                            {{ $purchase->transaction_date->format('d M Y') }}
+                    <x-badge :variant="$statusVariant" class="text-xs">
+                        {{ $statusLabel }}
+                    </x-badge>
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-y-4 gap-x-2 text-xs">
+                    <x-mobile.stat-row label="Tanggal" :value="$purchase->transaction_date?->format('d M Y') ?? '-'" />
+                    <x-mobile.stat-row label="Total Item" :value="number_format($totalItems, 0, ',', '.')" />
+                    <x-mobile.stat-row label="Total Qty" :value="number_format($totalQty, 0, ',', '.')" />
+                    <x-mobile.stat-row label="Total Nilai" :value="'Rp ' . number_format($totalValue, 0, ',', '.')" />
+                </div>
+            </x-mobile.card>
+
+            {{-- MOBILE ACTIONS --}}
+            @canany(['verify', 'reject', 'complete'], $purchase)
+                <x-mobile.card>
+                    <div class="space-y-3">
+                        @can('verify', $purchase)
+                            <button type="button" x-data @click="$dispatch('open-confirm-modal', {
+                                                                        action: '{{ route('purchases.verify', $purchase) }}',
+                                                                        method: 'PATCH',
+                                                                        title: 'Verifikasi Transaksi?',
+                                                                        message: 'Verifikasi transaksi ini dan perbarui stok?',
+                                                                        btnText: 'Ya, Verifikasi',
+                                                                        type: 'success'
+                                                                    })"
+                                class="w-full h-11 rounded-lg bg-teal-600 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-teal-700">
+                                <x-lucide-check class="w-5 h-5" />
+                                Verifikasi
+                            </button>
+                        @endcan
+
+                        @can('complete', $purchase)
+                            <button type="button" x-data @click="$dispatch('open-confirm-modal', {
+                                                                        action: '{{ route('purchases.complete', $purchase) }}',
+                                                                        method: 'PATCH',
+                                                                        title: 'Tandai Selesai?',
+                                                                        message: 'Apakah Anda yakin ingin menandai transaksi ini sebagai selesai?',
+                                                                        btnText: 'Ya, Tandai Selesai',
+                                                                        type: 'success'
+                                                                    })"
+                                class="w-full h-11 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-black">
+                                <x-lucide-check-circle class="w-5 h-5" />
+                                Tandai Selesai
+                            </button>
+                        @endcan
+
+                        @can('reject', $purchase)
+                            <button type="button" x-data @click="$dispatch('open-confirm-modal', {
+                                                                        action: '{{ route('purchases.reject', $purchase) }}',
+                                                                        method: 'PATCH',
+                                                                        title: 'Tolak Transaksi?',
+                                                                        message: 'Apakah Anda yakin ingin menolak transaksi ini?',
+                                                                        btnText: 'Ya, Tolak',
+                                                                        type: 'danger',
+                                                                        inputName: 'reason',
+                                                                        inputLabel: 'Alasan Penolakan',
+                                                                        inputPlaceholder: 'Masukkan alasan penolakan (opsional)'
+                                                                    })"
+                                class="w-full h-11 rounded-lg bg-rose-100 text-rose-700 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-rose-200">
+                                <x-lucide-x class="w-5 h-5" />
+                                Tolak
+                            </button>
+                        @endcan
+                    </div>
+                </x-mobile.card>
+            @endcanany
+
+            {{-- SECTION: Info Detail --}}
+            <x-mobile.card>
+                <h2 class="text-sm font-semibold text-slate-900 mb-3">
+                    Informasi Transaksi
+                </h2>
+                <div class="space-y-4 text-xs">
+                    <x-mobile.stat-row label="Supplier" :value="$purchase->supplier?->name ?? '-'" />
+                    <x-mobile.stat-row label="Diverifikasi oleh" :value="$purchase->verifiedBy?->name ?? '-'" />
+
+                    @if($purchase->notes)
+                        <div class="pt-3 border-t border-slate-100">
+                            <div class="text-xs text-slate-500 mb-1">Catatan</div>
+                            <p class="leading-relaxed text-sm text-slate-900">
+                                {!! nl2br(e($purchase->notes)) !!}
+                            </p>
+                        </div>
+                    @endif
+                </div>
+            </x-mobile.card>
+
+            {{-- MOBILE LIST --}}
+            <x-mobile.card>
+                <h2 class="text-sm font-semibold text-slate-900 mb-4">
+                    Detail Produk
+                </h2>
+                <div class="space-y-4 divide-y divide-slate-100">
+                    @forelse($purchase->items as $item)
+                        <div class="{{ $loop->first ? '' : 'pt-4' }}">
+                            {{-- Baris 1: Nama Produk --}}
+                            <div class="font-medium text-slate-900 text-sm mb-1">
+                                {{ optional($item->product)->name ?? '-' }}
+                            </div>
+
+                            <div class="flex justify-between items-start">
+                                {{-- Baris 2: SKU --}}
+                                <div class="text-xs text-slate-500 space-y-0.5">
+                                    <div>SKU: {{ optional($item->product)->sku ?? '-' }}</div>
+                                </div>
+
+                                {{-- Baris 3: Qty --}}
+                                <div class="text-right">
+                                    <div class="text-xs text-slate-500 mt-0.5">
+                                        x{{ number_format($item->quantity, 0, ',', '.') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center text-slate-500 py-4 text-sm">
+                            Tidak ada produk.
+                        </div>
+                    @endforelse
+                </div>
+            </x-mobile.card>
+        </div>
+
+        {{-- DESKTOP CONTENT --}}
+        <div class="hidden md:block space-y-6 text-sm text-slate-700">
+            {{-- TOOLBAR --}}
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <x-breadcrumbs :items="[
+            'Transaksi' => route('transactions.index'),
+            'Barang Masuk' => route('transactions.index', ['tab' => 'incoming']),
+            '#'.$purchase->transaction_number => route('purchases.show', $purchase),
+        ]" />
+
+                <div class="flex flex-wrap items-center gap-2 justify-end">
+                    <x-action-button href="{{ route('transactions.index', ['tab' => 'incoming']) }}" variant="secondary"
+                        icon="arrow-left">
+                        Kembali
+                    </x-action-button>
+
+                    @if($purchase->isPending())
+                        <x-action-button href="{{ route('purchases.edit', $purchase) }}" variant="primary" icon="edit">
+                            Edit Data
+                        </x-action-button>
+                    @endif
+                </div>
+            </div>
+
+            {{-- ACTIONS --}}
+            @canany(['verify', 'reject', 'complete'], $purchase)
+                <x-card class="p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <p class="text-base font-semibold text-slate-900">Kelola Status</p>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            @can('verify', $purchase)
+                                <x-action-button type="button" variant="primary" icon="check" x-data @click="$dispatch('open-confirm-modal', {
+                                                                    action: '{{ route('purchases.verify', $purchase) }}',
+                                                                    method: 'PATCH',
+                                                                    title: 'Verifikasi Transaksi?',
+                                                                    message: 'Verifikasi transaksi ini dan perbarui stok?',
+                                                                    btnText: 'Ya, Verifikasi',
+                                                                    type: 'success'
+                                                                })">
+                                    Verifikasi
+                                </x-action-button>
+                            @endcan
+
+                            @can('complete', $purchase)
+                                <x-action-button type="button" variant="secondary" icon="check-circle" x-data @click="$dispatch('open-confirm-modal', {
+                                                                    action: '{{ route('purchases.complete', $purchase) }}',
+                                                                    method: 'PATCH',
+                                                                    title: 'Tandai Selesai?',
+                                                                    message: 'Apakah Anda yakin ingin menandai transaksi ini sebagai selesai?',
+                                                                    btnText: 'Ya, Tandai Selesai',
+                                                                    type: 'success'
+                                                                })">
+                                    Tandai selesai
+                                </x-action-button>
+                            @endcan
+
+                            @can('reject', $purchase)
+                                <x-action-button type="button" variant="outline-danger" icon="x" x-data @click="$dispatch('open-confirm-modal', {
+                                                                    action: '{{ route('purchases.reject', $purchase) }}',
+                                                                    method: 'PATCH',
+                                                                    title: 'Tolak Transaksi?',
+                                                                    message: 'Apakah Anda yakin ingin menolak transaksi ini?',
+                                                                    btnText: 'Ya, Tolak',
+                                                                    type: 'danger',
+                                                                    inputName: 'reason',
+                                                                    inputLabel: 'Alasan Penolakan',
+                                                                    inputPlaceholder: 'Masukkan alasan penolakan (opsional)'
+                                                                })">
+                                    Tolak
+                                </x-action-button>
+                            @endcan
                         </div>
                     </div>
+                </x-card>
+            @endcanany
 
-                    <div>
-                        <span class="text-[11px] text-slate-500">Status</span>
-                        <div class="mt-0.5">
-                            @if($purchase->isPending())
-                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                                    Pending
-                                </span>
-                            @elseif($purchase->isVerified())
-                                <span class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700">
-                                    Verified
-                                </span>
-                            @elseif($purchase->isCompleted())
-                                <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                                    Completed
-                                </span>
-                            @elseif($purchase->isRejected())
-                                <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">
-                                    Rejected
-                                </span>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+                {{-- SECTION: Info --}}
+                <x-card class="p-6 space-y-6 lg:col-span-2">
+                    <div class="space-y-3">
+                        <p class="text-base font-semibold text-slate-900">Informasi Supplier</p>
+                        <div class="space-y-2">
+                            <x-description-item label="Nama" :value="optional($purchase->supplier)->name ?? '-'" icon="building-2" />
+                            @if(optional($purchase->supplier)->contact_person)
+                                <x-description-item label="Kontak" :value="$purchase->supplier->contact_person" icon="user-round" />
+                            @endif
+                            @if(optional($purchase->supplier)->email)
+                                <x-description-item label="Email" :value="$purchase->supplier->email" icon="mail" />
+                            @endif
+                            @if(optional($purchase->supplier)->phone)
+                                <x-description-item label="Telepon" :value="$purchase->supplier->phone" icon="phone" />
                             @endif
                         </div>
                     </div>
-                </div>
-            </div>
 
-            {{-- Supplier card --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
-                <div class="text-[11px] text-slate-500 uppercase tracking-wide">Supplier</div>
-                <div class="space-y-1">
-                    <div class="text-[11px] font-semibold text-slate-900">
-                        {{ $purchase->supplier->name }}
-                    </div>
-                    @if($purchase->supplier->contact_person)
-                        <div class="text-[11px] text-slate-700">
-                            Contact: {{ $purchase->supplier->contact_person }}
+                    <div class="space-y-3">
+                        <p class="text-base font-semibold text-slate-900">Informasi Transaksi</p>
+                        <div class="space-y-2">
+                            <x-description-item label="Nomor Transaksi" :value="$purchase->transaction_number" icon="hash" />
+                            <x-description-item label="Jenis" value="Barang Masuk" icon="log-in" />
+                            <x-description-item label="Tanggal" :value="$purchase->transaction_date->format('d M Y')" icon="calendar" />
+                            <x-description-item label="Catatan" :value="$purchase->notes ?? '-'" icon="notebook-pen" />
                         </div>
-                    @endif
-                    @if($purchase->supplier->email)
-                        <div class="text-[11px] text-slate-700">
-                            Email: {{ $purchase->supplier->email }}
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-base font-semibold text-slate-900">Informasi Tambahan</p>
+                        <div class="space-y-2">
+                            <x-description-item label="Diverifikasi oleh" :value="optional($purchase->verifiedBy)->name ?? '-'" icon="shield-check" />
                         </div>
-                    @endif
-                    @if($purchase->supplier->phone)
-                        <div class="text-[11px] text-slate-700">
-                            Phone: {{ $purchase->supplier->phone }}
+                    </div>
+                </x-card>
+
+                {{-- STATS CARDS --}}
+                <div class="space-y-3">
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                <x-lucide-package class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Total Item</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    {{ $purchase->total_items ?? $purchase->items->count() }}
+                                </p>
+                            </div>
                         </div>
-                    @endif
+                    </x-card>
+
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                <x-lucide-layers class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Total Qty</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    {{ number_format($purchase->total_quantity, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </x-card>
+
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                <x-lucide-wallet class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Total Nilai</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    Rp {{ number_format($purchase->total_amount, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </x-card>
+
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                @if($purchase->isPending())
+                                    <x-lucide-clock class="h-5 w-5" />
+                                @elseif($purchase->isVerified())
+                                    <x-lucide-check-circle class="h-5 w-5" />
+                                @elseif($purchase->isCompleted())
+                                    <x-lucide-check-circle-2 class="h-5 w-5" />
+                                @elseif($purchase->isRejected())
+                                    <x-lucide-x-circle class="h-5 w-5" />
+                                @endif
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Status</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    @if($purchase->isPending())
+                                        Pending
+                                    @elseif($purchase->isVerified())
+                                        Verified
+                                    @elseif($purchase->isCompleted())
+                                        Completed
+                                    @elseif($purchase->isRejected())
+                                        Rejected
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                    </x-card>
                 </div>
             </div>
 
-            {{-- Summary card --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
-                <div class="text-[11px] text-slate-500 uppercase tracking-wide">Summary</div>
-                <div class="space-y-1">
-                    <div class="flex justify-between">
-                        <span class="text-[11px] text-slate-500">Total items</span>
-                        <span class="text-[11px] font-semibold text-slate-900">
-                            {{ $purchase->total_items }}
-                        </span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-[11px] text-slate-500">Total quantity</span>
-                        <span class="text-[11px] font-semibold text-slate-900">
-                            {{ $purchase->total_quantity }}
-                        </span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-[11px] text-slate-500">Total amount</span>
-                        <span class="text-[11px] font-semibold text-slate-900">
-                            Rp {{ number_format($purchase->total_amount, 0, ',', '.') }}
-                        </span>
-                    </div>
+            {{-- SECTION: Products --}}
+            <x-card class="p-6 space-y-4">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <p class="text-base font-semibold text-slate-900">Produk</p>
                 </div>
-            </div>
-        </div>
 
-        {{-- Products list --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="text-[11px] font-semibold text-slate-800 uppercase tracking-wide">
-                    Products
-                </h2>
-            </div>
+                <x-table>
+                    <x-table.thead>
+                        <x-table.th>Produk</x-table.th>
+                        <x-table.th>SKU</x-table.th>
+                        <x-table.th align="right">Qty</x-table.th>
+                        <x-table.th align="right">Harga Beli</x-table.th>
+                        <x-table.th align="right">Subtotal</x-table.th>
+                    </x-table.thead>
 
-            <div class="rounded-xl border border-slate-100 overflow-hidden">
-                <table class="min-w-full text-left text-xs">
-                    <thead class="bg-slate-50 text-[11px] text-slate-500 uppercase tracking-wide">
-                        <tr>
-                            <th class="px-3 py-2">Product</th>
-                            <th class="px-3 py-2 text-right">Qty</th>
-                            <th class="px-3 py-2 text-right">Unit cost (Rp)</th>
-                            <th class="px-3 py-2 text-right">Line total (Rp)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach($purchase->items as $item)
-                            <tr>
-                                <td class="px-3 py-2">
-                                    <div class="flex flex-col">
-                                        <span class="text-[11px] font-semibold text-slate-900">
-                                            {{ $item->product->name }}
-                                        </span>
-                                        <span class="text-[10px] text-slate-500">
-                                            SKU: {{ $item->product->sku }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-3 py-2 text-right">
-                                    {{ $item->quantity }}
-                                </td>
-                                <td class="px-3 py-2 text-right">
-                                    {{ number_format($item->unit_cost, 0, ',', '.') }}
-                                </td>
-                                <td class="px-3 py-2 text-right">
-                                    {{ number_format($item->line_total, 0, ',', '.') }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            @if($purchase->notes)
-                <div class="mt-4">
-                    <div class="text-[11px] text-slate-500 mb-1">Notes</div>
-                    <div class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] text-slate-800">
-                        {{ $purchase->notes }}
-                    </div>
-                </div>
-            @endif
+                    <x-table.tbody>
+                        @forelse($purchase->items as $item)
+                            <x-table.tr>
+                                <x-table.td>
+                                    <p class="font-medium text-slate-900">
+                                        {{ optional($item->product)->name ?? '-' }}
+                                    </p>
+                                </x-table.td>
+                                <x-table.td class="text-slate-500">
+                                    {{ optional($item->product)->sku ?? '-' }}
+                                </x-table.td>
+                                <x-table.td align="right" class="font-semibold text-slate-900">
+                                    {{ number_format($item->quantity, 0, ',', '.') }}
+                                </x-table.td>
+                                <x-table.td align="right">
+                                    Rp {{ number_format((float) $item->unit_cost, 2, ',', '.') }}
+                                </x-table.td>
+                                <x-table.td align="right" class="font-semibold text-slate-900">
+                                    Rp {{ number_format((float) $item->line_total, 2, ',', '.') }}
+                                </x-table.td>
+                            </x-table.tr>
+                        @empty
+                            <x-table.tr>
+                                <x-table.td colspan="5" class="text-center text-slate-500">
+                                    Tidak ada produk pada transaksi ini.
+                                </x-table.td>
+                            </x-table.tr>
+                        @endforelse
+                    </x-table.tbody>
+                </x-table>
+            </x-card>
         </div>
     </div>
+
+    <x-confirm-modal />
 @endsection

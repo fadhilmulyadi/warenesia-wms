@@ -1,0 +1,3025 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Enums\\IncomingTransactionStatus\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Enums/IncomingTransactionStatus.php
+
+		-
+			message: '#^Method App\\Enums\\OutgoingTransactionStatus\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Enums/OutgoingTransactionStatus.php
+
+		-
+			message: '#^Method App\\Enums\\RestockStatus\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Enums/RestockStatus.php
+
+		-
+			message: '#^Method App\\Enums\\Role\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Enums/Role.php
+
+		-
+			message: '#^Method App\\Enums\\UserStatus\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Enums/UserStatus.php
+
+		-
+			message: '#^Cannot access property \$email on App\\Models\\User\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Controllers/Auth/ConfirmablePasswordController.php
+
+		-
+			message: '#^Cannot call method hasVerifiedEmail\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Auth/EmailVerificationNotificationController.php
+
+		-
+			message: '#^Cannot call method sendEmailVerificationNotification\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Auth/EmailVerificationNotificationController.php
+
+		-
+			message: '#^Cannot call method hasVerifiedEmail\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Auth/EmailVerificationPromptController.php
+
+		-
+			message: '#^Parameter \#1 \$key of function __ expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Auth/NewPasswordController.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Illuminate\\Support\\Facades\\Hash\:\:make\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Auth/NewPasswordController.php
+
+		-
+			message: '#^Parameter \#1 \$user of method App\\Services\\UserManagementService\:\:resetPassword\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Auth/PasswordController.php
+
+		-
+			message: '#^Parameter \#2 \$password of method App\\Services\\UserManagementService\:\:resetPassword\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Auth/PasswordController.php
+
+		-
+			message: '#^Cannot call method hasVerifiedEmail\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Auth/VerifyEmailController.php
+
+		-
+			message: '#^Cannot call method markEmailAsVerified\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Auth/VerifyEmailController.php
+
+		-
+			message: '#^Parameter \#1 \$user of class Illuminate\\Auth\\Events\\Verified constructor expects Illuminate\\Contracts\\Auth\\MustVerifyEmail, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Auth/VerifyEmailController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sku_prefix\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Cannot call method toDateTimeString\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:applyDateRange\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:applyFilters\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:applySearch\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:applySearch\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:quickStore\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:resolveSortAndDirection\(\) has parameter \$allowedSorts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:resolveSortAndDirection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\CategoryController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Parameter \#1 \$supplier of method App\\Services\\Dashboard\\SupplierDashboardService\:\:getData\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Parameter \#1 \$user of method App\\Services\\Dashboard\\StaffDashboardService\:\:getData\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\RestockOrder\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\RestockOrder\>\:\:\$supplier_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$createdBy\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$notes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$supplier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_items\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$transaction_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$transaction_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$verifiedBy\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to protected property App\\Models\\RestockOrder\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\RestockOrder\>\:\:\$items\.$#'
+			identifier: property.protected
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Cannot access property \$name on mixed\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Cannot call method format\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Cannot cast App\\Enums\\IncomingTransactionStatus\|string to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Constant App\\Http\\Controllers\\IncomingTransactionController\:\:DEFAULT_PER_PAGE is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Constant App\\Http\\Controllers\\IncomingTransactionController\:\:MAX_PER_PAGE is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Constant App\\Http\\Controllers\\IncomingTransactionController\:\:ROLE_STAFF is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:applyDateRange\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:applyFilters\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:applySearch\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:applySearch\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:incomingStatusOptions\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:incomingStatusOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:resolveSortAndDirection\(\) has parameter \$allowedSorts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\IncomingTransactionController\:\:resolveSortAndDirection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Parameter \#2 \$actor of method App\\Services\\IncomingTransactionService\:\:complete\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Parameter \#2 \$creator of method App\\Services\\IncomingTransactionService\:\:create\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Parameter \#2 \$verifier of method App\\Services\\IncomingTransactionService\:\:reject\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Parameter \#2 \$verifier of method App\\Services\\IncomingTransactionService\:\:verify\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Parameter \#3 \$reason of method App\\Services\\IncomingTransactionService\:\:reject\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Parameter \#3 \$updater of method App\\Services\\IncomingTransactionService\:\:update\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/IncomingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$approvedBy\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$createdBy\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$customer_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$notes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_items\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$transaction_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$transaction_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Cannot access property \$name on mixed\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Cannot call method format\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Cannot cast App\\Enums\\OutgoingTransactionStatus\|string to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Constant App\\Http\\Controllers\\OutgoingTransactionController\:\:DEFAULT_PER_PAGE is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Constant App\\Http\\Controllers\\OutgoingTransactionController\:\:MAX_PER_PAGE is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Constant App\\Http\\Controllers\\OutgoingTransactionController\:\:ROLE_STAFF is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OutgoingTransactionController\:\:applyDateRange\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OutgoingTransactionController\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OutgoingTransactionController\:\:applyFilters\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OutgoingTransactionController\:\:applySearch\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OutgoingTransactionController\:\:applySearch\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OutgoingTransactionController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OutgoingTransactionController\:\:resolveSortAndDirection\(\) has parameter \$allowedSorts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\OutgoingTransactionController\:\:resolveSortAndDirection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Parameter \#2 \$actor of method App\\Services\\OutgoingTransactionService\:\:ship\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Parameter \#2 \$approver of method App\\Services\\OutgoingTransactionService\:\:approve\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Parameter \#2 \$creator of method App\\Services\\OutgoingTransactionService\:\:create\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Parameter \#3 \$updater of method App\\Services\\OutgoingTransactionService\:\:update\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/OutgoingTransactionController.php
+
+		-
+			message: '#^Parameter \#1 \$content of function response expects array\|Illuminate\\Contracts\\View\\View\|string\|null, SimpleSoftwareIO\\QrCode\\Illuminate\\Support\\HtmlString\|string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/ProductBarcodeController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$current_stock\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$min_stock\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$purchase_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rack_location\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sale_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sku\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Cannot call method toDateTimeString\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:applyDateRange\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:applyFilters\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:applySearch\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:applySearch\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:resolveSortAndDirection\(\) has parameter \$allowedSorts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:resolveSortAndDirection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\ProductController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Relation ''products'' is not found in App\\Models\\Category model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Cannot access property \$email_verified_at on App\\Models\\User\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Controllers/ProfileController.php
+
+		-
+			message: '#^Cannot call method delete\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/ProfileController.php
+
+		-
+			message: '#^Cannot call method fill\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/ProfileController.php
+
+		-
+			message: '#^Cannot call method isDirty\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/ProfileController.php
+
+		-
+			message: '#^Cannot call method save\(\) on App\\Models\\User\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/ProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$confirmedBy\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$createdBy\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$expected_delivery_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$order_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$po_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rating\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rating_notes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status_label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$supplier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_items\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
+			identifier: property.nonObject
+			count: 4
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Cannot access property \$name on mixed\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Cannot call method format\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Cannot call method toDateTimeString\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RestockOrderController\:\:applyDateRange\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RestockOrderController\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RestockOrderController\:\:applyFilters\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RestockOrderController\:\:applySearch\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RestockOrderController\:\:applySearch\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RestockOrderController\:\:resolveSortAndDirection\(\) has parameter \$allowedSorts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RestockOrderController\:\:resolveSortAndDirection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\RestockOrderController\:\:restockStatusFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Parameter \#2 \$creator of method App\\Services\\RestockService\:\:create\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Parameter \#2 \$supplier of method App\\Services\\RestockService\:\:supplierConfirm\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Parameter \#2 \$supplier of method App\\Services\\RestockService\:\:supplierReject\(\) expects App\\Models\\User, App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Parameter \#3 \$reason of method App\\Services\\RestockService\:\:supplierReject\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/RestockOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$average_rating\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$city\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contact_person\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$country\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Cannot call method toDateTimeString\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:applyDateRange\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:applyFilters\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:applySearch\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:applySearch\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:resolveSortAndDirection\(\) has parameter \$allowedSorts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:resolveSortAndDirection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\SupplierController\:\:show\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/SupplierController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:applyDateRange\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:applyFilters\(\) has parameter \$map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:applyFilters\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:applySearch\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:applySearch\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:incomingStatusOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:outgoingStatusOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:resolveSortAndDirection\(\) has parameter \$allowedSorts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:resolveSortAndDirection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\TransactionController\:\:transactionTabs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/TransactionController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UnitController\:\:create\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/UnitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UnitController\:\:destroy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/UnitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UnitController\:\:edit\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/UnitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UnitController\:\:index\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/UnitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UnitController\:\:quickStore\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/UnitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UnitController\:\:store\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/UnitController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UnitController\:\:update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Http/Controllers/UnitController.php
+
+		-
+			message: '#^Dead catch \- DomainException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\UserController\:\:resolveSortAndDirection\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:mapWithKeys\(\) expects callable\(mixed, int\|string\)\: array\<int, string\|null\>, Closure\(App\\Models\\User\)\: non\-empty\-array\<int, string\|null\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/UserController.php
+
+		-
+			message: '#^Method App\\Http\\Middleware\\RoleMiddleware\:\:handle\(\) has parameter \$roles with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Http/Middleware/RoleMiddleware.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Requests/Auth/NewPasswordRequest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Requests/Auth/PasswordResetLinkRequest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Requests/CategoryStoreRequest.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of method App\\Http\\Requests\\CategoryStoreRequest\:\:sanitizePrefix\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Requests/CategoryStoreRequest.php
+
+		-
+			message: '#^Access to an undefined property \(object\|string\)\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Requests/CategoryUpdateRequest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Requests/CategoryUpdateRequest.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of method App\\Http\\Requests\\CategoryUpdateRequest\:\:sanitizePrefix\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Requests/CategoryUpdateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\IncomingTransactionRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/IncomingTransactionRequest.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Cannot access offset ''product_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Cannot access offset ''quantity'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Cannot access offset ''unit_price'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Cannot access property \$current_stock on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Cannot access property \$name on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 4
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\OutgoingTransactionRequest\:\:resolveProductsById\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Parameter \#1 \$value of function collect expects Illuminate\\Contracts\\Support\\Arrayable\<\(int\|string\), mixed\>\|iterable\<\(int\|string\), mixed\>\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Requests/OutgoingTransactionRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\ProductStoreRequest\:\:attributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/ProductStoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\ProductStoreRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/ProductStoreRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\ProductUpdateRequest\:\:attributes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/ProductUpdateRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\ProductUpdateRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/ProductUpdateRequest.php
+
+		-
+			message: '#^Cannot access property \$id on App\\Models\\User\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Requests/ProfileUpdateRequest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Requests/ProfileUpdateRequest.php
+
+		-
+			message: '#^Cannot access property \$role on App\\Models\\User\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Requests/RestockOrderRatingRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\RestockOrderRatingRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/RestockOrderRatingRequest.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Http/Requests/RestockOrderRequest.php
+
+		-
+			message: '#^Cannot access offset ''product_id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Requests/RestockOrderRequest.php
+
+		-
+			message: '#^Cannot access offset ''quantity'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Requests/RestockOrderRequest.php
+
+		-
+			message: '#^Cannot access offset ''unit_cost'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Http/Requests/RestockOrderRequest.php
+
+		-
+			message: '#^Cannot access property \$role on App\\Models\\User\|null\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Http/Requests/RestockOrderRequest.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 1
+			path: app/Http/Requests/RestockOrderRequest.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: app/Http/Requests/RestockOrderRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\RestockOrderRequest\:\:messages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/RestockOrderRequest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Requests/SupplierRegistrationRequest.php
+
+		-
+			message: '#^Access to an undefined property \(object\|string\)\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Requests/SupplierUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/UnitUpdateRequest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Requests/UserStoreRequest.php
+
+		-
+			message: '#^Access to an undefined property \(object\|string\)\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Requests/UserUpdateRequest.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Http/Requests/UserUpdateRequest.php
+
+		-
+			message: '#^Class App\\Models\\ActivityLog uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ActivityLog.php
+
+		-
+			message: '#^Method App\\Models\\ActivityLog\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ActivityLog.php
+
+		-
+			message: '#^Class App\\Models\\Category uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Category.php
+
+		-
+			message: '#^Method App\\Models\\Category\:\:products\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Models/Category.php
+
+		-
+			message: '#^Class App\\Models\\Customer uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Customer.php
+
+		-
+			message: '#^Class App\\Models\\IncomingTransaction uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/IncomingTransaction.php
+
+		-
+			message: '#^Method App\\Models\\IncomingTransaction\:\:createdBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/IncomingTransaction.php
+
+		-
+			message: '#^Method App\\Models\\IncomingTransaction\:\:items\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/IncomingTransaction.php
+
+		-
+			message: '#^Method App\\Models\\IncomingTransaction\:\:supplier\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/IncomingTransaction.php
+
+		-
+			message: '#^Method App\\Models\\IncomingTransaction\:\:verifiedBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/IncomingTransaction.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Models/IncomingTransaction.php
+
+		-
+			message: '#^Class App\\Models\\IncomingTransactionItem uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/IncomingTransactionItem.php
+
+		-
+			message: '#^Method App\\Models\\IncomingTransactionItem\:\:incomingTransaction\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/IncomingTransactionItem.php
+
+		-
+			message: '#^Method App\\Models\\IncomingTransactionItem\:\:product\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/IncomingTransactionItem.php
+
+		-
+			message: '#^Class App\\Models\\OutgoingTransaction uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OutgoingTransaction.php
+
+		-
+			message: '#^Method App\\Models\\OutgoingTransaction\:\:approvedBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OutgoingTransaction.php
+
+		-
+			message: '#^Method App\\Models\\OutgoingTransaction\:\:createdBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OutgoingTransaction.php
+
+		-
+			message: '#^Method App\\Models\\OutgoingTransaction\:\:items\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OutgoingTransaction.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Models/OutgoingTransaction.php
+
+		-
+			message: '#^Class App\\Models\\OutgoingTransactionItem uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OutgoingTransactionItem.php
+
+		-
+			message: '#^Method App\\Models\\OutgoingTransactionItem\:\:outgoingTransaction\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OutgoingTransactionItem.php
+
+		-
+			message: '#^Method App\\Models\\OutgoingTransactionItem\:\:product\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OutgoingTransactionItem.php
+
+		-
+			message: '#^Class App\\Models\\Product uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:category\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:restockOrderItems\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:setRackLocationAttribute\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:supplier\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:unit\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Cannot cast App\\Enums\\RestockStatus to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Class App\\Models\\RestockOrder uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Instanceof between App\\Enums\\RestockStatus and App\\Enums\\RestockStatus will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrder\:\:confirmedBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrder\:\:createdBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrder\:\:incomingTransaction\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasOne does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrder\:\:items\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrder\:\:ratingGivenBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrder\:\:statusOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrder\:\:supplier\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type App\\Enums\\RestockStatus\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/RestockOrder.php
+
+		-
+			message: '#^Class App\\Models\\RestockOrderItem uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrderItem.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrderItem\:\:product\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrderItem.php
+
+		-
+			message: '#^Method App\\Models\\RestockOrderItem\:\:restockOrder\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RestockOrderItem.php
+
+		-
+			message: '#^Class App\\Models\\StockAdjustment uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/StockAdjustment.php
+
+		-
+			message: '#^Method App\\Models\\StockAdjustment\:\:adjustedBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/StockAdjustment.php
+
+		-
+			message: '#^Method App\\Models\\StockAdjustment\:\:product\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/StockAdjustment.php
+
+		-
+			message: '#^Method App\\Models\\StockAdjustment\:\:related\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/StockAdjustment.php
+
+		-
+			message: '#^Class App\\Models\\Supplier uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Method App\\Models\\Supplier\:\:products\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Method App\\Models\\Supplier\:\:restockOrders\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Class App\\Models\\Unit uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Unit.php
+
+		-
+			message: '#^Method App\\Models\\Unit\:\:products\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Unit.php
+
+		-
+			message: '#^Class App\\Models\\User uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:approvedBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:roleOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Models\\User\:\:statusOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<1, 2\> and 3 is always true\.$#'
+			identifier: smaller.alwaysTrue
+			count: 1
+			path: app/Services/BaseTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\BaseTransactionService\:\:extractItems\(\) has parameter \$validatedData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/BaseTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\BaseTransactionService\:\:extractItems\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/BaseTransactionService.php
+
+		-
+			message: '#^Parameter \#4 \$subject of method App\\Services\\ActivityLogService\:\:log\(\) expects Illuminate\\Database\\Eloquent\\Model\|null, object given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/BaseTransactionService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Services/BaseTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:create\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:index\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:index\(\) return type with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:normaliseFilters\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:normaliseFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:query\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:query\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:storeImage\(\) should return string\|null but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Method App\\Services\\CategoryService\:\:update\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Parameter \#1 \$string of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Parameter \#1 \$string of function substr expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/CategoryService.php
+
+		-
+			message: '#^Cannot cast mixed to float\.$#'
+			identifier: cast.double
+			count: 1
+			path: app/Services/Dashboard/AdminDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\AdminDashboardService\:\:formatCurrency\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/Dashboard/AdminDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\AdminDashboardService\:\:formatNumber\(\) has parameter \$value with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/Dashboard/AdminDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\AdminDashboardService\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/AdminDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\AdminDashboardService\:\:kpis\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/AdminDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\AdminDashboardService\:\:lowStockAlerts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/AdminDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\AdminDashboardService\:\:shortcuts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/AdminDashboardService.php
+
+		-
+			message: '#^Cannot call method format\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\ManagerDashboardService\:\:activeRestocks\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\ManagerDashboardService\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\ManagerDashboardService\:\:overview\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\ManagerDashboardService\:\:pendingApprovals\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\ManagerDashboardService\:\:progress\(\) has parameter \$status with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\RestockOrder\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\RestockOrder\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Dashboard/ManagerDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\StaffDashboardService\:\:formProducts\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Services/Dashboard/StaffDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\StaffDashboardService\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/StaffDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\StaffDashboardService\:\:mapTxn\(\) has parameter \$icon with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/Dashboard/StaffDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\StaffDashboardService\:\:mapTxn\(\) has parameter \$trx with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Services/Dashboard/StaffDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\StaffDashboardService\:\:mapTxn\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/StaffDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\StaffDashboardService\:\:poReadyToReceive\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Services/Dashboard/StaffDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\StaffDashboardService\:\:suppliers\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/Services/Dashboard/StaffDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\StaffDashboardService\:\:todayTransactions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/StaffDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\SupplierDashboardService\:\:getData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/SupplierDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\SupplierDashboardService\:\:history\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/SupplierDashboardService.php
+
+		-
+			message: '#^Method App\\Services\\Dashboard\\SupplierDashboardService\:\:pending\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Dashboard/SupplierDashboardService.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, App\\Enums\\RestockStatus given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Dashboard/SupplierDashboardService.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Carbon\\Carbon\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Dashboard/SupplierDashboardService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:applyStaffScope\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:create\(\) has parameter \$validatedData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:create\(\) should return App\\Models\\IncomingTransaction but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:createItems\(\) has parameter \$itemsData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:indexQuery\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:indexQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:normalizeIndexFilters\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:normalizeIndexFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\IncomingTransactionService\:\:update\(\) has parameter \$validatedData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/IncomingTransactionService.php
+
+		-
+			message: '#^Parameter \#1 \$number of method App\\Services\\NumberGeneratorService\:\:extractSequence\(\) expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Services/NumberGeneratorService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:applyStaffScope\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:create\(\) has parameter \$validatedData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:create\(\) should return App\\Models\\OutgoingTransaction but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:createItems\(\) has parameter \$itemsData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:indexQuery\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:indexQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:normalizeIndexFilters\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:normalizeIndexFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:resolveUnitPrice\(\) has parameter \$itemData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Method App\\Services\\OutgoingTransactionService\:\:update\(\) has parameter \$validatedData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/OutgoingTransactionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$transaction_date\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$transaction_number\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<1, 2\> and 3 is always true\.$#'
+			identifier: smaller.alwaysTrue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:applyStockFilter\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:applyStockFilter\(\) has parameter \$statuses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:buildPayload\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:buildPayload\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:create\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:create\(\) should return App\\Models\\Product but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:getTransactionStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:index\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:index\(\) return type with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:normaliseFilters\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:normaliseFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:query\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:query\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:storeImage\(\) should return string\|null but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:update\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Method App\\Services\\ProductService\:\:update\(\) should return App\\Models\\Product but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>current_stock" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/ProductService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isPending\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Comparison operation "\<" between int\<1, 2\> and 3 is always true\.$#'
+			identifier: smaller.alwaysTrue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:buildIncomingPayload\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:create\(\) has parameter \$validatedData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:create\(\) should return App\\Models\\RestockOrder but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:createItems\(\) has parameter \$itemsData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:extractItems\(\) has parameter \$validatedData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:extractItems\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:indexQuery\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:indexQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:normalizeIndexFilters\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\RestockService\:\:normalizeIndexFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{product_id\: int\<0, max\>, quantity\: int, unit_cost\: numeric\-string\}, Closure\(App\\Models\\RestockOrderItem\)\: array\{product_id\: int\<0, max\>, quantity\: int, unit_cost\: numeric\-string\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Parameter \#1 \$transaction of method App\\Services\\IncomingTransactionService\:\:verify\(\) expects App\\Models\\IncomingTransaction, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Parameter \#4 \$subject of method App\\Services\\ActivityLogService\:\:log\(\) expects Illuminate\\Database\\Eloquent\\Model\|null, object given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Property App\\Services\\RestockService\:\:\$stockAdjustments is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Services/RestockService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierProfileService\:\:sync\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierProfileService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:create\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:index\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:index\(\) return type with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:mapPayload\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:mapPayload\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:normaliseFilters\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:normaliseFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:query\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:query\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:register\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\SupplierService\:\:update\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>is_active" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/SupplierService.php
+
+		-
+			message: '#^Method App\\Services\\Support\\TransactionTotalsCalculator\:\:calculate\(\) has parameter \$items with no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/Support/TransactionTotalsCalculator.php
+
+		-
+			message: '#^Method App\\Services\\UnitService\:\:create\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UnitService.php
+
+		-
+			message: '#^Method App\\Services\\UnitService\:\:index\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UnitService.php
+
+		-
+			message: '#^Method App\\Services\\UnitService\:\:index\(\) return type with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/UnitService.php
+
+		-
+			message: '#^Method App\\Services\\UnitService\:\:query\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UnitService.php
+
+		-
+			message: '#^Method App\\Services\\UnitService\:\:query\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/UnitService.php
+
+		-
+			message: '#^Method App\\Services\\UnitService\:\:update\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UnitService.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:applyFilters\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:applyFilters\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:create\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:list\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:list\(\) return type with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:mapBasePayload\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:mapBasePayload\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:normaliseFilterValues\(\) has parameter \$allowed with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:normaliseFilterValues\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:normaliseFilters\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:normaliseFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Services\\UserManagementService\:\:update\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/UserManagementService.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\CategoryConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/CategoryConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\ProductConfig\:\:config\(\) has parameter \$categories with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndex/ProductConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\ProductConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/ProductConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\PurchaseConfig\:\:config\(\) has parameter \$statusOptions with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndex/PurchaseConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\PurchaseConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/PurchaseConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\RestockConfig\:\:config\(\) has parameter \$statusOptions with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndex/RestockConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\RestockConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/RestockConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\SaleConfig\:\:config\(\) has parameter \$statusOptions with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndex/SaleConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\SaleConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/SaleConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\SupplierConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/SupplierConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\SupplierRestockConfig\:\:config\(\) has parameter \$statusOptions with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndex/SupplierRestockConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\SupplierRestockConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/SupplierRestockConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\UnitConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/UnitConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\UserConfig\:\:config\(\) has parameter \$roles with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/UserConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\UserConfig\:\:config\(\) has parameter \$statuses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/UserConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndex\\UserConfig\:\:config\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndex/UserConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:categories\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:products\(\) has parameter \$categories with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:products\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:purchases\(\) has parameter \$statusOptions with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:purchases\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:restocks\(\) has parameter \$statusOptions with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:restocks\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:sales\(\) has parameter \$statusOptions with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:sales\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:supplierRestocks\(\) has parameter \$statusOptions with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:supplierRestocks\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:suppliers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:units\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:users\(\) has parameter \$roles with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:users\(\) has parameter \$statuses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Method App\\Support\\MobileIndexConfig\:\:users\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/MobileIndexConfig.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
+			path: app/Support/TransactionPrefill.php
+
+		-
+			message: '#^Method App\\Support\\TransactionPrefill\:\:baseFromInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/TransactionPrefill.php
+
+		-
+			message: '#^Method App\\Support\\TransactionPrefill\:\:baseFromQuery\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/TransactionPrefill.php
+
+		-
+			message: '#^Method App\\Support\\TransactionPrefill\:\:forDashboard\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/TransactionPrefill.php
+
+		-
+			message: '#^Method App\\Support\\TransactionPrefill\:\:forPurchases\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/TransactionPrefill.php
+
+		-
+			message: '#^Method App\\Support\\TransactionPrefill\:\:forSales\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/TransactionPrefill.php
+
+		-
+			message: '#^Parameter \#1 \$string of function ucfirst expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/factories/ProductFactory.php
+
+		-
+			message: '#^Parameter \#1 \$string of function strtoupper expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/factories/UnitFactory.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:after\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: database/migrations/2025_11_23_111839_add_rating_fields_to_restock_orders_table.php
+
+		-
+			message: '#^Property App\\Models\\Product\:\:\$category_id \(int\<0, max\>\) does not accept int\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: database/seeders/DatabaseSeeder.php
+
+		-
+			message: '#^Property App\\Models\\Product\:\:\$supplier_id \(int\<0, max\>\|null\) does not accept int\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: database/seeders/DatabaseSeeder.php
+
+		-
+			message: '#^Method Database\\Seeders\\TransactionSeeder\:\:seedIncomingTransactions\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: database/seeders/TransactionSeeder.php
+
+		-
+			message: '#^Method Database\\Seeders\\TransactionSeeder\:\:seedIncomingTransactions\(\) has parameter \$products with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: database/seeders/TransactionSeeder.php
+
+		-
+			message: '#^Method Database\\Seeders\\TransactionSeeder\:\:seedIncomingTransactions\(\) has parameter \$suppliers with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: database/seeders/TransactionSeeder.php
+
+		-
+			message: '#^Method Database\\Seeders\\TransactionSeeder\:\:seedIncomingTransactions\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: database/seeders/TransactionSeeder.php
+
+		-
+			message: '#^Method Database\\Seeders\\TransactionSeeder\:\:seedOutgoingTransactions\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: database/seeders/TransactionSeeder.php
+
+		-
+			message: '#^Method Database\\Seeders\\TransactionSeeder\:\:seedOutgoingTransactions\(\) has parameter \$products with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: database/seeders/TransactionSeeder.php
+
+		-
+			message: '#^Method Database\\Seeders\\TransactionSeeder\:\:seedOutgoingTransactions\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: database/seeders/TransactionSeeder.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<1, 20\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: database/seeders/TransactionSeeder.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: routes/web.php

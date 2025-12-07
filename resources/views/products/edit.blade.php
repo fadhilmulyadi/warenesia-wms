@@ -3,51 +3,89 @@
 @section('title', 'Edit Produk')
 
 @section('page-header')
-    <div class="flex flex-wrap items-center justify-between gap-4">
-        {{-- Breadcrumb --}}
-        <nav class="flex items-center text-sm text-slate-500 gap-1">
-            <a href="{{ route('dashboard') }}" class="inline-flex items-center text-slate-600 hover:text-teal-600 transition-colors">
-                <x-lucide-home class="w-4 h-4" />
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
-
-            <a href="{{ route('products.index') }}" class="hover:text-teal-600 transition-colors">
-                Inventaris
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
-
-            <a href="{{ route('products.index') }}" class="hover:text-teal-600 transition-colors">
-                Produk
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
-
-            <span class="font-semibold text-teal-700">
-                {{ $product->sku ?? $product->name ?? 'Edit Produk' }}
-            </span>
-        </nav>
-
-        {{-- Action Buttons --}}
-        <div class="flex items-center gap-2">
-            <a href="{{ route('products.index') }}"
-                class="inline-flex items-center justify-center h-9 px-3 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
-                Batal
-            </a>
-
-            <button type="submit" form="product-form"
-                class="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-teal-600 text-sm font-semibold text-white hover:bg-teal-700 shadow-sm transition-all gap-1.5">
-                <x-lucide-save class="w-4 h-4" />
-                <span>Perbarui Produk</span>
-            </button>
-        </div>
+    <div class="hidden md:block">
+        <x-page-header
+            title="Edit Produk"
+            :description="'Perbarui informasi dan spesifikasi produk SKU ' . $product->sku"
+        />
+    </div>
+    <div class="md:hidden">
+        <x-mobile-header
+            title="Edit Produk"
+            back="{{ route('products.index') }}"
+        />
     </div>
 @endsection
 
 @section('content')
-    <div class="max-w-7xl mx-auto mt-2">
-        <form id="product-form" action="{{ route('products.update', $product) }}" method="POST" enctype="multipart/form-data">
+    {{-- MOBILE VERSION --}}
+    <x-mobile.form
+        form-id="product-form-mobile"
+        save-label="Simpan Perubahan"
+        save-icon="save"
+        :show-delete="true"
+        delete-action="{{ route('products.destroy', $product) }}"
+        delete-label="Hapus Produk"
+        delete-confirm="Hapus produk ini?"
+        :use-delete-modal="true"
+        delete-title="Hapus Produk"
+        item-name="{{ $product->name }}"
+    >
+        <x-slot:fields>
+            <form
+                id="product-form-mobile"
+                method="POST"
+                action="{{ route('products.update', $product) }}"
+                enctype="multipart/form-data"
+            >
+                @csrf
+                @method('PUT')
+                @include('products.form.form', [
+                    'product' => $product,
+                    'categories' => $categories,
+                    'suppliers' => $suppliers,
+                    'units' => $units,
+                    'readonly' => false
+                ])
+            </form>
+        </x-slot:fields>
+    </x-mobile.form>
+
+    {{-- DESKTOP VERSION --}}
+    <div class="hidden md:block space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <x-breadcrumbs :items="[
+                'Produk' => route('products.index'),
+                $product->name ?? $product->sku ?? 'Detail Produk' => route('products.show', $product),
+                'Edit' => '#',
+            ]" />
+            <div class="flex flex-wrap gap-2 justify-end">
+                <x-action-button href="{{ route('products.index') }}" variant="secondary" icon="arrow-left">
+                    Batal
+                </x-action-button>
+                <x-action-button type="submit" form="product-form" variant="primary" icon="save">
+                    Perbarui Produk
+                </x-action-button>
+            </div>
+        </div>
+
+        <form
+            id="product-form"
+            method="POST"
+            action="{{ route('products.update', $product) }}"
+            enctype="multipart/form-data"
+        >
             @csrf
             @method('PUT')
-            @include('products.partials._form', ['product' => $product])
+            @include('products.form.form', [
+                'product' => $product,
+                'categories' => $categories,
+                'suppliers' => $suppliers,
+                'units' => $units,
+                'readonly' => false
+            ])
         </form>
     </div>
+
+    <x-confirm-delete-modal />
 @endsection

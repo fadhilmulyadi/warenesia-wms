@@ -4,9 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ trim($__env->yieldContent('title', 'Warenesia')) }}</title>
 
+    <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
@@ -22,29 +24,72 @@
 
 <body class="font-sans antialiased bg-slate-100 text-slate-900">
     <div x-data="{
-        sidebarOpen: JSON.parse(localStorage.getItem('warenesia_sidebar_open') ?? 'true'),
+        sidebarOpen: false,
         appearanceOpen: false,
-        userMenuOpen: false
-    }" x-init="$watch('sidebarOpen', value => localStorage.setItem('warenesia_sidebar_open', JSON.stringify(value)))"
-        class="h-screen flex items-stretch overflow-hidden">
+        isDesktop: window.matchMedia('(min-width: 1024px)').matches,
+        init() {
+            const stored = JSON.parse(localStorage.getItem('warenesia_sidebar_open') ?? 'true');
+            this.sidebarOpen = this.isDesktop ? stored : false;
+
+            const mq = window.matchMedia('(min-width: 1024px)');
+            const syncViewport = () => {
+                this.isDesktop = mq.matches;
+                if (!this.isDesktop) {
+                    this.sidebarOpen = false;
+                } else {
+                    const saved = JSON.parse(localStorage.getItem('warenesia_sidebar_open') ?? 'true');
+                    this.sidebarOpen = saved;
+                }
+            };
+
+            mq.addEventListener('change', syncViewport);
+
+            this.$watch('sidebarOpen', (value) => {
+                if (this.isDesktop) {
+                    localStorage.setItem('warenesia_sidebar_open', JSON.stringify(value));
+                }
+            });
+        },
+        toggleSidebar() {
+            this.sidebarOpen = !this.sidebarOpen;
+        }
+    }" x-init="init()" class="h-screen flex items-stretch overflow-hidden">
+
         {{-- SIDEBAR --}}
-        <aside class="h-full flex flex-col bg-slate-900 text-slate-100 transition-all duration-300 ease-in-out relative"
-            :class="sidebarOpen ? 'w-64' : 'w-20'">
-            {{-- Logo + nama aplikasi --}}
-            <div class="h-16 flex items-center px-4 border-b border-slate-800">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="h-9 w-9 rounded-xl bg-teal-400 flex items-center justify-center text-slate-900 font-black text-lg">
-                        W
-                    </div>
+        <aside
+            class="fixed inset-y-0 left-0 z-30 flex h-full flex-col bg-slate-900 text-slate-100 transition-all duration-300 ease-in-out lg:relative"
+            :class="[
+                isDesktop ? (sidebarOpen ? 'w-64' : 'w-20') : 'w-72',
+                isDesktop ? 'translate-x-0' : (sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full')
+            ]">
+
+            {{-- HEADER SIDEBAR --}}
+            <div class="h-16 flex items-center border-b border-slate-800 transition-all duration-300"
+                :class="sidebarOpen ? 'justify-between px-4' : 'justify-center px-0'">
+
+                {{-- Logo & Judul --}}
+                <div class="flex items-center gap-3 overflow-hidden"
+                    @click="!sidebarOpen && isDesktop ? toggleSidebar() : null"
+                    :class="!sidebarOpen && isDesktop ? 'cursor-pointer' : ''">
+
+                    {{-- Icon Box --}}
+                    <x-lucide-box class="h-8 w-8 text-teal-400 flex-shrink-0 transition-transform duration-300"
+                        x-bind:class="sidebarOpen ? '' : 'scale-110'" />
+
+                    {{-- Teks Warenesia --}}
                     <div class="flex flex-col" x-show="sidebarOpen" x-transition>
-                        <span class="font-semibold text-lg tracking-tight">Warenesia</span>
-                        <span class="text-xs text-slate-400">Warehouse Management</span>
+                        <span class="font-semibold text-2xl tracking-tight leading-none text-white">Warenesia</span>
                     </div>
                 </div>
+
+                {{-- Tombol Toggle --}}
+                <button type="button" @click="toggleSidebar()" x-show="sidebarOpen && isDesktop"
+                    class="hidden lg:flex items-center justify-center p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <x-lucide-chevron-left class="h-5 w-5" />
+                </button>
             </div>
 
-            {{-- Menu utama --}}
+            {{-- NAVIGATION --}}
             <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto text-sm">
                 @php
                     function sidebar_classes($isActive = false)
@@ -65,26 +110,42 @@
                     <span class="font-medium" x-show="sidebarOpen" x-transition>Dashboard</span>
                 </a>
 
-                {{-- Purchases / Barang Masuk --}}
-                @can('viewAny', \App\Models\IncomingTransaction::class)
-                    <a href="{{ route('purchases.index') }}"
-                        class="{{ sidebar_classes(request()->routeIs('purchases.*')) }}">
+                @can('viewAny', \App\Models\Product::class)
+                    <a href="{{ route('products.index') }}" class="{{ sidebar_classes(request()->routeIs('products.*')) }}">
                         <span
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-shopping-bag class="h-4 w-4" />
+                            <x-lucide-box class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Purchases</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Produk</span>
                     </a>
                 @endcan
 
-                {{-- Restocks (PO ke supplier) --}}
+                @php
+                    $canViewIncoming = auth()->user()?->can('viewAny', \App\Models\IncomingTransaction::class);
+                    $canViewOutgoing = auth()->user()?->can('viewAny', \App\Models\OutgoingTransaction::class);
+                @endphp
+
+                @if($canViewIncoming || $canViewOutgoing)
+                                <a href="{{ route('transactions.index') }}" class="{{ sidebar_classes(
+                        request()->routeIs('transactions.*') ||
+                        request()->routeIs('purchases.*') ||
+                        request()->routeIs('sales.*')
+                    ) }}">
+                                    <span
+                                        class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                                        <x-lucide-arrow-right-left class="h-4 w-4" />
+                                    </span>
+                                    <span class="font-medium" x-show="sidebarOpen" x-transition>Transaksi</span>
+                                </a>
+                @endif
+
                 @can('viewAny', \App\Models\RestockOrder::class)
                     <a href="{{ route('restocks.index') }}" class="{{ sidebar_classes(request()->routeIs('restocks.*')) }}">
                         <span
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-repeat class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Restocks</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Restock</span>
                     </a>
                 @endcan
 
@@ -99,41 +160,6 @@
                     </a>
                 @endcan
 
-                {{-- Sales / Barang Keluar --}}
-                @can('viewAny', \App\Models\OutgoingTransaction::class)
-                    <a href="{{ route('sales.index') }}" class="{{ sidebar_classes(request()->routeIs('sales.*')) }}">
-                        <span
-                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-shopping-cart class="h-4 w-4" />
-                        </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Sales</span>
-                    </a>
-                @endcan
-
-                {{-- Inventory / Products --}}
-                @can('viewAny', \App\Models\Product::class)
-                    <a href="{{ route('products.index') }}" class="{{ sidebar_classes(request()->routeIs('products.*')) }}">
-                        <span
-                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-box class="h-4 w-4" />
-                        </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Inventory</span>
-                    </a>
-                @endcan
-
-                {{-- Categories --}}
-                @can('viewAny', \App\Models\Category::class)
-                    <a href="{{ route('categories.index') }}"
-                        class="{{ sidebar_classes(request()->routeIs('categories.*')) }}">
-                        <span
-                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-tags class="h-4 w-4" />
-                        </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Categories</span>
-                    </a>
-                @endcan
-
-                {{-- Suppliers --}}
                 @can('viewAny', \App\Models\Supplier::class)
                     <a href="{{ route('suppliers.index') }}"
                         class="{{ sidebar_classes(request()->routeIs('suppliers.*')) }}">
@@ -141,96 +167,112 @@
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
                             <x-lucide-building-2 class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Suppliers</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Supplier</span>
                     </a>
                 @endcan
 
-                {{-- Reports --}}
-                @can('view-transactions-report')
-                    <a href="{{ route('reports.transactions') }}"
-                        class="{{ sidebar_classes(request()->routeIs('reports.*')) }}">
+                @can('viewAny', \App\Models\Category::class)
+                    <a href="{{ route('categories.index') }}"
+                        class="{{ sidebar_classes(request()->routeIs('categories.*')) }}">
                         <span
                             class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
-                            <x-lucide-bar-chart-3 class="h-4 w-4" />
+                            <x-lucide-tags class="h-4 w-4" />
                         </span>
-                        <span class="font-medium" x-show="sidebarOpen" x-transition>Reports</span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Kategori</span>
+                    </a>
+                @endcan
+
+                @can('viewAny', \App\Models\Unit::class)
+                    <a href="{{ route('units.index') }}" class="{{ sidebar_classes(request()->routeIs('units.*')) }}">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                            <x-lucide-ruler class="h-4 w-4" />
+                        </span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>Satuan</span>
+                    </a>
+                @endcan
+
+                @can('viewAny', \App\Models\User::class)
+                    <a href="{{ route('users.index') }}" class="{{ sidebar_classes(request()->routeIs('users.*')) }}">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-800/60 group-hover:bg-slate-700">
+                            <x-lucide-users class="h-4 w-4" />
+                        </span>
+                        <span class="font-medium" x-show="sidebarOpen" x-transition>User Management</span>
                     </a>
                 @endcan
             </nav>
 
-            {{-- Tombol SUPPORT --}}
+            {{-- SUPPORT BUTTON --}}
             <div class="px-3 pb-3 pt-2 mt-auto border-t border-slate-800">
-                <button type="button"
+                <a href="https://github.com/fadhilmulyadi/warenesia-wms" target="_blank" rel="noopener noreferrer"
                     class="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-teal-400/70 px-3 py-2 text-xs font-semibold text-teal-200 hover:bg-teal-400 hover:text-slate-900 transition">
                     <span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-teal-300">
                         ?
                     </span>
                     <span x-show="sidebarOpen" x-transition>Support</span>
-                </button>
+                </a>
             </div>
 
-            {{-- Tombol collapse --}}
-            <button type="button" @click="sidebarOpen = !sidebarOpen"
-                class="absolute -right-3 top-20 h-7 w-7 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-200 shadow-md hover:bg-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2"
-                    :class="sidebarOpen ? '' : 'rotate-180 transition-transform'">
-                    <path d="M15 18l-6-6 6-6" />
-                </svg>
-            </button>
         </aside>
+
+        {{-- OVERLAY MOBILE --}}
+        <div x-cloak x-show="sidebarOpen && !isDesktop" x-transition.opacity class="fixed inset-0 z-20 bg-slate-900/60"
+            @click="sidebarOpen = false"></div>
 
         {{-- MAIN AREA --}}
         <div class="flex-1 flex flex-col min-w-0 h-full">
+
             {{-- TOPBAR --}}
             <header
-                class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 shrink-0">
+                class="min-h-[64px] bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 px-3 sm:px-4 lg:px-6 shrink-0">
 
-                {{-- Judul dan Deskripsi --}}
-                <div class="flex-1 min-w-0 flex items-center">
-                    @hasSection('page-header')
-                        <div class="w-full">
-                            @yield('page-header')
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Palette / Appearance --}}
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
                     <button type="button"
-                        class="inline-flex items-center justify-center h-9 w-9 rounded-full border border-slate-300 hover:bg-slate-100"
-                        @click="appearanceOpen = true">
-                        <span class="sr-only">Appearance</span>
-                        <x-lucide-palette class="h-4 w-4" />
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 lg:hidden"
+                        @click="toggleSidebar()" aria-label="Toggle sidebar">
+                        <x-lucide-menu class="h-5 w-5" />
                     </button>
 
-                    {{-- User menu --}}
-                    <div class="relative" x-data="{ open: false }">
+                    <div class="flex-1 min-w-0 flex items-center">
+                        @hasSection('page-header')
+                            <div class="w-full">
+                                @yield('page-header')
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- USER MENU --}}
+                <div class="flex items-center gap-3 flex-none">
+
+                    <div class="relative flex-none" x-data="{ open: false }">
                         <button type="button" @click="open = !open"
                             class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2 py-1.5 hover:bg-slate-200">
+                            {{-- Avatar --}}
                             <div
-                                class="h-8 w-8 rounded-full bg-teal-500 text-slate-900 flex items-center justify-center font-semibold text-sm">
+                                class="h-9 w-9 rounded-full bg-teal-500 text-slate-900 flex items-center justify-center font-semibold text-sm">
                                 {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
                             </div>
-                            <div class="hidden md:flex flex-col items-start">
-                                <span class="text-xs text-slate-500">Logged in as</span>
-                                <span class="text-sm font-medium leading-none">
+
+                            {{-- Text --}}
+                            <div class="hidden sm:flex flex-col items-start min-w-0 max-w-[160px]">
+                                <span class="text-xs text-slate-500 leading-none">Logged in as</span>
+                                <span class="text-sm font-medium leading-none truncate">
                                     {{ auth()->user()->name ?? 'User' }}
                                 </span>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-500" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2">
+
+                            <svg class="hidden sm:block h-4 w-4 text-slate-500" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M6 9l6 6 6-6" />
                             </svg>
                         </button>
 
+                        {{-- Dropdown --}}
                         <div x-cloak x-show="open" @click.outside="open = false" x-transition
                             class="absolute right-0 mt-2 w-48 rounded-xl bg-white shadow-lg border border-slate-200 py-2 text-sm z-20">
-                            <a href="{{ route('profile.edit') }}" class="block px-3 py-2 hover:bg-slate-50">
-                                Profile
-                            </a>
-                            <div class="border-t my-1 border-slate-100"></div>
-                            <form method="POST" action="{{ route('logout') }}">
+                            <form method="POST" action="{{ route('logout') }}" @click.stop>
                                 @csrf
                                 <button type="submit" class="w-full text-left px-3 py-2 hover:bg-slate-50">
                                     Log out
@@ -238,40 +280,21 @@
                             </form>
                         </div>
                     </div>
+
                 </div>
             </header>
 
             {{-- CONTENT --}}
-            <main class="flex-1 overflow-y-auto px-4 py-6 lg:px-8">
+            <main class="flex-1 overflow-y-auto px-3 py-6 sm:px-4 lg:px-8">
                 @yield('content')
             </main>
-        </div>
 
-        {{-- Modal appearance (dummy untuk sekarang) --}}
-        <div x-cloak x-show="appearanceOpen"
-            class="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/40">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold">Appearance settings</h2>
-                    <button @click="appearanceOpen = false" class="text-slate-400 hover:text-slate-600"
-                        aria-label="Close appearance settings">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <p class="text-sm text-slate-500">
-                    (Placeholder) Nanti di sini kamu bisa tambah pilihan warna tema dan gaya navigasi.
-                </p>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button"
-                        class="px-3 py-1.5 rounded-lg text-sm border border-slate-200 hover:bg-slate-50"
-                        @click="appearanceOpen = false">
-                        Close
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
+
     <x-toast />
+    @stack('scripts')
+
 </body>
 
 </html>

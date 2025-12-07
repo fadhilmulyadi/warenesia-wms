@@ -1,189 +1,128 @@
 @extends('layouts.app')
 
-@section('title', 'Suppliers')
+@section('title', 'Supplier')
 
 @section('page-header')
-    <x-page-header
-        title="Data Pemasok"
-        description="Kelola informasi supplier, kontak, dan relasi pengadaan barang."
-    />
+    <x-page-header title="Data Supplier" description="Database pemasok dan riwayat relasi pengadaan" />
+@endsection
 
-    @endsection
-    
-    @section('content')
-    <div class="flex items-center gap-2">
-        @can('export', \App\Models\Supplier::class)
-            <x-action-button 
-                href="{{ route('suppliers.export', request()->query()) }}"
-                variant="secondary"
-                icon="download"
-            >
-                Ekspor CSV
-            </x-action-button>
-        @endcan
+@section('content')
+    @php
+        $mobileIndexConfig = \App\Support\MobileIndexConfig::suppliers();
+    @endphp
 
-        @can('create', \App\Models\Supplier::class)
-            <x-action-button 
-                href="{{ route('suppliers.create') }}"
-                variant="primary"
-                icon="plus"
-            >
-                Tambah Pemasok
-            </x-action-button>
-        @endcan
+    {{-- MOBILE LIST --}}
+    <div class="md:hidden">
+        <x-mobile.index :items="$suppliers" :config="$mobileIndexConfig" card-view="mobile.suppliers.card" />
     </div>
-    <div class="max-w-6xl mx-auto space-y-4 text-xs">
-        {{-- @if(session('success'))
-            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-800">
-                {{ session('success') }}
+
+    {{-- PAGE CONTENT --}}
+    <div class="hidden md:block space-y-4">
+
+        {{-- TOOLBAR --}}
+        <x-toolbar>
+            <form method="GET" action="{{ route('suppliers.index') }}" class="flex-1 max-w-sm">
+                <x-search-bar :value="$search" placeholder="Cari nama supplier..." />
+            </form>
+
+            <div class="flex items-center gap-2">
+                @can('export', \App\Models\Supplier::class)
+                    <x-action-button href="{{ route('suppliers.export', request()->query()) }}" variant="secondary"
+                        icon="download">
+                        Ekspor CSV
+                    </x-action-button>
+                @endcan
+
+
             </div>
-        @endif
+        </x-toolbar>
 
-        @if(session('error'))
-            <div class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-red-800">
-                {{ session('error') }}
-            </div>
-        @endif --}}
-
-        <form method="GET" action="{{ route('suppliers.index') }}" class="flex items-center gap-2">
-            <input
-                type="text"
-                name="q"
-                value="{{ $search }}"
-                placeholder="Search by name, contact, email, or phone..."
-                class="w-full rounded-lg border border-slate-200 px-3 py-2 text-[11px]"
-            >
-            <button
-                type="submit"
-                class="rounded-lg border border-slate-200 px-3 py-2 text-[11px] text-slate-700 hover:bg-slate-50"
-            >
-                Search
-            </button>
-        </form>
-
-        <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-            <table class="min-w-full text-left text-xs">
-                <thead class="bg-slate-50 text-[11px] text-slate-500 uppercase tracking-wide">
-                    <tr>
-                        <th class="px-4 py-2">Name</th>
-                        <th class="px-4 py-2">Contact</th>
-                        <th class="px-4 py-2">Email</th>
-                        <th class="px-4 py-2">Phone</th>
-                        <th class="px-4 py-2">Avg rating</th>
-                        <th class="px-4 py-2">Rated restocks</th>
-                        <th class="px-4 py-2 text-center">Status</th>
-                        @can('create', \App\Models\Supplier::class)
-                            <th class="px-4 py-2 text-right">Actions</th>
+        {{-- TABLE --}}
+        <x-card class="p-0 overflow-hidden">
+            <div class="w-full overflow-x-auto">
+                <x-table>
+                    <x-table.thead>
+                        <x-table.th sortable name="name">Nama</x-table.th>
+                        <x-table.th>Kontak</x-table.th>
+                        <x-table.th>Email</x-table.th>
+                        <x-table.th>No. Handphone</x-table.th>
+                        <x-table.th sortable name="average_rating">Rata-rata rating</x-table.th>
+                        <x-table.th sortable name="rated_restock_count">Restock dinilai</x-table.th>
+                        @can('viewAny', \App\Models\Supplier::class)
+                            <x-table.th align="right">Aksi</x-table.th>
                         @endcan
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($suppliers as $supplier)
-                        <tr>
-                            <td class="px-4 py-2">
-                                <div class="flex flex-col">
-                                    <span class="font-semibold text-slate-900">
-                                        {{ $supplier->name }}
-                                    </span>
-                                    @if($supplier->city || $supplier->country)
-                                        <span class="text-[10px] text-slate-500">
-                                            {{ $supplier->city ? $supplier->city . ', ' : '' }}{{ $supplier->country }}
+                    </x-table.thead>
+                    <x-table.tbody>
+                        @forelse($suppliers as $supplier)
+                            <x-table.tr>
+                                <x-table.td class="font-semibold text-slate-900">
+                                    <div class="flex flex-col">
+                                        <span>
+                                            {{ $supplier->name }}
                                         </span>
+                                        @if($supplier->city || $supplier->country)
+                                            <span class="text-[10px] text-slate-500 font-normal">
+                                                {{ $supplier->city ? $supplier->city . ', ' : '' }}{{ $supplier->country }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </x-table.td>
+                                <x-table.td>
+                                    <div class="flex flex-col">
+                                        <span>{{ $supplier->contact_person ?: '-' }}</span>
+                                    </div>
+                                </x-table.td>
+                                <x-table.td>
+                                    {{ $supplier->email ?: '-' }}
+                                </x-table.td>
+                                <x-table.td>
+                                    {{ $supplier->phone ?: '-' }}
+                                </x-table.td>
+                                <x-table.td>
+                                    @if($supplier->average_rating !== null)
+                                        <div class="inline-flex items-center gap-1">
+                                            <span
+                                                class="text-[12px] text-slate-900">{{ number_format((float) $supplier->average_rating, 1) }}</span>
+                                            <x-lucide-star class="h-3 w-3 text-yellow-400" />
+                                        </div>
+                                    @else
+                                        <span class="text-slate-400">-</span>
                                     @endif
-                                </div>
-                            </td>
-                            <td class="px-4 py-2">
-                                <div class="flex flex-col">
-                                    <span>{{ $supplier->contact_person ?: '-' }}</span>
-                                </div>
-                            </td>
-                            <td class="px-4 py-2">
-                                {{ $supplier->email ?: '-' }}
-                            </td>
-                            <td class="px-4 py-2">
-                                {{ $supplier->phone ?: '-' }}
-                            </td>
-                            <td class="px-4 py-2">
-                                @if($supplier->average_rating !== null)
-                                    <div class="inline-flex items-center gap-1">
-                                        <span class="text-[12px] text-slate-900">{{ number_format((float) $supplier->average_rating, 1) }}</span>
-                                        <x-lucide-star class="h-3 w-3 text-yellow-400" />
-                                    </div>
-                                @else
-                                    <span class="text-slate-400">-</span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-2">
-                                {{ $supplier->rated_restock_count ?? 0 }}
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                @if($supplier->is_active)
-                                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                                        Active
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                                        Inactive
-                                    </span>
-                                @endif
-                            </td>
-                            @can('create', \App\Models\Supplier::class)
-                                <td class="px-4 py-2 text-right">
-                                    <div class="inline-flex items-center gap-1">
-                                        @can('update', $supplier)
-                                            <a
-                                                href="{{ route('suppliers.edit', $supplier) }}"
-                                                class="rounded-lg border border-slate-200 px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50"
-                                            >
-                                                Edit
-                                            </a>
-                                        @endcan
+                                </x-table.td>
+                                <x-table.td>
+                                    {{ $supplier->rated_restock_count ?? 0 }}
+                                </x-table.td>
+                                @can('viewAny', \App\Models\Supplier::class)
+                                    <x-table.td align="right">
+                                        <x-supplier.actions :supplier="$supplier" />
+                                    </x-table.td>
+                                @endcan
+                            </x-table.tr>
+                        @empty
+                            <x-table.tr>
+                                <x-table.td colspan="8" class="py-10">
+                                    <x-empty-state title="Supplier tidak ditemukan"
+                                        description="Coba ubah filter pencarian atau tambahkan supplier baru."
+                                        icon="building-2">
+                                        <x-slot name="actions">
 
-                                        @can('delete', $supplier)
-                                            <button
-                                                type="button"
-                                                @click="$dispatch('open-delete-modal', { 
-                                                    action: '{{ route('suppliers.destroy', $supplier) }}',
-                                                    title: 'Delete Supplier',
-                                                    message: 'Delete this supplier? This action cannot be undone.',
-                                                    itemName: '{{ $supplier->name }}'
-                                                })"
-                                                class="rounded-lg border border-red-200 px-2 py-1 text-[11px] text-red-700 hover:bg-red-50"
-                                            >
-                                                Delete
-                                            </button>
-                                        @endcan
-                                    </div>
-                                </td>
-                            @endcan
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="px-4 py-6 text-center text-[11px] text-slate-500">
-                                No suppliers found. Try changing the filter or add a new supplier.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                        </x-slot>
+                                    </x-empty-state>
+                                </x-table.td>
+                            </x-table.tr>
+                        @endforelse
+                    </x-table.tbody>
+                </x-table>
+            </div>
 
-            @if($suppliers->hasPages())
-                <div class="border-t border-slate-100 px-4 py-2 flex items-center justify-between text-[11px] text-slate-500">
-                    <div>
-                        Showing
-                        <span class="font-semibold text-slate-700">{{ $suppliers->firstItem() }}</span>
-                        to
-                        <span class="font-semibold text-slate-700">{{ $suppliers->lastItem() }}</span>
-                        of
-                        <span class="font-semibold text-slate-700">{{ $suppliers->total() }}</span>
-                        suppliers
-                    </div>
-                    <div>
-                        {{ $suppliers->links() }}
-                    </div>
-                </div>
-            @endif
-        </div>
+        </x-card>
+
+        {{-- PAGINATION --}}
+        @if($suppliers->hasPages() || $suppliers->total() > 0)
+            <x-advanced-pagination :paginator="$suppliers" />
+        @endif
     </div>
+
+
     <x-confirm-delete-modal />
 @endsection

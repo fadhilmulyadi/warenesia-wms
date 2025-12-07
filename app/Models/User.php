@@ -2,70 +2,112 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Role;
+use App\Enums\UserStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<int, string>
-     */
+    public const ROLE_SUPER_ADMIN_ID = 1;
+
+    public const DEFAULT_PER_PAGE = 10;
+
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
+        'status',
         'is_approved',
+        'department',
+        'last_login_at',
+        'approved_at',
+        'approved_by',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'is_approved' => 'boolean',
+            'last_login_at' => 'datetime',
+            'approved_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === Role::ADMIN->value;
     }
 
     public function isManager(): bool
     {
-        return $this->role === 'manager';
+        return $this->role === Role::MANAGER->value;
     }
 
     public function isStaff(): bool
     {
-        return $this->role === 'staff';
+        return $this->role === Role::STAFF->value;
     }
 
     public function isSupplier(): bool
     {
-        return $this->role === 'supplier';
+        return $this->role === Role::SUPPLIER->value;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === UserStatus::PENDING->value;
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === UserStatus::SUSPENDED->value;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === UserStatus::ACTIVE->value;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return (int) $this->id === self::ROLE_SUPER_ADMIN_ID;
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'approved_by');
+    }
+
+    public function supplier(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Supplier::class);
+    }
+
+    public static function roleOptions(): array
+    {
+        return collect(Role::cases())
+            ->mapWithKeys(fn($role) => [$role->value => $role->label()])
+            ->toArray();
+    }
+
+    public static function statusOptions(): array
+    {
+        return collect(UserStatus::cases())
+            ->mapWithKeys(fn($status) => [$status->value => $status->label()])
+            ->toArray();
     }
 }

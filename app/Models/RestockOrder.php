@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Services\GeneratorService;
+use App\Enums\RestockStatus;
+use App\Services\NumberGeneratorService;
+use App\Services\Support\TransactionTotalsCalculator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,19 +14,36 @@ class RestockOrder extends Model
 {
     use HasFactory;
 
-    public const STATUS_PENDING    = 'pending';
-    public const STATUS_CONFIRMED  = 'confirmed';
-    public const STATUS_IN_TRANSIT = 'in_transit';
-    public const STATUS_RECEIVED   = 'received';
-    public const STATUS_CANCELLED  = 'cancelled';
+    public function recalculateTotals(): void
+    {
+        $totals = TransactionTotalsCalculator::calculate($this->items);
+
+        $this->total_items = $totals['total_items'];
+        $this->total_quantity = $totals['total_quantity'];
+        $this->total_amount = number_format($totals['total_amount'], 2, '.', '');
+
+        $this->save();
+    }
+
+    public const STATUS_PENDING = RestockStatus::PENDING->value;
+
+    public const STATUS_CONFIRMED = RestockStatus::CONFIRMED->value;
+
+    public const STATUS_IN_TRANSIT = RestockStatus::IN_TRANSIT->value;
+
+    public const STATUS_RECEIVED = RestockStatus::RECEIVED->value;
+
+    public const STATUS_CANCELLED = RestockStatus::CANCELLED->value;
 
     public const MIN_RATING = 1;
+
     public const MAX_RATING = 5;
 
     public const DEFAULT_PER_PAGE = 10;
 
     private const PURCHASE_ORDER_PREFIX = 'PO';
-    private const SEQUENCE_PAD_LENGTH   = 4;
+
+    private const SEQUENCE_PAD_LENGTH = 4;
 
     protected $fillable = [
         'po_number',
@@ -45,48 +64,36 @@ class RestockOrder extends Model
     ];
 
     protected $casts = [
-        'order_date'              => 'date',
-        'expected_delivery_date'  => 'date',
-        'total_items'             => 'integer',
-        'total_quantity'          => 'integer',
-        'total_amount'            => 'decimal:2',
-        'rating'                  => 'integer',
-        'rating_given_at'         => 'datetime',
+        'order_date' => 'date',
+        'expected_delivery_date' => 'date',
+        'total_items' => 'integer',
+        'total_quantity' => 'integer',
+        'total_amount' => 'decimal:2',
+        'rating' => 'integer',
+        'rating_given_at' => 'datetime',
+        'status' => RestockStatus::class,
     ];
 
-    /**
-     * Generate next purchase order number with pattern:
-     * PO-YYYYMMDD-XXXX
-     */
     public static function generateNextPurchaseOrderNumber(): string
     {
-        return GeneratorService::generateDailySequence(
-            static::class,
+        return app(NumberGeneratorService::class)->generateDailySequence(
+            (new static)->getTable(),
             'po_number',
             self::PURCHASE_ORDER_PREFIX,
             self::SEQUENCE_PAD_LENGTH
         );
     }
 
-    /**
-     * Supplier yang menerima restock order ini.
-     */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    /**
-     * User yang membuat restock order.
-     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    /**
-     * User yang mengkonfirmasi restock order (jika ada).
-     */
     public function confirmedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'confirmed_by');
@@ -97,70 +104,53 @@ class RestockOrder extends Model
         return $this->belongsTo(User::class, 'rating_given_by');
     }
 
-    /**
-     * Item produk di dalam restock order.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<RestockOrderItem>
-     */
     public function items(): HasMany
     {
         return $this->hasMany(RestockOrderItem::class);
     }
 
-    /**
-     * Opsi status untuk dropdown/filter/UI.
-     *
-     * @return array<string,string>
-     */
     public static function statusOptions(): array
     {
-        return [
-            self::STATUS_PENDING    => 'Pending',
-            self::STATUS_CONFIRMED  => 'Confirmed',
-            self::STATUS_IN_TRANSIT => 'In transit',
-            self::STATUS_RECEIVED   => 'Received',
-            self::STATUS_CANCELLED  => 'Cancelled',
-        ];
+        return collect(RestockStatus::cases())
+            ->mapWithKeys(fn (RestockStatus $status) => [$status->value => $status->label()])
+            ->all();
     }
 
-    /**
-     * Label status yang sudah dirapikan untuk kebutuhan UI.
-     */
     public function getStatusLabelAttribute(): string
     {
-        return self::statusOptions()[$this->status]
+        $status = $this->status instanceof RestockStatus
+            ? $this->status
+            : RestockStatus::tryFrom((string) $this->status);
+
+        return $status?->label()
             ?? ucfirst((string) $this->status);
     }
 
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === RestockStatus::PENDING;
     }
 
     public function isConfirmed(): bool
     {
-        return $this->status === self::STATUS_CONFIRMED;
+        return $this->status === RestockStatus::CONFIRMED;
     }
 
     public function isInTransit(): bool
     {
-        return $this->status === self::STATUS_IN_TRANSIT;
+        return $this->status === RestockStatus::IN_TRANSIT;
     }
 
     public function isReceived(): bool
     {
-        return $this->status === self::STATUS_RECEIVED;
+        return $this->status === RestockStatus::RECEIVED;
     }
 
     public function isCancelled(): bool
     {
-        return $this->status === self::STATUS_CANCELLED;
+        return $this->status === RestockStatus::CANCELLED;
     }
 
-    /**
-     * Dipakai untuk aksi "Confirm" di workflow (Admin/Manager sekarang),
-     * dan bisa juga nanti di-reuse untuk konfirmasi sisi supplier.
-     */
     public function canBeConfirmed(): bool
     {
         return $this->isPending();
@@ -203,5 +193,10 @@ class RestockOrder extends Model
         }
 
         return (int) $this->rating_given_by === (int) $user->id;
+    }
+
+    public function incomingTransaction(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(IncomingTransaction::class);
     }
 }

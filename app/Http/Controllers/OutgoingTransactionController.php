@@ -2,55 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\OutgoingTransactionRequest;
+use App\Enums\OutgoingTransactionStatus;
 use App\Exceptions\InsufficientStockException;
+use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
+use App\Http\Requests\OutgoingTransactionRequest;
 use App\Models\OutgoingTransaction;
 use App\Models\Product;
+use App\Services\OutgoingTransactionService;
 use App\Support\CsvExporter;
-use App\Services\TransactionService;
+use App\Support\TransactionPrefill;
 use DomainException;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use InvalidArgumentException;
 use Illuminate\View\View;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OutgoingTransactionController extends Controller
 {
+    use HasIndexQueryHelpers;
+
+    private const DEFAULT_PER_PAGE = OutgoingTransaction::DEFAULT_PER_PAGE;
+
+    private const MAX_PER_PAGE = 250;
+
     private const ROLE_STAFF = 'staff';
+
     private const EXPORT_CHUNK_SIZE = 200;
 
-    public function __construct(private readonly TransactionService $transactionService)
+    public function __construct(private readonly OutgoingTransactionService $transactionService) {}
+
+    public function index(Request $request): RedirectResponse
     {
+        return redirect()->route('transactions.index', ['tab' => 'outgoing']);
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): View
-    {
-        $this->authorize('viewAny', OutgoingTransaction::class);
-
-        $transactionsQuery = $this->buildOutgoingTransactionIndexQuery($request);
-
-        $transactions = $transactionsQuery
-            ->paginate(OutgoingTransaction::DEFAULT_PER_PAGE)
-            ->withQueryString();
-
-        $search = (string) $request->query('q', '');
-        $statusFilter = (string) $request->query('status', '');
-        $statusOptions = $this->outgoingStatusOptions();
-
-        return view('sales.index', compact('transactions', 'search', 'statusFilter', 'statusOptions'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(Request $request): View
     {
         $this->authorize('create', OutgoingTransaction::class);
@@ -58,14 +46,35 @@ class OutgoingTransactionController extends Controller
         $products = Product::orderBy('name')->get();
         $today = now()->toDateString();
 
-        $prefilledProductId = $this->resolvePrefilledProductId($request);
+        $prefill = TransactionPrefill::forSales($request);
+        $prefilledProductId = $prefill['product_id'];
+        $prefilledCustomerName = $prefill['customer_name'];
+        $prefilledQuantity = $prefill['quantity'];
+        $prefilledUnitPrice = $prefill['unit_price'];
 
-        return view('sales.create', compact('products', 'today', 'prefilledProductId'));
+        $initialItems = [];
+        if ($prefilledProductId) {
+            $initialItems[] = [
+                'product_id' => (int) $prefilledProductId,
+                'quantity' => (int) $prefilledQuantity,
+                'unit_price' => (float) ($prefilledUnitPrice ?? 0),
+            ];
+        }
+
+        return view(
+            'sales.create',
+            compact(
+                'products',
+                'today',
+                'prefilledProductId',
+                'prefilledCustomerName',
+                'prefilledQuantity',
+                'prefilledUnitPrice',
+                'initialItems'
+            )
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(OutgoingTransactionRequest $request): RedirectResponse
     {
         $this->authorize('create', OutgoingTransaction::class);
@@ -73,11 +82,11 @@ class OutgoingTransactionController extends Controller
         $validated = $request->validated();
 
         try {
-            $transaction = $this->transactionService->createOutgoing($validated, $request->user());
+            $transaction = $this->transactionService->create($validated, $request->user());
 
             return redirect()
                 ->route('sales.show', $transaction)
-                ->with('success', 'Outgoing transaction created successfully. Pending approval.');
+                ->with('success', 'Transaksi keluar berhasil ditambahkan.');
         } catch (InvalidArgumentException $exception) {
             return back()
                 ->withInput()
@@ -93,14 +102,23 @@ class OutgoingTransactionController extends Controller
     {
         $this->authorize('export', OutgoingTransaction::class);
 
-        $transactionQuery = $this->buildOutgoingTransactionIndexQuery($request);
-        $user = $request->user();
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['transaction_date', 'transaction_number', 'customer_name', 'status', 'total_items', 'total_quantity', 'total_amount', 'created_at'],
+            defaultSort: 'transaction_date',
+            defaultDirection: 'desc'
+        );
 
-        if ($user !== null && $user->role === self::ROLE_STAFF) {
-            $transactionQuery->where('created_by', $user->id);
-        }
+        $transactionQuery = $this->transactionService->indexQuery([
+            'search' => (string) $request->query('q', ''),
+            'status' => (array) $request->query('status', []),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'sort' => $sort,
+            'direction' => $direction,
+        ], $request->user());
 
-        $fileName = 'sales-' . now()->format('Ymd-His') . '.csv';
+        $fileName = 'sales-'.now()->format('Ymd-His').'.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($transactionQuery): void {
             $output->fputcsv([
@@ -117,15 +135,13 @@ class OutgoingTransactionController extends Controller
             ]);
 
             $transactionQuery
-                ->orderBy('transaction_date')
-                ->orderBy('id')
                 ->chunk(self::EXPORT_CHUNK_SIZE, function (Collection $transactions) use ($output): void {
                     foreach ($transactions as $transaction) {
                         $output->fputcsv([
                             $transaction->transaction_number,
                             optional($transaction->transaction_date)->format('Y-m-d'),
                             $transaction->customer_name,
-                            $this->outgoingStatusLabel((string) $transaction->status),
+                            $this->outgoingStatusLabel($transaction->status),
                             (int) $transaction->total_items,
                             (int) $transaction->total_quantity,
                             (float) $transaction->total_amount,
@@ -138,9 +154,6 @@ class OutgoingTransactionController extends Controller
         });
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(OutgoingTransaction $sale): View
     {
         $this->authorize('view', $sale);
@@ -150,28 +163,63 @@ class OutgoingTransactionController extends Controller
         return view('sales.show', compact('sale'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(OutgoingTransaction $sale): View|RedirectResponse
     {
-        //
+        $this->authorize('update', $sale);
+
+        if (! $sale->isPending()) {
+            return redirect()
+                ->route('sales.show', $sale)
+                ->withErrors(['general' => 'Only pending transactions can be edited.']);
+        }
+
+        $sale->load(['items']);
+        $products = Product::orderBy('name')->get();
+
+        return view('sales.edit', compact('sale', 'products'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(OutgoingTransactionRequest $request, OutgoingTransaction $sale): RedirectResponse
     {
-        //
+        $this->authorize('update', $sale);
+
+        if (! $sale->isPending()) {
+            return back()->withErrors(['general' => 'Hanya transaksi status Pending yang dapat diedit.']);
+        }
+
+        $validated = $request->validated();
+
+        try {
+            $this->transactionService->update($sale, $validated, $request->user());
+
+            return redirect()
+                ->route('sales.show', $sale)
+                ->with('success', 'Transaksi keluar berhasil diperbarui.');
+
+        } catch (InvalidArgumentException $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['items' => $exception->getMessage()]);
+        } catch (\Throwable $exception) {
+            return back()
+                ->withInput()
+                ->withErrors(['general' => 'Gagal memperbarui transaksi: '.$exception->getMessage()]);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(OutgoingTransaction $sale)
     {
-        //
+        $this->authorize('delete', $sale);
+
+        if (! $sale->isPending()) {
+            return back()->withErrors(['general' => 'Hanya transaksi status Pending yang dapat dihapus.']);
+        }
+
+        $sale->delete();
+
+        return redirect()
+            ->route('transactions.index', ['tab' => 'outgoing'])
+            ->with('success', 'Transaksi keluar berhasil dihapus.');
     }
 
     public function approve(Request $request, OutgoingTransaction $sale): RedirectResponse
@@ -179,11 +227,11 @@ class OutgoingTransactionController extends Controller
         $this->authorize('approve', $sale);
 
         try {
-            $this->transactionService->approveOutgoing($sale, $request->user());
+            $this->transactionService->approve($sale, $request->user());
 
             return redirect()
                 ->route('sales.show', $sale)
-                ->with('success', 'Transaction approved and stock updated.');
+                ->with('success', 'Transaksi keluar berhasil disetujui.');
         } catch (InsufficientStockException|DomainException|ModelNotFoundException $exception) {
             return redirect()
                 ->route('sales.show', $sale)
@@ -200,11 +248,11 @@ class OutgoingTransactionController extends Controller
         $this->authorize('ship', $sale);
 
         try {
-            $this->transactionService->shipOutgoing($sale, $request->user());
+            $this->transactionService->ship($sale, $request->user());
 
             return redirect()
                 ->route('sales.show', $sale)
-                ->with('success', 'Transaction marked as shipped.');
+                ->with('success', 'Transaksi keluar berhasil diproses.');
         } catch (DomainException $exception) {
             return redirect()
                 ->route('sales.show', $sale)
@@ -212,59 +260,12 @@ class OutgoingTransactionController extends Controller
         }
     }
 
-    private function resolvePrefilledProductId(Request $request): ?int
+    private function outgoingStatusLabel(OutgoingTransactionStatus|string $status): string
     {
-        $productId = $request->query('product_id');
+        $statusEnum = $status instanceof OutgoingTransactionStatus
+            ? $status
+            : OutgoingTransactionStatus::tryFrom((string) $status);
 
-        if ($productId === null || $productId === '') {
-            return null;
-        }
-
-        return is_numeric($productId) ? (int) $productId : null;
-    }
-
-    private function buildOutgoingTransactionIndexQuery(Request $request): Builder
-    {
-        $search = (string) $request->query('q', '');
-        $statusFilter = (string) $request->query('status', '');
-        $dateFrom = $request->query('date_from');
-        $dateTo = $request->query('date_to');
-
-        return OutgoingTransaction::query()
-            ->with(['createdBy', 'approvedBy'])
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $innerQuery) use ($search): void {
-                    $innerQuery
-                        ->where('transaction_number', 'like', '%' . $search . '%')
-                        ->orWhere('customer_name', 'like', '%' . $search . '%');
-                });
-            })
-            ->when($statusFilter !== '', function (Builder $query) use ($statusFilter): void {
-                $query->where('status', $statusFilter);
-            })
-            ->when($dateFrom, function (Builder $query) use ($dateFrom): void {
-                $query->whereDate('transaction_date', '>=', $dateFrom);
-            })
-            ->when($dateTo, function (Builder $query) use ($dateTo): void {
-                $query->whereDate('transaction_date', '<=', $dateTo);
-            })
-            ->orderByDesc('transaction_date')
-            ->orderByDesc('id');
-    }
-
-    private function outgoingStatusOptions(): array
-    {
-        return [
-            OutgoingTransaction::STATUS_PENDING => 'Pending',
-            OutgoingTransaction::STATUS_APPROVED => 'Approved',
-            OutgoingTransaction::STATUS_SHIPPED => 'Shipped',
-        ];
-    }
-
-    private function outgoingStatusLabel(string $status): string
-    {
-        $options = $this->outgoingStatusOptions();
-
-        return $options[$status] ?? ucfirst($status);
+        return $statusEnum?->label() ?? ucfirst((string) $status);
     }
 }

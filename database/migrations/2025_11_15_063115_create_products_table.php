@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->foreignId('supplier_id')
                 ->nullable();
-                
+
             $table->text('description')->nullable();
 
             $table->decimal('purchase_price', 15, 2)->default(0);
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->unsignedInteger('min_stock')->default(0);
             $table->unsignedInteger('current_stock')->default(0);
 
-            $table->string('unit', 20)->default('pcs');
+            $table->string('unit', 80)->default('pcs');
             $table->string('rack_location', 50)->nullable();
 
             $table->string('image_path')->nullable();

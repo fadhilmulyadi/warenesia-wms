@@ -11,6 +11,7 @@ class CategoryPolicy
     use HandlesAuthorization;
 
     private const VIEW_ROLES = ['admin', 'manager'];
+
     private const MANAGE_ROLES = ['admin', 'manager'];
 
     public function viewAny(User $user): bool
@@ -36,6 +37,11 @@ class CategoryPolicy
     public function delete(User $user, Category $category): bool
     {
         return $this->canManage($user);
+    }
+
+    public function export(User $user): bool
+    {
+        return $this->canView($user);
     }
 
     private function canView(User $user): bool

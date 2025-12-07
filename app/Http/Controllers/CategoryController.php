@@ -2,43 +2,72 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\CategoryRequest;
+use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
+use App\Http\Requests\CategoryStoreRequest;
+use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Category;
+use App\Services\CategoryService;
 use App\Support\CsvExporter;
-use Illuminate\Database\Eloquent\Builder;
+use DomainException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CategoryController extends Controller
 {
+    use HasIndexQueryHelpers;
+
     private const DEFAULT_PER_PAGE = 10;
+
+    private const MAX_PER_PAGE = 250;
+
     private const EXPORT_CHUNK_SIZE = 200;
 
-    /**
-     * Display a listing of the resource.
-     */
+    private const NAME_FILTER_THRESHOLD = 8;
+
+    public function __construct(private readonly CategoryService $categories) {}
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', Category::class);
 
-        $categoryQuery = $this->buildCategoryIndexQuery($request);
+        $perPage = $this->resolvePerPage(
+            $request,
+            self::DEFAULT_PER_PAGE,
+            self::MAX_PER_PAGE
+        );
 
-        $categories = $categoryQuery
-            ->paginate(self::DEFAULT_PER_PAGE)
-            ->withQueryString();
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'sku_prefix', 'products_count', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
+
+        $filters = [
+            'search' => (string) $request->query('q', ''),
+            'name' => $request->query('name'),
+            'sort' => $sort,
+            'direction' => $direction,
+            'per_page' => $perPage,
+        ];
+
+        $categories = $this->categories->index($filters);
 
         $search = (string) $request->query('q', '');
+        $nameFilterOptions = Category::orderBy('name')->get(['id', 'name']);
+        $showNameFilter = $nameFilterOptions->count() >= self::NAME_FILTER_THRESHOLD;
 
-        return view('categories.index', [
-            'categories' => $categories,
-            'search'     => $search,
-        ]);
+        return view('categories.index', compact(
+            'categories',
+            'search',
+            'sort',
+            'direction',
+            'perPage',
+            'nameFilterOptions',
+            'showNameFilter'
+        ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $this->authorize('create', Category::class);
@@ -46,31 +75,17 @@ class CategoryController extends Controller
         return view('categories.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(CategoryRequest $request)
+    public function store(CategoryStoreRequest $request)
     {
         $this->authorize('create', Category::class);
 
-        Category::create($request->validated());
+        $this->categories->create($request->validated());
 
         return redirect()
             ->route('categories.index')
             ->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Category $category)
     {
         $this->authorize('update', $category);
@@ -80,55 +95,49 @@ class CategoryController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(CategoryRequest $request, Category $category)
+    public function update(CategoryUpdateRequest $request, Category $category)
     {
         $this->authorize('update', $category);
 
-        $category->update($request->validated());
+        $this->categories->update($category, $request->validated());
 
         return redirect()
             ->route('categories.index')
             ->with('success', 'Kategori berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Category $category)
     {
         $this->authorize('delete', $category);
 
-        if ($category->products()->exists()) {
-            return back()
-                ->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh satu atau lebih produk.');
+        try {
+            $this->categories->delete($category);
+        } catch (DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
         }
-
-        $category->delete();
 
         return redirect()
             ->route('categories.index')
             ->with('success', 'Kategori berhasil dihapus.');
     }
 
-    public function quickStore(CategoryRequest $request)
+    public function quickStore(CategoryStoreRequest $request)
     {
         $this->authorize('create', Category::class);
 
-        $category = Category::create($request->validated());
+        $category = $this->categories->create($request->validated());
 
         if ($request->wantsJson()) {
             return response()->json([
-                'id'   => $category->id,
+                'id' => $category->id,
                 'name' => $category->name,
-            ]);
+                'sku_prefix' => $category->sku_prefix,
+            ], 201);
         }
 
         return redirect()
             ->back()
-            ->with('success', 'Category created successfully.')
+            ->with('success', 'Kategori berhasil ditambahkan.')
             ->with('newCategoryId', $category->id);
     }
 
@@ -136,26 +145,38 @@ class CategoryController extends Controller
     {
         $this->authorize('viewAny', Category::class);
 
-        $categoryQuery = $this->buildCategoryIndexQuery($request);
-        $fileName = 'categories-' . now()->format('Ymd-His') . '.csv';
+        [$sort, $direction] = $this->resolveSortAndDirection(
+            $request,
+            allowedSorts: ['name', 'sku_prefix', 'products_count', 'created_at'],
+            defaultSort: 'name',
+            defaultDirection: 'asc'
+        );
+
+        $categoryQuery = $this->categories->query([
+            'search' => (string) $request->query('q', ''),
+            'sort' => $sort,
+            'direction' => $direction,
+            'name' => $request->query('name'),
+        ]);
+        $fileName = 'categories-'.now()->format('Ymd-His').'.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($categoryQuery): void {
             $output->fputcsv([
                 'ID',
                 'Name',
+                'SKU Prefix',
                 'Description',
                 'Created At',
                 'Updated At',
             ]);
 
             $categoryQuery
-                ->orderBy('name')
-                ->orderBy('id')
                 ->chunk(self::EXPORT_CHUNK_SIZE, static function ($categories) use ($output): void {
                     foreach ($categories as $category) {
                         $output->fputcsv([
                             $category->id,
                             $category->name,
+                            $category->sku_prefix,
                             (string) $category->description,
                             optional($category->created_at)->toDateTimeString(),
                             optional($category->updated_at)->toDateTimeString(),
@@ -164,17 +185,4 @@ class CategoryController extends Controller
                 });
         });
     }
-
-    private function buildCategoryIndexQuery(Request $request): Builder
-    {
-        $search = (string) $request->input('q', '');
-
-        return Category::query()
-            ->withCount('products')
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where('name', 'like', '%' . $search . '%');
-            })
-            ->orderBy('name');
-    }
-
 }

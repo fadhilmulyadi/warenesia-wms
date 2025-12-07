@@ -3,55 +3,73 @@
 @section('title', 'Tambah Produk')
 
 @section('page-header')
-    <x-page-header
-        title="Tambah Produk"
-        description="Masukkan detail produk baru untuk menambahkannya ke inventaris gudang."
-    />
+    {{-- PAGE HEADER: Desktop --}}
+    <div class="hidden md:block">
+        <x-page-header
+            title="Tambah Produk"
+            description="Input data produk baru ke dalam inventaris"
+        />
+    </div>
+    {{-- PAGE HEADER: Mobile --}}
+    <div class="md:hidden">
+        <x-mobile-header
+            title="Tambah Produk"
+            back="{{ route('products.index') }}"
+        />
+    </div>
 @endsection
 
 @section('content')
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        
-        {{-- Breadcrumb --}}
-        <nav class="flex items-center text-sm text-slate-500 gap-1">
-            <a href="{{ route('dashboard') }}" class="inline-flex items-center text-slate-600 hover:text-teal-600 transition-colors">
-                <x-lucide-home class="w-4 h-4" />
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
+    {{-- MOBILE FORM --}}
+    <x-mobile.form form-id="product-form-mobile" save-label="Simpan Produk" save-icon="save">
+        <x-slot:fields>
+            <form
+                id="product-form-mobile"
+                method="POST"
+                action="{{ route('products.store') }}"
+                enctype="multipart/form-data"
+            >
+                @csrf
+                @include('products.form.form', [
+                    'product' => null,
+                    'categories' => $categories,
+                    'suppliers' => $suppliers,
+                    'units' => $units,
+                    'readonly' => false
+                ])
+            </form>
+        </x-slot:fields>
+    </x-mobile.form>
 
-            <a href="{{ route('products.index') }}" class="hover:text-teal-600 transition-colors">
-                Inventaris
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
-
-            <a href="{{ route('products.index') }}" class="hover:text-teal-600 transition-colors">
-                Produk
-            </a>
-            <x-lucide-chevron-right class="w-4 h-4 text-slate-300" />
-
-            <span class="font-semibold text-teal-700">
-                Buat Baru
-            </span>
-        </nav>
-
-        {{-- Tombol Action --}}
-        <div class="flex items-center gap-2">
-            {{-- Menggunakan component action-button agar lebih rapi (opsional) --}}
-            <x-action-button href="{{ route('products.index') }}" variant="secondary">
-                Batal
-            </x-action-button>
-
-            <x-action-button type="button" onclick="document.getElementById('product-form').submit()" variant="primary" icon="save">
-                Simpan Produk
-            </x-action-button>
+    {{-- PAGE CONTENT --}}
+    <div class="hidden md:block space-y-6">
+        {{-- TOOLBAR --}}
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <x-breadcrumbs :items="['Produk' => route('products.index'), 'Tambah' => '#']" />
+            <div class="flex flex-wrap gap-2 justify-end">
+                <x-action-button href="{{ route('products.index') }}" variant="secondary" icon="arrow-left">
+                    Batal
+                </x-action-button>
+                <x-action-button type="submit" form="product-form" variant="primary" icon="save">
+                    Simpan Produk
+                </x-action-button>
+            </div>
         </div>
-    </div>
 
-    {{-- Form --}}
-    <div class="max-w-7xl mx-auto">
-        <form id="product-form" action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+        {{-- FORM --}}
+        <form
+            id="product-form"
+            method="POST"
+            action="{{ route('products.store') }}"
+            enctype="multipart/form-data"
+        >
             @csrf
-            @include('products.partials._form', ['product' => null])
+            @include('products.form.form', [
+                'product' => null,
+                'categories' => $categories,
+                'suppliers' => $suppliers,
+                'units' => $units,
+            ])
         </form>
     </div>
 @endsection

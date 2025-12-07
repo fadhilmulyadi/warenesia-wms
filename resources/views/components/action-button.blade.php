@@ -2,7 +2,7 @@
     'href' => '#',
     'variant' => 'secondary', // primary, secondary, danger, ghost
     'icon' => null,
-    'type' => 'a', // Bisa 'a' (link) atau 'button' (form submit)
+    'type' => 'a', // Gunakan 'a' untuk link, 'button' / 'submit' untuk tombol
 ])
 
 @php
@@ -17,9 +17,11 @@
     ];
 
     $classes = $baseClasses . ' ' . ($variants[$variant] ?? $variants['secondary']);
+    $isLink = $type === 'a';
+    $buttonType = in_array($type, ['submit', 'reset', 'button'], true) ? $type : 'button';
 @endphp
 
-@if($type === 'a')
+@if($isLink)
     <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>
         @if($icon)
             <x-dynamic-component :component="'lucide-'.$icon" class="w-3.5 h-3.5" />
@@ -27,7 +29,7 @@
         <span>{{ $slot }}</span>
     </a>
 @else
-    <button {{ $attributes->merge(['class' => $classes]) }}>
+    <button type="{{ $buttonType }}" {{ $attributes->merge(['class' => $classes]) }}>
         @if($icon)
             <x-dynamic-component :component="'lucide-'.$icon" class="w-3.5 h-3.5" />
         @endif

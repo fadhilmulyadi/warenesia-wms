@@ -11,6 +11,7 @@ class SupplierPolicy
     use HandlesAuthorization;
 
     private const VIEW_ROLES = ['admin', 'manager'];
+
     private const MANAGE_ROLES = ['admin', 'manager'];
 
     public function viewAny(User $user): bool
@@ -25,7 +26,7 @@ class SupplierPolicy
 
     public function create(User $user): bool
     {
-        return $this->canManage($user);
+        return false;
     }
 
     public function update(User $user, Supplier $supplier): bool
@@ -35,7 +36,7 @@ class SupplierPolicy
 
     public function delete(User $user, Supplier $supplier): bool
     {
-        return $this->canManage($user);
+        return false;
     }
 
     public function export(User $user): bool

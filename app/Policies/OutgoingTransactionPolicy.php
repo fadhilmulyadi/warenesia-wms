@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\OutgoingTransactionStatus;
 use App\Models\OutgoingTransaction;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -11,6 +12,7 @@ class OutgoingTransactionPolicy
     use HandlesAuthorization;
 
     private const CREATOR_ROLES = ['admin', 'manager', 'staff'];
+
     private const APPROVER_ROLES = ['admin', 'manager'];
 
     public function viewAny(User $user): bool
@@ -20,6 +22,10 @@ class OutgoingTransactionPolicy
 
     public function view(User $user, OutgoingTransaction $transaction): bool
     {
+        if ($user->role === 'staff') {
+            return (int) $transaction->created_by === (int) $user->id;
+        }
+
         return $this->canCreateOrView($user);
     }
 
@@ -58,8 +64,7 @@ class OutgoingTransactionPolicy
 
     public function export(User $user): bool
     {
-        // Scope exported rows appropriately in controllers (staff should only see their own data).
-        return $this->canCreateOrView($user);
+        return $this->isApprover($user);
     }
 
     private function canCreateOrView(User $user): bool
@@ -74,7 +79,7 @@ class OutgoingTransactionPolicy
 
     private function staffOwnsPending(User $user, OutgoingTransaction $transaction): bool
     {
-        return $transaction->status === OutgoingTransaction::STATUS_PENDING
+        return $transaction->status === OutgoingTransactionStatus::PENDING
             && (int) $transaction->created_by === (int) $user->id;
     }
 }

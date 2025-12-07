@@ -20,8 +20,12 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        if ($user->role === 'supplier' && ! $user->is_approved) {
-            abort(403, 'Your supplier account is not approved yet.');
+        if ($user->isSuspended()) {
+            abort(403, 'Your account is suspended.');
+        }
+
+        if ($user->isPending()) {
+            abort(403, 'Your account is pending approval.');
         }
 
         if (! in_array($user->role, $roles, true)) {
