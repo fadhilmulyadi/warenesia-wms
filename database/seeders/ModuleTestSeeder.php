@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
-use App\Models\Customer;
 use App\Models\Product;
 use App\Models\RestockOrder;
 use App\Models\RestockOrderItem;
@@ -37,7 +36,6 @@ class ModuleTestSeeder extends Seeder
         $units = $this->seedUnits();
         $categories = $this->seedCategories();
         $suppliers = Supplier::factory()->count(8)->create();
-        Customer::factory()->count(20)->create();
 
         $products = $this->seedProducts($categories, $units, $suppliers);
 

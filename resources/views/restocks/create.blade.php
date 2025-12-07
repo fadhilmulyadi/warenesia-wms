@@ -3,7 +3,12 @@
 @section('title', 'Buat Pesanan Restock')
 
 @section('page-header')
-    <x-page-header title="Buat Pesanan Restock" description="Ajukan permintaan stok baru kepada supplier" />
+    <div class="hidden md:block">
+        <x-page-header title="Buat Pesanan Restock" description="Ajukan permintaan stok baru kepada supplier" />
+    </div>
+    <div class="md:hidden">
+        <x-mobile-header title="Buat Restock" back="{{ isset($redirectUrl) ? $redirectUrl : route('restocks.index') }}" />
+    </div>
 @endsection
 
 @section('content')
@@ -23,6 +28,9 @@
 
             <form id="restock-form-mobile" method="POST" action="{{ route('restocks.store') }}" class="space-y-6">
                 @csrf
+                @if(isset($redirectUrl))
+                    <input type="hidden" name="redirect_to" value="{{ $redirectUrl }}">
+                @endif
 
                 {{-- Informasi Pesanan --}}
                 <x-card class="p-4 space-y-4">
@@ -95,7 +103,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
         <x-breadcrumbs :items="['Restock' => route('restocks.index'), 'Buat Baru' => '#']" />
         <div class="flex flex-wrap gap-2 justify-end">
-            <x-action-button href="{{ route('restocks.index') }}" variant="secondary" icon="arrow-left">
+            <x-action-button href="{{ isset($redirectUrl) ? $redirectUrl : route('restocks.index') }}" variant="secondary" icon="arrow-left">
                 Kembali
             </x-action-button>
             <x-action-button type="submit" form="restock-form" variant="primary" icon="save">
@@ -117,6 +125,9 @@
 
     <form id="restock-form" method="POST" action="{{ route('restocks.store') }}" class="space-y-6">
         @csrf
+        @if(isset($redirectUrl))
+            <input type="hidden" name="redirect_to" value="{{ $redirectUrl }}">
+        @endif
 
         <x-card class="p-6">
             {{-- Header Inputs --}}

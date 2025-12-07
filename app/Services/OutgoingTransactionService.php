@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\OutgoingTransactionStatus;
-use App\Models\Customer;
 use App\Models\OutgoingTransaction;
 use App\Models\OutgoingTransactionItem;
 use App\Models\Product;
@@ -32,17 +31,6 @@ class OutgoingTransactionService extends BaseTransactionService
 
         if (! empty($filters['status'])) {
             $query->whereIn('status', array_map(static fn (OutgoingTransactionStatus $status) => $status->value, $filters['status']));
-        }
-
-        if (! empty($filters['customer_ids'])) {
-            $customerNames = Customer::whereIn('id', $filters['customer_ids'])
-                ->pluck('name')
-                ->filter()
-                ->values();
-
-            if ($customerNames->isNotEmpty()) {
-                $query->whereIn('customer_name', $customerNames);
-            }
         }
 
         if ($filters['date_from']) {
@@ -216,7 +204,6 @@ class OutgoingTransactionService extends BaseTransactionService
         return [
             'search' => trim((string) ($filters['search'] ?? '')),
             'status' => $statusEnums,
-            'customer_ids' => array_values(array_filter((array) ($filters['customer_ids'] ?? []), static fn ($val) => $val !== null && $val !== '')),
             'date_from' => $filters['date_from'] ?? null,
             'date_to' => $filters['date_to'] ?? null,
             'sort' => $sort,

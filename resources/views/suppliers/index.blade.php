@@ -52,7 +52,6 @@
                         <x-table.th>No. Handphone</x-table.th>
                         <x-table.th sortable name="average_rating">Rata-rata rating</x-table.th>
                         <x-table.th sortable name="rated_restock_count">Restock dinilai</x-table.th>
-                        <x-table.th class="text-center">Status</x-table.th>
                         @can('create', \App\Models\Supplier::class)
                             <x-table.th align="right">Aksi</x-table.th>
                         @endcan
@@ -97,13 +96,6 @@
                                 <x-table.td>
                                     {{ $supplier->rated_restock_count ?? 0 }}
                                 </x-table.td>
-                                <x-table.td class="text-center">
-                                    @if($supplier->is_active)
-                                        <x-badge variant="success">Active</x-badge>
-                                    @else
-                                        <x-badge variant="neutral">Inactive</x-badge>
-                                    @endif
-                                </x-table.td>
                                 @can('create', \App\Models\Supplier::class)
                                     <x-table.td align="right">
                                         <x-supplier.actions :supplier="$supplier" />
@@ -113,14 +105,13 @@
                         @empty
                             <x-table.tr>
                                 <x-table.td colspan="8" class="py-10">
-                                    <x-empty-state
-                                        title="Supplier tidak ditemukan"
+                                    <x-empty-state title="Supplier tidak ditemukan"
                                         description="Coba ubah filter pencarian atau tambahkan supplier baru."
-                                        icon="building-2"
-                                    >
+                                        icon="building-2">
                                         <x-slot name="actions">
                                             @can('create', \App\Models\Supplier::class)
-                                                <x-action-button href="{{ route('suppliers.create') }}" variant="primary" icon="plus">
+                                                <x-action-button href="{{ route('suppliers.create') }}" variant="primary"
+                                                    icon="plus">
                                                     Tambah Supplier
                                                 </x-action-button>
                                             @endcan

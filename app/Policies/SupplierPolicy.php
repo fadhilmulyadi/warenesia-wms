@@ -36,7 +36,7 @@ class SupplierPolicy
 
     public function delete(User $user, Supplier $supplier): bool
     {
-        return $this->canManage($user);
+        return false;
     }
 
     public function export(User $user): bool

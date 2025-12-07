@@ -1,17 +1,9 @@
-@php
-    $statusLabel = $item->is_active ? 'Active' : 'Inactive';
-    $statusVariant = $item->is_active ? 'success' : 'neutral';
-@endphp
-
 <x-mobile.card>
     {{-- HEADER --}}
     <div class="flex items-start justify-between gap-3">
         <div class="text-base font-semibold text-slate-900 leading-snug line-clamp-2">
             {{ $item->name }}
         </div>
-        <x-badge :variant="$statusVariant" class="shrink-0">
-            {{ $statusLabel }}
-        </x-badge>
     </div>
 
     {{-- CONTACT PERSON --}}
@@ -44,8 +36,10 @@
     {{-- PHONE --}}
     @if(!empty($item->phone))
         <div class="mt-3 pt-3 border-t border-slate-50">
-            <a href="tel:{{ $item->phone }}" class="flex items-center gap-2 text-sm text-slate-600 hover:text-teal-600 transition group">
-                <div class="p-1.5 rounded-md bg-slate-50 group-hover:bg-teal-50 text-slate-400 group-hover:text-teal-600 transition">
+            <a href="tel:{{ $item->phone }}"
+                class="flex items-center gap-2 text-sm text-slate-600 hover:text-teal-600 transition group">
+                <div
+                    class="p-1.5 rounded-md bg-slate-50 group-hover:bg-teal-50 text-slate-400 group-hover:text-teal-600 transition">
                     <x-lucide-phone class="w-4 h-4" />
                 </div>
                 <span class="font-mono font-medium">{{ $item->phone }}</span>
@@ -56,20 +50,9 @@
     {{-- ACTION BUTTONS --}}
     <div class="mt-4 flex gap-3">
         <a href="{{ route('suppliers.edit', $item) }}"
-           class="flex-1 h-11 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium flex items-center justify-center gap-2 hover:bg-slate-200 active:scale-95 transition">
+            class="flex-1 h-11 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium flex items-center justify-center gap-2 hover:bg-slate-200 active:scale-95 transition">
             <x-lucide-pencil class="w-5 h-5" /> Edit
         </a>
 
-        @if(auth()->user()->can('delete', $item))
-            <button x-on:click="$dispatch('open-delete-modal', { 
-                        action: '{{ route('suppliers.destroy', $item) }}',
-                        title: 'Hapus Supplier',
-                        message: 'Yakin ingin menghapus supplier ini?',
-                        itemName: '{{ addslashes($item->name) }}'
-                    })"
-                class="w-11 h-11 flex items-center justify-center rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 active:scale-95 transition">
-                <x-lucide-trash class="w-5 h-5" />
-            </button>
-        @endif
     </div>
 </x-mobile.card>

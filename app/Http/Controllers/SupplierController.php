@@ -24,7 +24,9 @@ class SupplierController extends Controller
 
     private const EXPORT_CHUNK_SIZE = 200;
 
-    public function __construct(private readonly SupplierService $suppliers) {}
+    public function __construct(private readonly SupplierService $suppliers)
+    {
+    }
 
     /**
      * Display a listing of the resource.
@@ -121,19 +123,7 @@ class SupplierController extends Controller
      */
     public function destroy(Supplier $supplier): RedirectResponse
     {
-        $this->authorize('delete', $supplier);
-
-        try {
-            $this->suppliers->delete($supplier);
-        } catch (DomainException $exception) {
-            return redirect()
-                ->route('suppliers.index')
-                ->with('error', $exception->getMessage());
-        }
-
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Supplier berhasil dihapus.');
+        abort(404);
     }
 
     public function export(Request $request): StreamedResponse
@@ -152,7 +142,7 @@ class SupplierController extends Controller
             'sort' => $sort,
             'direction' => $direction,
         ]);
-        $fileName = 'suppliers-'.now()->format('Ymd-His').'.csv';
+        $fileName = 'suppliers-' . now()->format('Ymd-His') . '.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($supplierQuery): void {
             $output->fputcsv([

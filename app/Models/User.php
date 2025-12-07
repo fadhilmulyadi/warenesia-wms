@@ -95,14 +95,14 @@ class User extends Authenticatable
     public static function roleOptions(): array
     {
         return collect(Role::cases())
-            ->mapWithKeys(fn ($role) => [$role->value => $role->label()])
+            ->mapWithKeys(fn($role) => [$role->value => $role->label()])
             ->toArray();
     }
 
     public static function statusOptions(): array
     {
         return collect(UserStatus::cases())
-            ->mapWithKeys(fn ($status) => [$status->value => $status->label()])
+            ->mapWithKeys(fn($status) => [$status->value => $status->label()])
             ->toArray();
     }
 }

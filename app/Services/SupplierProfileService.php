@@ -7,7 +7,7 @@ use App\Models\User;
 
 class SupplierProfileService
 {
-    public function sync(User $user, array $data = [], bool $active = true): Supplier
+    public function sync(User $user, array $data = []): Supplier
     {
         $companyName = $data['company_name']
             ?? $data['name']
@@ -23,7 +23,7 @@ class SupplierProfileService
             ?? null;
 
         if (Supplier::where('name', $companyName)->where('id', '!=', $user->id)->exists()) {
-            $companyName = $companyName.' #'.$user->id;
+            $companyName = $companyName . ' #' . $user->id;
         }
 
         return Supplier::updateOrCreate(
@@ -33,7 +33,6 @@ class SupplierProfileService
                 'contact_person' => $contactPerson,
                 'email' => $user->email,
                 'phone' => $data['phone'] ?? null,
-                'is_active' => $active,
                 'notes' => $notes,
             ]
         );

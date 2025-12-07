@@ -16,7 +16,8 @@ class UserController extends Controller
 {
     public function __construct(
         private readonly UserManagementService $userManagement
-    ) {}
+    ) {
+    }
 
     public function index(Request $request): View
     {
@@ -39,10 +40,7 @@ class UserController extends Controller
             'deleted' => $deletedFilter,
         ]);
 
-        $deletionGuards = collect($users->items())
-            ->mapWithKeys(fn (User $user) => [
-                $user->id => $this->userManagement->deletionGuardReason($user, $request->user()),
-            ]);
+        //
 
         return view('users.index', [
             'users' => $users,
@@ -55,7 +53,7 @@ class UserController extends Controller
             'deletedFilter' => $deletedFilter,
             'roleFilter' => $roleFilter,
             'statusFilter' => $statusFilter,
-            'deletionGuards' => $deletionGuards,
+
         ]);
     }
 
@@ -88,7 +86,7 @@ class UserController extends Controller
             'user' => $user,
             'roles' => User::roleOptions(),
             'statuses' => User::statusOptions(),
-            'deletionReason' => $this->userManagement->deletionGuardReason($user, $request->user()),
+
         ]);
     }
 
@@ -109,20 +107,7 @@ class UserController extends Controller
             ->with('success', 'User berhasil diperbarui.');
     }
 
-    public function destroy(User $user): RedirectResponse
-    {
-        $this->authorize('delete', $user);
 
-        try {
-            $this->userManagement->delete($user);
-        } catch (DomainException $exception) {
-            return back()->withErrors(['delete' => $exception->getMessage()]);
-        }
-
-        return redirect()
-            ->route('users.index')
-            ->with('success', 'User berhasil dihapus.');
-    }
 
     public function approveSupplier(UserStatusUpdateRequest $request, User $user): RedirectResponse
     {
@@ -130,7 +115,7 @@ class UserController extends Controller
 
         try {
             $this->userManagement->approveSupplier($user, $request->user());
-        } catch (DomainException|\Throwable $exception) {
+        } catch (DomainException | \Throwable $exception) {
             return back()->withErrors(['approve' => $exception->getMessage()]);
         }
 
@@ -144,7 +129,7 @@ class UserController extends Controller
         $allowedSorts = ['created_at', 'last_login_at', 'name', 'email'];
 
         $sort = $request->query('sort', 'created_at');
-        if (! in_array($sort, $allowedSorts, true)) {
+        if (!in_array($sort, $allowedSorts, true)) {
             $sort = 'created_at';
         }
 

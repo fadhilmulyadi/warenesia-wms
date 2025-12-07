@@ -129,10 +129,12 @@
                     </x-table.tr>
                 @empty
                     <x-table.tr>
-                        <x-table.td colspan="6" align="center">
-                            <span class="text-[11px] text-slate-500 py-6 block">
-                                Tidak ada pesanan restok yang ditugaskan kepada Anda.
-                            </span>
+                        <x-table.td colspan="6" class="py-10">
+                            <x-empty-state
+                                title="Belum ada pesanan restock"
+                                description="Pesanan restock yang perlu Anda proses akan muncul di sini."
+                                icon="inbox"
+                            />
                         </x-table.td>
                     </x-table.tr>
                 @endforelse

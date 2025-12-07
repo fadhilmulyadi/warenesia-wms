@@ -61,6 +61,7 @@
                     <x-mobile.stat-row label="Tanggal" :value="$purchase->transaction_date?->format('d M Y') ?? '-'" />
                     <x-mobile.stat-row label="Total Item" :value="number_format($totalItems, 0, ',', '.')" />
                     <x-mobile.stat-row label="Total Qty" :value="number_format($totalQty, 0, ',', '.')" />
+                    <x-mobile.stat-row label="Total Nilai" :value="'Rp ' . number_format($totalValue, 0, ',', '.')" />
                 </div>
             </x-mobile.card>
 
@@ -315,6 +316,20 @@
                                 <p class="text-slate-500">Total Qty</p>
                                 <p class="text-base font-semibold text-slate-900">
                                     {{ number_format($purchase->total_quantity, 0, ',', '.') }}
+                                </p>
+                            </div>
+                        </div>
+                    </x-card>
+
+                    <x-card class="p-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50 text-slate-600">
+                                <x-lucide-wallet class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-slate-500">Total Nilai</p>
+                                <p class="text-base font-semibold text-slate-900">
+                                    Rp {{ number_format($purchase->total_amount, 0, ',', '.') }}
                                 </p>
                             </div>
                         </div>

@@ -5,7 +5,7 @@
 @section('page-header')
     {{-- PAGE HEADER: Desktop --}}
     <div class="hidden md:block">
-        <x-page-header title="Edit Supplier" description="Perbarui data kontak dan status kerjasama" />
+        <x-page-header title="Edit Supplier" description="Perbarui data kontak supplier" />
     </div>
 
     {{-- PAGE HEADER: Mobile --}}

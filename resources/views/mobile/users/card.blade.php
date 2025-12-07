@@ -3,7 +3,7 @@
     $statusValue = $item->status instanceof \BackedEnum ? $item->status->value : (string) $item->status;
 
     $roleLabel = $roles[$roleValue] ?? ucfirst(str_replace('_', ' ', $roleValue));
-    $statusLabel = $statuses[$statusValue] 
+    $statusLabel = $statuses[$statusValue]
         ?? ($item->status instanceof \BackedEnum && method_exists($item->status, 'label')
             ? $item->status->label()
             : ucfirst(str_replace('_', ' ', $statusValue)));
@@ -35,21 +35,6 @@
             <x-lucide-pencil class="w-4 h-4" /> Edit
         </a>
 
-        @if(auth()->user()->can('delete', $item) && !isset($deletionGuards[$item->id]))
-            <button x-on:click="$dispatch('open-delete-modal', { 
-                            action: '{{ route('users.destroy', $item) }}',
-                            title: 'Hapus User',
-                            message: 'Yakin ingin menghapus user ini?',
-                            itemName: '{{ addslashes($item->name) }}'
-                        })"
-                class="w-9 h-9 flex items-center justify-center rounded-lg bg-rose-100 text-rose-600 hover:bg-rose-200 transition">
-                <x-lucide-trash class="w-4 h-4" />
-            </button>
-        @else
-            <button disabled
-                class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 cursor-not-allowed">
-                <x-lucide-ban class="w-4 h-4" />
-            </button>
-        @endif
+
     </div>
 </x-mobile.card>

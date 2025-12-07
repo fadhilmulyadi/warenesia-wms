@@ -23,11 +23,10 @@
             @endphp
 
             <x-mobile.index :items="$users" :config="$mobileIndexConfig" card-view="mobile.users.card" :extra-data="[
-                        'roles' => $roles,
-                        'statuses' => $statuses,
-                        'statusVariants' => $statusVariants ?? [],
-                        'deletionGuards' => $deletionGuards ?? []
-                    ]" />
+                                    'roles' => $roles,
+                                    'statuses' => $statuses,
+                                    'statusVariants' => $statusVariants ?? [],
+                                ]" />
         </div>
 
         {{-- PAGE CONTENT --}}
@@ -78,7 +77,6 @@
                         <x-table.tbody>
                             @forelse($users as $user)
                                 @php
-                                    $guardReason = $deletionGuards[$user->id] ?? null;
                                     $roleLabel = $roles[$user->role] ?? ucfirst($user->role);
                                     $statusLabel = $statuses[$user->status] ?? ucfirst($user->status);
                                     $statusVariant = $statusVariants[$user->status] ?? 'neutral';
@@ -112,56 +110,40 @@
                                     </x-table.td>
 
                                     <x-table.td align="right">
-                                        <x-table.actions>
-                                            <x-table.action-item icon="pencil" href="{{ route('users.edit', $user) }}">
-                                                Edit
-                                            </x-table.action-item>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('users.edit', $user) }}"
+                                                class="inline-flex items-center justify-center w-8 h-8 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                                                title="Edit User">
+                                                <x-lucide-pencil class="w-4 h-4" />
+                                            </a>
+                                        </div>
 
-                                            @can('approveSupplier', $user)
-                                                @if($user->role === \App\Enums\Role::SUPPLIER->value && $user->status === \App\Enums\UserStatus::PENDING->value)
-                                                    <form method="POST" action="{{ route('users.approve', $user) }}" class="m-0">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <x-table.action-item type="submit" icon="check">
-                                                            Approve
-                                                        </x-table.action-item>
-                                                    </form>
-                                                @endif
-                                            @endcan
-
-                                            @if(auth()->user()->can('delete', $user) && !$guardReason)
-                                                <x-table.action-item icon="trash-2" danger="true" x-on:click="$dispatch('open-delete-modal', { 
-                                                                    action: '{{ route('users.destroy', $user) }}',
-                                                                    title: 'Hapus User',
-                                                                    message: 'Yakin ingin menghapus user ini?',
-                                                                    itemName: '{{ addslashes($user->name) }}'
-                                                                })">
-                                                    Hapus
-                                                </x-table.action-item>
-                                            @else
-                                                <x-table.action-item icon="ban" disabled
-                                                    title="{{ $guardReason ?? 'Tidak diizinkan' }}"
-                                                    class="opacity-40 cursor-not-allowed">
-                                                    Hapus
-                                                </x-table.action-item>
+                                        @can('approveSupplier', $user)
+                                            @if($user->role === \App\Enums\Role::SUPPLIER->value && $user->status === \App\Enums\UserStatus::PENDING->value)
+                                                <form method="POST" action="{{ route('users.approve', $user) }}" class="m-0">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <x-table.action-item type="submit" icon="check">
+                                                        Approve
+                                                    </x-table.action-item>
+                                                </form>
                                             @endif
-                                        </x-table.actions>
+                                        @endcan
                                     </x-table.td>
                                 </x-table.tr>
                             @empty
                                 <x-table.tr>
                                     <x-table.td colspan="7" class="py-10">
-                                        <x-empty-state
-                                            title="Belum ada user yang memenuhi filter"
-                                            description="Coba ubah kata kunci atau reset filter pencarian."
-                                            icon="users"
-                                        >
+                                        <x-empty-state title="Belum ada user yang memenuhi filter"
+                                            description="Coba ubah kata kunci atau reset filter pencarian." icon="users">
                                             <x-slot name="actions">
-                                                <x-action-button href="{{ route('users.index') }}" variant="secondary" icon="rotate-ccw">
+                                                <x-action-button href="{{ route('users.index') }}" variant="secondary"
+                                                    icon="rotate-ccw">
                                                     Reset Filter
                                                 </x-action-button>
                                                 @can('create', \App\Models\User::class)
-                                                    <x-action-button href="{{ route('users.create') }}" variant="primary" icon="plus">
+                                                    <x-action-button href="{{ route('users.create') }}" variant="primary"
+                                                        icon="plus">
                                                         Tambah User
                                                     </x-action-button>
                                                 @endcan

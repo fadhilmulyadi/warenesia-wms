@@ -19,7 +19,9 @@ class SupplierService
 
     private const MAX_PER_PAGE = 250;
 
-    public function __construct(private readonly SupplierProfileService $profiles) {}
+    public function __construct(private readonly SupplierProfileService $profiles)
+    {
+    }
 
     public function index(array $filters = []): LengthAwarePaginator
     {
@@ -44,10 +46,10 @@ class SupplierService
         if ($filters['search'] !== '') {
             $keyword = $filters['search'];
             $query->where(function (Builder $builder) use ($keyword): void {
-                $builder->where('name', 'like', '%'.$keyword.'%')
-                    ->orWhere('contact_person', 'like', '%'.$keyword.'%')
-                    ->orWhere('email', 'like', '%'.$keyword.'%')
-                    ->orWhere('phone', 'like', '%'.$keyword.'%');
+                $builder->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('contact_person', 'like', '%' . $keyword . '%')
+                    ->orWhere('email', 'like', '%' . $keyword . '%')
+                    ->orWhere('phone', 'like', '%' . $keyword . '%');
             });
         }
 
@@ -91,7 +93,7 @@ class SupplierService
                 'password' => Hash::make($data['password']),
             ]);
 
-            $this->profiles->sync($user, $data, false);
+            $this->profiles->sync($user, $data);
 
             return $user;
         });
@@ -106,21 +108,14 @@ class SupplierService
         $user->update([
             'status' => UserStatus::ACTIVE->value,
             'approved_at' => now(),
-            'approved_by' => $approver->id,
             'is_approved' => true,
         ]);
 
-        $this->profiles->sync($user, [], true);
+        $this->profiles->sync($user, []);
     }
 
     private function mapPayload(array $data, ?Supplier $supplier = null): array
     {
-        $isActive = $supplier?->is_active ?? true;
-
-        if (array_key_exists('is_active', $data)) {
-            $isActive = (bool) $data['is_active'];
-        }
-
         return [
             'name' => trim((string) $data['name']),
             'contact_person' => $data['contact_person'] ?? null,
@@ -130,7 +125,6 @@ class SupplierService
             'address' => $data['address'] ?? null,
             'city' => $data['city'] ?? null,
             'country' => $data['country'] ?? 'Indonesia',
-            'is_active' => $isActive,
             'notes' => $data['notes'] ?? null,
         ];
     }
@@ -139,12 +133,12 @@ class SupplierService
     {
         $allowedSorts = ['name', 'average_rating', 'rated_restock_count', 'created_at'];
         $sort = $filters['sort'] ?? 'name';
-        if (! in_array($sort, $allowedSorts, true)) {
+        if (!in_array($sort, $allowedSorts, true)) {
             $sort = 'name';
         }
 
         $direction = strtolower((string) ($filters['direction'] ?? 'asc'));
-        if (! in_array($direction, ['asc', 'desc'], true)) {
+        if (!in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'asc';
         }
 

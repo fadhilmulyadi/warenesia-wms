@@ -26,9 +26,6 @@ class CategoryController extends Controller
 
     public function __construct(private readonly CategoryService $categories) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $this->authorize('viewAny', Category::class);
@@ -71,9 +68,6 @@ class CategoryController extends Controller
         ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $this->authorize('create', Category::class);
@@ -81,9 +75,6 @@ class CategoryController extends Controller
         return view('categories.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(CategoryStoreRequest $request)
     {
         $this->authorize('create', Category::class);
@@ -95,17 +86,6 @@ class CategoryController extends Controller
             ->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Category $category)
     {
         $this->authorize('update', $category);
@@ -115,9 +95,6 @@ class CategoryController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(CategoryUpdateRequest $request, Category $category)
     {
         $this->authorize('update', $category);
@@ -129,9 +106,6 @@ class CategoryController extends Controller
             ->with('success', 'Kategori berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Category $category)
     {
         $this->authorize('delete', $category);

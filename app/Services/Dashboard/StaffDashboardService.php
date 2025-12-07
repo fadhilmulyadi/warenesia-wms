@@ -95,7 +95,7 @@ class StaffDashboardService
         return [
             'icon' => $icon,
             'title' => ucfirst($trx->transaction_number),
-            'description' => "{$trx->total_quantity} items - ".ucfirst(str_replace('_', ' ', $trx->status)),
+            'description' => "{$trx->total_quantity} items - ".ucfirst(str_replace('_', ' ', $trx->status->value)),
             'meta' => $trx->created_at?->format('H:i'),
             'created_at' => $trx->created_at,
             'href' => route('dashboard.staff', [

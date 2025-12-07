@@ -31,7 +31,9 @@ class RestockOrderController extends Controller
 
     private const EXPORT_CHUNK_SIZE = 200;
 
-    public function __construct(private readonly RestockService $restockService) {}
+    public function __construct(private readonly RestockService $restockService)
+    {
+    }
 
     public function index(Request $request): View
     {
@@ -76,11 +78,16 @@ class RestockOrderController extends Controller
         $products = Product::orderBy('name')->get();
         $prefill = RestockPrefill::forCreate($request, $products);
 
-        $suppliers = Supplier::where('is_active', true)
-            ->when($prefill['supplier_id'], fn ($query, $supplierId) => $query->orWhere('id', $supplierId))
+        $suppliers = Supplier::query()
+            ->when($prefill['supplier_id'], fn($query, $supplierId) => $query->orWhere('id', $supplierId))
             ->orderBy('name')
             ->get();
         $prefilledSupplierId = $prefill['supplier_id'];
+
+        $redirectUrl = null;
+        if ($request->has('product')) {
+            $redirectUrl = route('products.show', $request->query('product'));
+        }
 
         return view('restocks.create', [
             'suppliers' => $suppliers,
@@ -89,6 +96,7 @@ class RestockOrderController extends Controller
             'expectedDeliveryDate' => $prefill['expected_delivery_date'],
             'prefilledSupplierId' => $prefilledSupplierId,
             'initialItems' => $prefill['items'],
+            'redirectUrl' => $redirectUrl,
         ]);
     }
 
@@ -100,6 +108,13 @@ class RestockOrderController extends Controller
 
         try {
             $restockOrder = $this->restockService->create($validated, $request->user());
+
+            $redirectUrl = $request->input('redirect_to');
+
+            if ($redirectUrl) {
+                return redirect($redirectUrl)
+                    ->with('success', 'Restock order berhasil ditambahkan.');
+            }
 
             return redirect()
                 ->route('restocks.show', $restockOrder)
@@ -133,7 +148,7 @@ class RestockOrderController extends Controller
     {
         $this->authorize('rate', $restockOrder);
 
-        if (! $restockOrder->canBeRated()) {
+        if (!$restockOrder->canBeRated()) {
             return redirect()
                 ->route('restocks.show', $restockOrder)
                 ->withErrors([
@@ -186,7 +201,7 @@ class RestockOrderController extends Controller
             return redirect()
                 ->route('restocks.show', $restock)
                 ->with('success', 'Restock order berhasil diproses.');
-        } catch (DomainException|ModelNotFoundException $exception) {
+        } catch (DomainException | ModelNotFoundException $exception) {
             return redirect()
                 ->route('restocks.show', $restock)
                 ->withErrors([
@@ -239,7 +254,7 @@ class RestockOrderController extends Controller
             'sort' => $sort,
             'direction' => $direction,
         ], $request->user());
-        $fileName = 'restocks-'.now()->format('Ymd-His').'.csv';
+        $fileName = 'restocks-' . now()->format('Ymd-His') . '.csv';
 
         return CsvExporter::stream($fileName, function (\SplFileObject $output) use ($restockOrdersQuery): void {
             $output->fputcsv([
@@ -372,13 +387,13 @@ class RestockOrderController extends Controller
     private function restockStatusFilters(): array
     {
         return collect(RestockStatus::cases())
-            ->filter(static fn (RestockStatus $status) => in_array($status, [
+            ->filter(static fn(RestockStatus $status) => in_array($status, [
                 RestockStatus::PENDING,
                 RestockStatus::CONFIRMED,
                 RestockStatus::IN_TRANSIT,
                 RestockStatus::RECEIVED,
             ], true))
-            ->mapWithKeys(fn (RestockStatus $status) => [$status->value => $status->label()])
+            ->mapWithKeys(fn(RestockStatus $status) => [$status->value => $status->label()])
             ->all();
     }
 

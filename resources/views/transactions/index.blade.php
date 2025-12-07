@@ -24,11 +24,9 @@
 
     if ($activeTab === 'incoming') {
         $filters['supplier_id'] = 'Supplier';
-        $resetKeys = ['status', 'supplier_id', 'date_from', 'date_to', 'date_range'];
-    } else {
-        $filters['customer_id'] = 'Customer';
-        $resetKeys = ['status', 'customer_id', 'date_from', 'date_to', 'date_range'];
     }
+
+    $resetKeys = ['status', 'supplier_id', 'date_from', 'date_to', 'date_range'];
 
     $filters['date_range'] = 'Rentang Tanggal';
 
@@ -78,6 +76,7 @@
                 :resetKeys="$resetKeys"
                 :placeholder="$searchPlaceholder"
             >
+                <input type="hidden" name="tab" value="{{ $activeTab }}">
                 {{-- STATUS --}}
                 <x-slot:filter_status>
                     <x-filter.checkbox-list
@@ -106,14 +105,6 @@
                             :selected="request()->query('supplier_id', [])"
                         />
                     </x-slot:filter_supplier_id>
-                @else
-                    <x-slot:filter_customer_id>
-                        <x-filter.checkbox-list
-                            name="customer_id"
-                            :options="$customers->map(fn ($c) => ['value' => $c->id, 'label' => $c->name])"
-                            :selected="request()->query('customer_id', [])"
-                        />
-                    </x-slot:filter_customer_id>
                 @endif
 
             </x-filter-bar>

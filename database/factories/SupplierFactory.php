@@ -25,7 +25,6 @@ class SupplierFactory extends Factory
             'address' => $this->faker->address(),
             'city' => $this->faker->city(),
             'country' => 'Indonesia',
-            'is_active' => true,
             'notes' => null,
         ];
     }

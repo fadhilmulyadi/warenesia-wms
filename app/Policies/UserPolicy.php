@@ -27,7 +27,7 @@ class UserPolicy
 
     public function update(User $user, User $model): bool
     {
-        if (! $this->isAdmin($user)) {
+        if (!$this->isAdmin($user)) {
             return false;
         }
 
@@ -41,23 +41,7 @@ class UserPolicy
 
     public function delete(User $user, User $model): bool
     {
-        if (! $this->isAdmin($user)) {
-            return false;
-        }
-
-        if ((int) $user->id === (int) $model->id) {
-            return false;
-        }
-
-        if ($model->isSuperAdmin()) {
-            return false;
-        }
-
-        if ($model->role === Role::ADMIN->value && ! $this->hasAnotherActiveAdmin($model)) {
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     public function approveSupplier(User $user, User $model): bool
@@ -75,7 +59,7 @@ class UserPolicy
             return false;
         }
 
-        if ($model->role === Role::ADMIN->value && ! $this->hasAnotherActiveAdmin($model)) {
+        if ($model->role === Role::ADMIN->value && !$this->hasAnotherActiveAdmin($model)) {
             return false;
         }
 

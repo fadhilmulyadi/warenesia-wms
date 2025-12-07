@@ -1,24 +1,11 @@
 @props(['supplier'])
 
-<x-table.actions>
+<div class="flex items-center justify-end gap-2">
     @can('update', $supplier)
-        <x-table.action-item icon="pencil" href="{{ route('suppliers.edit', $supplier) }}">
-            Edit
-        </x-table.action-item>
+        <a href="{{ route('suppliers.edit', $supplier) }}"
+            class="inline-flex items-center justify-center w-8 h-8 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+            title="Edit Supplier">
+            <x-lucide-pencil class="w-4 h-4" />
+        </a>
     @endcan
-
-    @can('delete', $supplier)
-        <x-table.action-item
-            icon="trash-2"
-            danger="true"
-            x-on:click="$dispatch('open-delete-modal', { 
-                action: '{{ route('suppliers.destroy', $supplier) }}',
-                title: 'Hapus Supplier',
-                message: 'Hapus supplier ini? Tindakan tidak dapat dibatalkan.',
-                itemName: '{{ addslashes($supplier->name) }}'
-            })"
-        >
-            Hapus
-        </x-table.action-item>
-    @endcan
-</x-table.actions>
+</div>

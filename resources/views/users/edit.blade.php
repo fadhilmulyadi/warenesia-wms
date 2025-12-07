@@ -15,10 +15,7 @@
 
 @section('content')
     {{-- MOBILE FORM --}}
-    <x-mobile.form form-id="user-form-mobile" save-label="Simpan Perubahan" save-icon="save"
-        :show-delete="!$deletionReason && auth()->user()->can('delete', $user)"
-        delete-action="{{ route('users.destroy', $user) }}" delete-label="Hapus User"
-        delete-confirm="Hapus user ini? Data akan disoft delete.">
+    <x-mobile.form form-id="user-form-mobile" save-label="Simpan Perubahan" save-icon="save">
         <x-slot:fields>
             @if(session('success'))
                 <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
@@ -85,20 +82,7 @@
                     @endif
                 @endcan
 
-                @if(!$deletionReason && auth()->user()->can('delete', $user))
-                    <form method="POST" action="{{ route('users.destroy', $user) }}"
-                        onsubmit="return confirm('Hapus user ini? Data akan disoft delete.');">
-                        @csrf
-                        @method('DELETE')
-                        <x-action-button type="submit" variant="outline-danger" icon="trash-2">
-                            Hapus
-                        </x-action-button>
-                    </form>
-                @else
-                    <x-action-button variant="ghost" icon="ban" disabled title="{{ $deletionReason ?? 'Tidak diizinkan' }}">
-                        Hapus
-                    </x-action-button>
-                @endif
+
 
                 <x-action-button type="submit" form="user-form" variant="primary" icon="save">
                     Simpan Perubahan

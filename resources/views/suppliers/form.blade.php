@@ -10,123 +10,108 @@
     $city = old('city', optional($supplier)->city);
     $country = old('country', optional($supplier)->country ?? 'Indonesia');
     $notes = old('notes', optional($supplier)->notes);
-    $isActive = old('is_active', optional($supplier)->is_active ?? false);
 @endphp
 
 <div class="space-y-6">
 
     {{-- SECTION: Information --}}
     <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm">
-        <div class="mb-4">
-            <h2 class="text-sm font-semibold text-slate-900">Informasi Supplier</h2>
-            <p class="text-[11px] text-slate-500">Nama, kontak, dan data dasar supplier.</p>
-        </div>
+        <h2 class="text-base font-semibold text-slate-900 mb-4">Informasi Supplier</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
             {{-- Name --}}
-            <div>
-                <x-input-label for="name" :value="__('Supplier Name')" class="text-xs font-semibold text-slate-700"
+            <div class="space-y-1">
+                <x-input-label for="name" :value="__('Nama Supplier')" class="text-sm font-semibold text-slate-700"
                     required />
                 <x-text-input id="name" name="name" type="text"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    :value="$supplierName" required autofocus />
-                <x-input-error class="mt-2" :messages="$errors->get('name')" />
+                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    :value="$supplierName" required autofocus placeholder="Masukkan nama supplier" />
+                <x-input-error class="mt-1" :messages="$errors->get('name')" />
             </div>
 
             {{-- Contact Person --}}
-            <div>
-                <x-input-label for="contact_person" :value="__('Contact Person')"
-                    class="text-xs font-semibold text-slate-700" />
+            <div class="space-y-1">
+                <x-input-label for="contact_person" :value="__('Kontak Person')"
+                    class="text-sm font-semibold text-slate-700" />
                 <x-text-input id="contact_person" name="contact_person" type="text"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    :value="$contactPerson" />
-                <x-input-error class="mt-2" :messages="$errors->get('contact_person')" />
+                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    :value="$contactPerson" placeholder="Nama kontak yang bisa dihubungi" />
+                <x-input-error class="mt-1" :messages="$errors->get('contact_person')" />
             </div>
 
             {{-- Email --}}
-            <div>
-                <x-input-label for="email" :value="__('Email')" class="text-xs font-semibold text-slate-700" required />
+            <div class="space-y-1">
+                <x-input-label for="email" :value="__('Email')" class="text-sm font-semibold text-slate-700" required />
                 <x-text-input id="email" name="email" type="email"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    :value="$email" required />
-                <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    :value="$email" required placeholder="email@contoh.com" />
+                <x-input-error class="mt-1" :messages="$errors->get('email')" />
             </div>
 
             {{-- Phone --}}
-            <div>
-                <x-input-label for="phone" :value="__('Phone')" class="text-xs font-semibold text-slate-700" />
+            <div class="space-y-1">
+                <x-input-label for="phone" :value="__('No. Telepon')" class="text-sm font-semibold text-slate-700" />
                 <x-text-input id="phone" name="phone" type="text"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    :value="$phone" />
-                <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    :value="$phone" placeholder="Contoh: 08123456789" />
+                <x-input-error class="mt-1" :messages="$errors->get('phone')" />
             </div>
 
             {{-- Tax Number --}}
-            <div>
-                <x-input-label for="tax_number" :value="__('Tax Number (NPWP)')"
-                    class="text-xs font-semibold text-slate-700" />
+            <div class="space-y-1">
+                <x-input-label for="tax_number" :value="__('NPWP')" class="text-sm font-semibold text-slate-700" />
                 <x-text-input id="tax_number" name="tax_number" type="text"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    :value="$taxNumber" />
-                <x-input-error class="mt-2" :messages="$errors->get('tax_number')" />
+                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    :value="$taxNumber" placeholder="Nomor Pokok Wajib Pajak" />
+                <x-input-error class="mt-1" :messages="$errors->get('tax_number')" />
             </div>
 
             {{-- City --}}
-            <div>
-                <x-input-label for="city" :value="__('City')" class="text-xs font-semibold text-slate-700" />
+            <div class="space-y-1">
+                <x-input-label for="city" :value="__('Kota')" class="text-sm font-semibold text-slate-700" />
                 <x-text-input id="city" name="city" type="text"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    :value="$city" />
-                <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    :value="$city" placeholder="Nama kota" />
+                <x-input-error class="mt-1" :messages="$errors->get('city')" />
             </div>
 
             {{-- Country --}}
-            <div class="md:col-span-2">
-                <x-input-label for="country" :value="__('Country')" class="text-xs font-semibold text-slate-700" />
+            <div class="space-y-1 md:col-span-2">
+                <x-input-label for="country" :value="__('Negara')" class="text-sm font-semibold text-slate-700" />
                 <x-text-input id="country" name="country" type="text"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    :value="$country" />
-                <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    :value="$country" placeholder="Nama negara" />
+                <x-input-error class="mt-1" :messages="$errors->get('country')" />
             </div>
         </div>
     </div>
 
     {{-- SECTION: Address & Notes --}}
     <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm">
-        <div class="mb-4">
-            <h2 class="text-sm font-semibold text-slate-900">Alamat & Catatan</h2>
-            <p class="text-[11px] text-slate-500">Detail alamat operasional dan catatan internal.</p>
-        </div>
+        <h2 class="text-base font-semibold text-slate-900 mb-4">Alamat & Catatan</h2>
 
         <div class="space-y-4">
+
             {{-- Address --}}
-            <div>
-                <x-input-label for="address" :value="__('Address')" class="text-xs font-semibold text-slate-700" />
+            <div class="space-y-1">
+                <x-input-label for="address" :value="__('Alamat')" class="text-sm font-semibold text-slate-700" />
                 <textarea id="address" name="address" rows="3"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500">{{ $address }}</textarea>
-                <x-input-error class="mt-2" :messages="$errors->get('address')" />
+                    class="mt-1 block w-full rounded-xl border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    placeholder="Alamat lengkap operasional">{{ $address }}</textarea>
+                <x-input-error class="mt-1" :messages="$errors->get('address')" />
             </div>
 
             {{-- Notes --}}
-            <div>
-                <x-input-label for="notes" :value="__('Internal Notes')" class="text-xs font-semibold text-slate-700" />
+            <div class="space-y-1">
+                <x-input-label for="notes" :value="__('Catatan Internal')"
+                    class="text-sm font-semibold text-slate-700" />
                 <textarea id="notes" name="notes" rows="3"
-                    class="mt-1 block w-full rounded-lg border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500"
-                    placeholder="Optional notes visible only to internal users.">{{ $notes }}</textarea>
-                <x-input-error class="mt-2" :messages="$errors->get('notes')" />
+                    class="mt-1 block w-full rounded-xl border-slate-200 text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500 placeholder:text-slate-400"
+                    placeholder="Catatan internal untuk supplier ini">{{ $notes }}</textarea>
+                <x-input-error class="mt-1" :messages="$errors->get('notes')" />
             </div>
 
-            {{-- Is Active --}}
-            <div>
-                <label for="is_active" class="inline-flex items-center">
-                    <input id="is_active" type="checkbox" name="is_active" value="1" @checked($isActive)
-                        class="h-4 w-4 text-teal-600 border-slate-300 rounded focus:ring-teal-500">
-                    <span class="ml-2 text-xs font-semibold text-slate-700">{{ __('Active Supplier') }}</span>
-                </label>
-                <p class="text-[11px] text-slate-500 mt-1 ml-6">
-                    Inactive suppliers cannot be selected for new restock orders.
-                </p>
-            </div>
         </div>
     </div>
 

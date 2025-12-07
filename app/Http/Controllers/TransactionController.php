@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Enums\IncomingTransactionStatus;
 use App\Enums\OutgoingTransactionStatus;
 use App\Http\Controllers\Concerns\HasIndexQueryHelpers;
-use App\Models\Customer;
 use App\Models\IncomingTransaction;
 use App\Models\OutgoingTransaction;
 use App\Models\Supplier;
@@ -60,7 +59,6 @@ class TransactionController extends Controller
             'search' => (string) $request->query('q', ''),
             'status' => (array) $request->query('status', []),
             'supplier_id' => $request->query('supplier_id'),
-            'customer_ids' => (array) $request->query('customer_id', []),
             'date_from' => $request->query('date_from'),
             'date_to' => $request->query('date_to'),
             'sort' => $sort,
@@ -80,7 +78,6 @@ class TransactionController extends Controller
             ? $this->incomingStatusOptions()
             : $this->outgoingStatusOptions();
         $suppliers = Supplier::orderBy('name')->get(['id', 'name']);
-        $customers = Customer::orderBy('name')->get(['id', 'name']);
 
         return view('transactions.index', compact(
             'tabs',
@@ -89,7 +86,6 @@ class TransactionController extends Controller
             'search',
             'statusOptions',
             'suppliers',
-            'customers',
             'typeParam',
             'sort',
             'direction',
